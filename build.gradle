@@ -1,0 +1,45 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath 'io.franzbecker:gradle-lombok:1.14'
+        classpath 'net.researchgate:gradle-release:2.6.0'
+    }
+}
+
+subprojects {
+
+    apply plugin: 'java-library'
+    apply plugin: 'io.franzbecker.gradle-lombok'
+
+    lombok {
+        version = '1.18.2'
+        sha256 = ""
+    }
+
+    sourceCompatibility = 1.11
+    targetCompatibility = 1.11
+
+    dependencies {
+        implementation group: 'com.google.guava', name: 'guava', version: '26.0-jre'
+
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.0'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.0'
+        testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
+        testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '2.23.0'
+    }
+
+    repositories {
+        jcenter()
+    }
+
+    test {
+        testLogging {
+            showStandardStreams = true
+        }
+
+        systemProperty 'java.util.logging.config.file', 'src/test/resources/logging.properties'
+    }
+}

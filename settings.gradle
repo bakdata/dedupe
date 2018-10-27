@@ -1,0 +1,3 @@
+rootProject.name = 'dedup'
+
+include 'core', 'common', 'examples'
