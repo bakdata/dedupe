@@ -1,0 +1,59 @@
+package com.bakdata.deduplication.person;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+class PersonDeduplicationTest {
+    static DateTimeFormatter BdayFormat = DateTimeFormatter.ofPattern("dd.MM.yy");
+
+    @Test
+    void testDeduplication() throws IOException {
+        final PersonDeduplication deduplication = new PersonDeduplication(hardPair -> Optional.empty(), Optional::of);
+
+        // no fusion on the non-duplicated customers
+        for (Person customer : parseCsv("/customer.csv")) {
+            final Person fusedPerson = deduplication.deduplicate(customer);
+            assertSame(customer, fusedPerson);
+        }
+
+        for (Person customer : parseCsv("/exact_duplicates.csv")) {
+            final Person fusedPerson = deduplication.deduplicate(customer);
+            assertNotSame(customer, fusedPerson);
+            // should be the same except for fusion id
+            assertEquals(customer, fusedPerson.toBuilder().fusedIds(Set.of()).build());
+        }
+    }
+
+    private List<Person> parseCsv(String resourceName) throws IOException {
+        final CSVFormat format = CSVFormat.newFormat('\t').withFirstRecordAsHeader();
+        try(var parser = CSVParser.parse(PersonDeduplicationTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8, format)) {
+            return parser.getRecords()
+                    .stream()
+                    .map(record -> Person.builder()
+        .id(record.get("id"))
+                            .firstName(record.get("firstname_full"))
+                            .lastName(record.get("lastname"))
+                            .birthDate(LocalDate.parse(record.get("birthdate"), BdayFormat))
+                            .gender(Gender.valueOf(record.get("gender").toUpperCase()))
+                            .lastModified(LocalDateTime.now())
+                    .build())
+                    .collect(Collectors.toList());
+
+        }
+    }
+}
