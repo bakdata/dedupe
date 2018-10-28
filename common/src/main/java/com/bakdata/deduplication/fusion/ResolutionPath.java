@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.bakdata.deduplication.fusion.ConflictResolutions.isNonEmpty;
+import static com.bakdata.util.ObjectUtils.isNonEmpty;
 
 @Value
 public class ResolutionPath<T, C, R>  implements ConflictResolution<T, R> {

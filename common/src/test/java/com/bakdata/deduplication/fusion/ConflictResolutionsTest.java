@@ -1,12 +1,12 @@
 package com.bakdata.deduplication.fusion;
 
-import static com.bakdata.deduplication.fusion.ConflictResolutions.assumeEqualValue;
-import static com.bakdata.deduplication.fusion.ConflictResolutions.latest;
-import static com.bakdata.deduplication.fusion.ConflictResolutions.longest;
-import static com.bakdata.deduplication.fusion.ConflictResolutions.max;
-import static com.bakdata.deduplication.fusion.ConflictResolutions.min;
-import static com.bakdata.deduplication.fusion.ConflictResolutions.union;
-import static com.bakdata.deduplication.fusion.ConflictResolutions.vote;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.assumeEqualValue;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.latest;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.longest;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.max;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.min;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.union;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.vote;
 import static com.bakdata.util.FunctionalClass.from;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

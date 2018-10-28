@@ -10,7 +10,7 @@ import lombok.experimental.Delegate;
 
 import java.util.Set;
 
-import static com.bakdata.deduplication.fusion.ConflictResolutions.*;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.*;
 
 @Value
 public class PersonFusion implements Fusion<Person> {
