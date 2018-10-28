@@ -19,8 +19,9 @@ subprojects {
         sha256 = ""
     }
 
-    sourceCompatibility = 1.11
-    targetCompatibility = 1.11
+    // build fails for java 11
+    sourceCompatibility = 1.10
+    targetCompatibility = 1.10
 
     dependencies {
         implementation group: 'com.google.guava', name: 'guava', version: '26.0-jre'
