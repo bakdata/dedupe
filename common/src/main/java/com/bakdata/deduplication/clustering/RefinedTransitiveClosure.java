@@ -1,5 +1,6 @@
 package com.bakdata.deduplication.clustering;
 
+import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 import lombok.Builder;
 import lombok.Value;
 

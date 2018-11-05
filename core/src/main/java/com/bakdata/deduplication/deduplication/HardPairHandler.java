@@ -1,6 +1,6 @@
 package com.bakdata.deduplication.deduplication;
 
-import com.bakdata.deduplication.clustering.ClassifiedCandidate;
+import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 
 import java.util.Optional;
 import java.util.function.Function;
