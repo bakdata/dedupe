@@ -1,4 +1,4 @@
-package com.bakdata.deduplication.clustering;
+package com.bakdata.deduplication.classifier;
 
 import com.bakdata.deduplication.candidate_selection.Candidate;
 import com.bakdata.deduplication.classifier.Classification;

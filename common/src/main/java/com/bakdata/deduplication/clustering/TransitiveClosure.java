@@ -2,6 +2,7 @@ package com.bakdata.deduplication.clustering;
 
 import com.bakdata.deduplication.candidate_selection.Candidate;
 import com.bakdata.deduplication.classifier.Classification;
+import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 import lombok.Getter;
 import lombok.Value;
 
