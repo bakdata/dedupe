@@ -29,7 +29,7 @@ public class ConsistentClustering<T, I extends Comparable<I>> implements Cluster
     Clustering<T> clustering;
     Function<T, I> idExtractor;
     @Getter(lazy = true, value = AccessLevel.PRIVATE)
-    TransitiveClosure<T, I> internalClosure = new TransitiveClosure<>(idExtractor);
+    TransitiveClosure<T, I> internalClosure = TransitiveClosure.<T, I>builder().idExtractor(idExtractor).build();
 
     @Override
     public List<Cluster<T>> cluster(List<ClassifiedCandidate<T>> classified) {

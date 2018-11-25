@@ -1,13 +1,14 @@
 package com.bakdata.deduplication.candidate_selection;
 
+import lombok.NonNull;
 import lombok.Value;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;
 
 @Value
 public class SortingKey<T> {
+    @NonNull
     String name;
-    Function<@NonNull T, @Nullable Comparable<?>> keyExtractor;
+    @NonNull
+    Function<T, Comparable<?>> keyExtractor;
 }

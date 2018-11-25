@@ -25,7 +25,10 @@ public class PersonFusion implements Fusion<Person> {
             .build();
 
     private static Set<String> fusionIdWithPersonId(Person p) {
-        return Set.copyOf(Sets.union(p.getFusedIds(), Set.of(p.getId())));
+        if(p.getFusedIds().isEmpty()) {
+            return Set.of(p.id);
+        }
+        return p.fusedIds;
     }
 
     @Delegate

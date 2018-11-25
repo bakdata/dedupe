@@ -1,5 +1,10 @@
 package com.bakdata.util;
 
+import lombok.AccessLevel;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
+
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
@@ -7,10 +12,6 @@ import java.lang.reflect.Method;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import lombok.AccessLevel;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
 
 @Value
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)

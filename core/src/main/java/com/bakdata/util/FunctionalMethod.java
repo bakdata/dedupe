@@ -1,10 +1,11 @@
 package com.bakdata.util;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 @Value
 public class FunctionalMethod<T> {

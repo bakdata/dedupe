@@ -1,21 +1,14 @@
 package com.bakdata.deduplication.fusion;
 
-import static com.bakdata.deduplication.fusion.CommonConflictResolutions.assumeEqualValue;
-import static com.bakdata.deduplication.fusion.CommonConflictResolutions.latest;
-import static com.bakdata.deduplication.fusion.CommonConflictResolutions.longest;
-import static com.bakdata.deduplication.fusion.CommonConflictResolutions.max;
-import static com.bakdata.deduplication.fusion.CommonConflictResolutions.min;
-import static com.bakdata.deduplication.fusion.CommonConflictResolutions.union;
-import static com.bakdata.deduplication.fusion.CommonConflictResolutions.vote;
-import static com.bakdata.util.FunctionalClass.from;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
 import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.AdditionalFieldMergeBuilder;
 import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.FieldMergeBuilder;
 import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.MergeBuilder;
 import com.bakdata.util.FunctionalClass;
 import com.google.common.collect.Sets;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import org.junit.jupiter.api.Test;
+
 import java.beans.IntrospectionException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,15 +17,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.FieldDefaults;
-import org.junit.jupiter.api.Test;
+
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.*;
+import static com.bakdata.util.FunctionalClass.from;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class ConflictResolutionsTest {
 

@@ -20,16 +20,14 @@ import java.util.stream.StreamSupport;
 
 @Value
 @Builder
-public class RefineCluster<T, I extends Comparable<I>> {
+public class RefineCluster<T, I extends Comparable<?>> {
     private static int MAX_SUB_CLUSTERS = 100;
     @Builder.Default
     int maxSmallClusterSize = 10;
     @NonNull
     Classifier<T> classifier;
-    @NonNull
-    Function<T, I> idExtractor;
-    @Getter(lazy = true)
-    Comparator<T> comparator = Comparator.comparing(idExtractor);
+    @Builder.Default
+    Function<Iterable<T>, ?> clusterIdGenerator = Cluster.intGenerator();
 
     private static float getWeight(Classification classification) {
         switch (classification.getResult()) {
@@ -44,7 +42,7 @@ public class RefineCluster<T, I extends Comparable<I>> {
         }
     }
 
-    public List<Cluster<T>> refine(List<Cluster<T>> transitiveClosure, List<ClassifiedCandidate<T>> knownClassifications) {
+    public List<Cluster<T>> refine(List<Cluster<T>> transitiveClosure, Iterable<ClassifiedCandidate<T>> knownClassifications) {
         final Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex = getRelevantClassificationIndex(knownClassifications);
         return transitiveClosure.stream()
                 .flatMap(cluster -> refineCluster(cluster, getRelevantClassifications(cluster, relevantClassificationIndex)))
@@ -58,7 +56,7 @@ public class RefineCluster<T, I extends Comparable<I>> {
                 .collect(Collectors.toList());
     }
 
-    private Map<T, List<ClassifiedCandidate<T>>> getRelevantClassificationIndex(List<ClassifiedCandidate<T>> knownClassifications) {
+    private Map<T, List<ClassifiedCandidate<T>>> getRelevantClassificationIndex(Iterable<ClassifiedCandidate<T>> knownClassifications) {
         Map<T, List<ClassifiedCandidate<T>>> relevantClassifications = new HashMap<>();
         for (ClassifiedCandidate<T> knownClassification : knownClassifications) {
             final Candidate<T> candidate = knownClassification.getCandidate();
@@ -154,7 +152,7 @@ public class RefineCluster<T, I extends Comparable<I>> {
                 .mapToObj(index -> new AbstractMap.SimpleEntry<>(bestClustering[index], cluster.get(index)))
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
         return subClusters.values().stream()
-                .map(records -> new Cluster<>(records, getComparator()));
+                .map(records -> new Cluster<>(clusterIdGenerator.apply(records), records));
     }
 
     private byte[] greedyCluster(Cluster<T> cluster, List<WeightedEdge> edges) {

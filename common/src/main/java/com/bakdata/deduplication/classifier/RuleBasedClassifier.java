@@ -1,9 +1,6 @@
 package com.bakdata.deduplication.classifier;
 
 import com.bakdata.deduplication.candidate_selection.Candidate;
-import com.bakdata.deduplication.fusion.AnnotatedValue;
-import com.bakdata.deduplication.fusion.FusionContext;
-import com.bakdata.deduplication.fusion.FusionException;
 import com.bakdata.deduplication.similarity.SimilarityContext;
 import com.bakdata.deduplication.similarity.SimilarityException;
 import com.bakdata.deduplication.similarity.SimilarityMeasure;

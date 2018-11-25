@@ -1,18 +1,19 @@
 package com.bakdata.util;
 
-import static com.bakdata.util.FunctionalClass.from;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
 import com.bakdata.util.FunctionalClass.Field;
-import java.beans.IntrospectionException;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
+
+import java.beans.IntrospectionException;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static com.bakdata.util.FunctionalClass.from;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class FunctionalClassTest {
 

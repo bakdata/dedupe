@@ -2,8 +2,8 @@ package com.bakdata.deduplication.deduplication.online;
 
 import com.bakdata.deduplication.candidate_selection.online.OnlineCandidateSelection;
 import com.bakdata.deduplication.classifier.Classification;
-import com.bakdata.deduplication.classifier.Classifier;
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
+import com.bakdata.deduplication.classifier.Classifier;
 import com.bakdata.deduplication.clustering.Cluster;
 import com.bakdata.deduplication.clustering.Clustering;
 import com.bakdata.deduplication.deduplication.HardFusionHandler;
@@ -27,7 +27,7 @@ public class OnlinePairBasedDeduplication<T> implements OnlineDeduplication<T> {
     Clustering<T> clustering;
     Fusion<T> fusion;
     @Builder.Default
-    HardPairHandler<T> hardPairHandler = (cc) -> Optional.empty();
+    HardPairHandler<T> hardPairHandler = HardPairHandler.ignore();
     @Builder.Default
     HardFusionHandler<T> hardFusionHandler = HardFusionHandler.dontFuse();
 

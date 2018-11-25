@@ -14,9 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PersonDeduplicationTest {
     static DateTimeFormatter BdayFormat = DateTimeFormatter.ofPattern("dd.MM.yy");
@@ -40,7 +38,7 @@ class PersonDeduplicationTest {
     }
 
     private List<Person> parseCsv(String resourceName) throws IOException {
-        final CSVFormat format = CSVFormat.newFormat('\t').withFirstRecordAsHeader();
+        final CSVFormat format = CSVFormat.newFormat('\t').withFirstRecordAsHeader().withQuote('"');
         try(var parser = CSVParser.parse(PersonDeduplicationTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8, format)) {
             return parser.getRecords()
                     .stream()

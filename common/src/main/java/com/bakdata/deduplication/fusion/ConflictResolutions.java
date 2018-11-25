@@ -3,6 +3,9 @@ package com.bakdata.deduplication.fusion;
 import com.bakdata.deduplication.fusion.CommonConflictResolutions.TaggedResolution;
 import com.bakdata.util.FunctionalClass;
 import com.bakdata.util.ObjectUtils;
+import lombok.Value;
+import lombok.experimental.Wither;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,8 +14,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import lombok.Value;
-import lombok.experimental.Wither;
 
 //TODO move to core without moving CommonConflictResolutions if possible
 public class ConflictResolutions {

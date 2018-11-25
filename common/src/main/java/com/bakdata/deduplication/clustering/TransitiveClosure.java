@@ -3,7 +3,9 @@ package com.bakdata.deduplication.clustering;
 import com.bakdata.deduplication.candidate_selection.Candidate;
 import com.bakdata.deduplication.classifier.Classification;
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Value;
 
 import java.util.*;
@@ -11,11 +13,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Value
+@Builder
 public class TransitiveClosure<T, I extends Comparable<I>> implements Clustering<T> {
+    @NonNull
     Function<T, I> idExtractor;
+    @Builder.Default
+    Function<Iterable<T>, ?> clusterIdGenerator = Cluster.intGenerator();
+    @NonNull
+    @Builder.Default
     Map<I, Cluster<T>> clusterIndex = new HashMap<>();
-    @Getter(lazy = true)
-    Comparator<T> comparator = Comparator.comparing(idExtractor);
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -28,45 +34,45 @@ public class TransitiveClosure<T, I extends Comparable<I>> implements Clustering
     }
 
     public List<Cluster<T>> clusterDuplicates(List<Candidate<T>> duplicates) {
-        List<T> changedClusterEntries = new ArrayList<>();
+        List<Cluster<T>> changedClusters = new ArrayList<>();
 
         // apply in-memory transitive closure
         for (Candidate<T> candidate : duplicates) {
             var leftCluster = clusterIndex.get(idExtractor.apply(candidate.getNewRecord()));
             var rightCluster = clusterIndex.get(idExtractor.apply(candidate.getOldRecord()));
             if (leftCluster == null && rightCluster == null) {
-                Cluster<T> newCluster = new Cluster<>(getComparator());
-                newCluster.add(candidate.getNewRecord());
-                newCluster.add(candidate.getOldRecord());
+                List<T> elements = List.of(candidate.getNewRecord(), candidate.getOldRecord());
+                Cluster<T> newCluster = new Cluster<>(clusterIdGenerator.apply(elements), elements);
                 clusterIndex.put(idExtractor.apply(candidate.getNewRecord()), newCluster);
                 clusterIndex.put(idExtractor.apply(candidate.getOldRecord()), newCluster);
-                changedClusterEntries.addAll(newCluster.getElements());
+                changedClusters.add(newCluster);
             } else if (leftCluster == rightCluster) {
                 // nothing to do; already known duplicate
+                // still mark it as changed so that downstream processes can work with it
+                changedClusters.add(leftCluster);
             } else if (leftCluster == null) {
                 rightCluster.add(candidate.getNewRecord());
                 clusterIndex.put(idExtractor.apply(candidate.getNewRecord()), rightCluster);
-                changedClusterEntries.add(candidate.getNewRecord());
+                changedClusters.add(rightCluster);
             } else if (rightCluster == null) {
                 leftCluster.add(candidate.getOldRecord());
                 clusterIndex.put(idExtractor.apply(candidate.getOldRecord()), leftCluster);
-                changedClusterEntries.add(candidate.getOldRecord());
+                changedClusters.add(leftCluster);
             } else { // merge
-                Cluster<T> smaller = leftCluster.size() < rightCluster.size() ? leftCluster : rightCluster;
-                Cluster<T> bigger = smaller == leftCluster ? rightCluster : leftCluster;
-                for (T person : smaller.getElements()) {
-                    bigger.add(person);
-                    clusterIndex.put(idExtractor.apply(person), bigger);
-                    changedClusterEntries.add(person);
+                final Cluster<T> merged = leftCluster.merge(clusterIdGenerator, rightCluster);
+                for (T person : merged.getElements()) {
+                    clusterIndex.put(idExtractor.apply(person), merged);
                 }
+                changedClusters.add(merged);
             }
         }
 
         // return the changed clusters but remove multiple occurrences of the same cluster
-        return changedClusterEntries.stream()
-                .map(person -> idExtractor.apply(clusterIndex.get(idExtractor.apply(person)).get(0)))
-                .distinct()
-                .map(clusterIndex::get)
+        return changedClusters.stream()
+                .collect(Collectors.groupingBy(Cluster::getId))
+                .values()
+                .stream()
+                .map(l -> l.get(0))
                 .collect(Collectors.toList());
     }
 
