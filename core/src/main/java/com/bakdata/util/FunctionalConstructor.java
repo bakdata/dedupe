@@ -1,10 +1,11 @@
 package com.bakdata.util;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 @Value
 public class FunctionalConstructor<T> {

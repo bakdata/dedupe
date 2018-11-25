@@ -10,12 +10,12 @@ import lombok.experimental.Delegate;
 @Value
 public class PersonClustering implements Clustering<Person> {
     RefineCluster<Person, String> refineCluster = RefineCluster.<Person, String>builder()
-            .idExtractor(Person::getId)
             .classifier(new PersonClassifier())
             .build();
 
     Clustering<Person> refinedTransitiveClosure = RefinedTransitiveClosure.<Person, String>builder()
             .refineCluster(refineCluster)
+            .idExtractor(Person::getId)
             .build();
 
     @Delegate

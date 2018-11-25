@@ -2,6 +2,7 @@ package com.bakdata.deduplication.clustering;
 
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 import lombok.Builder;
+import lombok.NonNull;
 import lombok.Value;
 
 import java.util.*;
@@ -9,21 +10,19 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Value
+@Builder
 public class RefinedTransitiveClosure<T, I extends Comparable<I>> implements Clustering<T> {
-    TransitiveClosure<T, I> closure;
-
+    @NonNull
     RefineCluster<T, I> refineCluster;
 
-    Map<I, Cluster<T>> oldClusterIndex = new HashMap<>();
+    @NonNull
+    Map<I, Cluster<T>> oldClusterIndex;
 
-    private final Function<T, I> idExtractor;
+    @NonNull
+    TransitiveClosure<T, I> closure;
 
-    @Builder
-    public RefinedTransitiveClosure(RefineCluster<T, I> refineCluster) {
-        this.refineCluster = refineCluster;
-        this.idExtractor = refineCluster.getIdExtractor();
-        this.closure = new TransitiveClosure<>(this.idExtractor);
-    }
+    @NonNull
+    Function<T, I> idExtractor;
 
     @Override
     public List<Cluster<T>> cluster(List<ClassifiedCandidate<T>> classified) {
@@ -52,5 +51,14 @@ public class RefinedTransitiveClosure<T, I extends Comparable<I>> implements Clu
 
     private I getClusterId(Cluster<T> cluster) {
         return idExtractor.apply(cluster.get(0));
+    }
+
+    public static class RefinedTransitiveClosureBuilder<T, I extends Comparable<I>> {
+        public RefinedTransitiveClosure<T, I> build() {
+            Map<I, Cluster<T>> oldClusterIndex = this.oldClusterIndex != null ? this.oldClusterIndex : new HashMap<>();
+            var refineCluster = Objects.requireNonNull(this.refineCluster);
+            var tc = new TransitiveClosure<>(idExtractor, refineCluster.getClusterIdGenerator(), new HashMap<>());
+            return new RefinedTransitiveClosure<>(refineCluster, oldClusterIndex, tc, idExtractor);
+        }
     }
 }
