@@ -6,7 +6,6 @@ import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 import com.bakdata.deduplication.classifier.Classifier;
 import com.google.common.primitives.Bytes;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Wither;
@@ -20,14 +19,13 @@ import java.util.stream.StreamSupport;
 
 @Value
 @Builder
-public class RefineCluster<T, I extends Comparable<?>> {
+public class RefineCluster<CID, T, I extends Comparable<?>> {
     private static int MAX_SUB_CLUSTERS = 100;
     @Builder.Default
     int maxSmallClusterSize = 10;
     @NonNull
     Classifier<T> classifier;
-    @Builder.Default
-    Function<Iterable<T>, ?> clusterIdGenerator = Cluster.intGenerator();
+    Function<Iterable<T>, CID> clusterIdGenerator;
 
     private static float getWeight(Classification classification) {
         switch (classification.getResult()) {
@@ -42,14 +40,14 @@ public class RefineCluster<T, I extends Comparable<?>> {
         }
     }
 
-    public List<Cluster<T>> refine(List<Cluster<T>> transitiveClosure, Iterable<ClassifiedCandidate<T>> knownClassifications) {
+    public List<Cluster<CID, T>> refine(List<Cluster<CID, T>> transitiveClosure, Iterable<ClassifiedCandidate<T>> knownClassifications) {
         final Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex = getRelevantClassificationIndex(knownClassifications);
         return transitiveClosure.stream()
                 .flatMap(cluster -> refineCluster(cluster, getRelevantClassifications(cluster, relevantClassificationIndex)))
                 .collect(Collectors.toList());
     }
 
-    private List<ClassifiedCandidate<T>> getRelevantClassifications(Cluster<T> cluster, Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex) {
+    private List<ClassifiedCandidate<T>> getRelevantClassifications(Cluster<CID, T> cluster, Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex) {
         return cluster.getElements().stream()
                 .flatMap(record -> relevantClassificationIndex.getOrDefault(record, List.of()).stream()
                         .filter(classifiedCandidate -> cluster.contains(classifiedCandidate.getCandidate().getOldRecord())))
@@ -65,7 +63,7 @@ public class RefineCluster<T, I extends Comparable<?>> {
         return relevantClassifications;
     }
 
-    private byte[] refineBigCluster(Cluster<T> cluster, List<ClassifiedCandidate<T>> knownClassifications) {
+    private byte[] refineBigCluster(Cluster<CID, T> cluster, List<ClassifiedCandidate<T>> knownClassifications) {
         final List<WeightedEdge> duplicates = toWeightedEdges(knownClassifications, cluster);
         final int desiredNumEdges = getNumEdges(maxSmallClusterSize);
 
@@ -80,7 +78,7 @@ public class RefineCluster<T, I extends Comparable<?>> {
      *
      * @return the best clustering
      */
-    private byte[] refineSmallCluster(Cluster<T> cluster, List<ClassifiedCandidate<T>> knownClassifications) {
+    private byte[] refineSmallCluster(Cluster<CID, T> cluster, List<ClassifiedCandidate<T>> knownClassifications) {
         float[][] weightMatrix = getKnownWeightMatrix(cluster, knownClassifications);
 
         final int n = cluster.size();
@@ -100,7 +98,7 @@ public class RefineCluster<T, I extends Comparable<?>> {
                 .orElseThrow(() -> new IllegalStateException("Non-empty clusters should have one valid clustering"));
     }
 
-    private List<WeightedEdge> toWeightedEdges(List<ClassifiedCandidate<T>> knownClassifications, Cluster<T> cluster) {
+    private List<WeightedEdge> toWeightedEdges(List<ClassifiedCandidate<T>> knownClassifications, Cluster<CID, T> cluster) {
         final Map<T, Integer> clusterIndex =
                 IntStream.range(0, cluster.size()).boxed().collect(Collectors.toMap(cluster::get, i -> i));
 
@@ -112,7 +110,7 @@ public class RefineCluster<T, I extends Comparable<?>> {
                 .collect(Collectors.toList());
     }
 
-    private float[][] getKnownWeightMatrix(Cluster<T> cluster, List<ClassifiedCandidate<T>> knownClassifications) {
+    private float[][] getKnownWeightMatrix(Cluster<CID, T> cluster, List<ClassifiedCandidate<T>> knownClassifications) {
         var n = cluster.size();
         var weightMatrix = new float[n][n];
         for (var row : weightMatrix) {
@@ -130,7 +128,7 @@ public class RefineCluster<T, I extends Comparable<?>> {
         return weightMatrix;
     }
 
-    private Stream<Cluster<T>> refineCluster(Cluster<T> cluster, List<ClassifiedCandidate<T>> knownClassifications) {
+    private Stream<Cluster<CID, T>> refineCluster(Cluster<CID, T> cluster, List<ClassifiedCandidate<T>> knownClassifications) {
         if (cluster.size() <= 2) {
             return Stream.of(cluster);
         }
@@ -147,7 +145,7 @@ public class RefineCluster<T, I extends Comparable<?>> {
         return getSubClusters(bestClustering, cluster);
     }
 
-    private Stream<Cluster<T>> getSubClusters(byte[] bestClustering, Cluster<T> cluster) {
+    private Stream<Cluster<CID, T>> getSubClusters(byte[] bestClustering, Cluster<CID, T> cluster) {
         final Map<Byte, List<T>> subClusters = IntStream.range(0, bestClustering.length)
                 .mapToObj(index -> new AbstractMap.SimpleEntry<>(bestClustering[index], cluster.get(index)))
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
@@ -155,7 +153,7 @@ public class RefineCluster<T, I extends Comparable<?>> {
                 .map(records -> new Cluster<>(clusterIdGenerator.apply(records), records));
     }
 
-    private byte[] greedyCluster(Cluster<T> cluster, List<WeightedEdge> edges) {
+    private byte[] greedyCluster(Cluster<CID, T> cluster, List<WeightedEdge> edges) {
 
         final PriorityQueue<WeightedEdge> queue = new PriorityQueue<>(Comparator.comparing(WeightedEdge::getWeight));
         queue.addAll(edges);
@@ -225,7 +223,7 @@ public class RefineCluster<T, I extends Comparable<?>> {
         return new ArrayList<>(weightedEdges);
     }
 
-    private List<WeightedEdge> getWeightedEdges(Cluster<T> cluster, List<WeightedEdge> duplicates, int desiredNumEdges) {
+    private List<WeightedEdge> getWeightedEdges(Cluster<CID, T> cluster, List<WeightedEdge> duplicates, int desiredNumEdges) {
         final List<WeightedEdge> weightedEdges;
         if (duplicates.isEmpty()) {
             final int n = cluster.size();

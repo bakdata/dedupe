@@ -9,8 +9,17 @@ public class SimilarityPath<R, T> implements SimilarityMeasure<T> {
     private final SimilarityMeasure<R> measure;
 
     public float getSimilarity(T left, T right, SimilarityContext context) {
-        return context.safeExecute(() -> measure.getSimilarity(extractor.transform(left, context), extractor.transform(right, context), context))
-                .orElse(0f);
+        return context.safeExecute(() -> {
+            final R leftElement = extractor.transform(left, context);
+            if(leftElement == null) {
+                return context.getSimilarityForNull();
+            }
+            final R rightElement = extractor.transform(right, context);
+            if(rightElement == null) {
+                return context.getSimilarityForNull();
+            }
+            return measure.getSimilarity(leftElement, rightElement, context);
+        }).orElse(context.getSimilarityForNull());
     }
 
     @Override

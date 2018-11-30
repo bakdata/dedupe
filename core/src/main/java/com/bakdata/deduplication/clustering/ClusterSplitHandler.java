@@ -2,6 +2,6 @@ package com.bakdata.deduplication.clustering;
 
 import java.util.List;
 
-public interface ClusterSplitHandler<T> {
-    boolean clusterSplit(Cluster<T> mainCluster, List<Cluster<T>> splitParts);
+public interface ClusterSplitHandler<CID, T> {
+    boolean clusterSplit(Cluster<CID, T> mainCluster, List<Cluster<CID, T>> splitParts);
 }

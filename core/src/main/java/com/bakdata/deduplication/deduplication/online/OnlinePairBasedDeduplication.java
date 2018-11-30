@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 public class OnlinePairBasedDeduplication<T> implements OnlineDeduplication<T> {
     OnlineCandidateSelection<T> candidateSelection;
     Classifier<T> classifier;
-    Clustering<T> clustering;
+    Clustering<?, T> clustering;
     Fusion<T> fusion;
     @Builder.Default
     HardPairHandler<T> hardPairHandler = HardPairHandler.ignore();
@@ -44,12 +44,12 @@ public class OnlinePairBasedDeduplication<T> implements OnlineDeduplication<T> {
                         Stream.of(cc))
                 .collect(Collectors.toList());
 
-        final List<Cluster<T>> clusters = clustering.cluster(handledPairs);
+        final List<? extends Cluster<?, T>> clusters = clustering.cluster(handledPairs);
         if(clusters.isEmpty()) {
             return newRecord;
         }
 
-        Cluster<T> mainCluster = clusters.stream().filter(c -> c.contains(newRecord)).collect(MoreCollectors.onlyElement());
+        Cluster<?, T> mainCluster = clusters.stream().filter(c -> c.contains(newRecord)).collect(MoreCollectors.onlyElement());
 
         return Optional.of(fusion.fuse(mainCluster))
                 .flatMap(hardFusionHandler::handlePartiallyFusedValue)

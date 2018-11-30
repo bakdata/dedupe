@@ -1,13 +1,10 @@
 package com.bakdata.deduplication.clustering;
 
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -16,11 +13,12 @@ import java.util.function.Function;
 @Value
 @RequiredArgsConstructor
 @Builder
-public class Cluster<T> {
-    Object id;
+public class Cluster<CID, T> {
+    CID id;
+
     List<T> elements;
 
-    public Cluster(Object id) {
+    public Cluster(CID id) {
         this(id, new ArrayList<>());
     }
 
@@ -40,7 +38,7 @@ public class Cluster<T> {
         return this.elements.contains(record);
     }
 
-    public Cluster<T> merge(Function<Iterable<T>, ?> idGenerator, Cluster<T> other) {
+    public Cluster<CID, T> merge(Function<Iterable<T>, CID> idGenerator, Cluster<CID, T> other) {
         if(other == this) {
             return this;
         }

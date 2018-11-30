@@ -8,4 +8,5 @@ import lombok.experimental.Delegate;
 public class SimilarityContext {
     @Delegate
     ExceptionContext exceptionContext = new ExceptionContext();
+    float similarityForNull = Float.NaN;
 }

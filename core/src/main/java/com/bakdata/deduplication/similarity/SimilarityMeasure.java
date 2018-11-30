@@ -28,7 +28,8 @@ public interface SimilarityMeasure<T> {
     }
 
     default SimilarityMeasure<T> scaleWithThreshold(float min) {
-        return (left, right, context) -> scaleWithThreshold(getSimilarity(left, right, context), min);
+        final SimilarityMeasure<T> cutoff = cutoff(min);
+        return (left, right, context) -> scaleWithThreshold(cutoff.getSimilarity(left, right, context), min);
     }
 
     default SimilarityMeasure<T> unknownIf(Predicate<Float> scorePredicate) {
@@ -43,7 +44,7 @@ public interface SimilarityMeasure<T> {
         SimilarityMeasure<T> inner;
         float threshold;
 
-        static float cutoff(float similarity, float min) {
+        protected static float cutoff(float similarity, float min) {
             return similarity < min ? 0 : similarity;
         }
 
