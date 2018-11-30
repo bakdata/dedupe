@@ -1,9 +1,5 @@
 package com.bakdata.deduplication.fusion;
 
-import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.AdditionalFieldMergeBuilder;
-import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.FieldMergeBuilder;
-import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.MergeBuilder;
-import com.bakdata.util.FunctionalClass;
 import com.google.common.collect.Sets;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -18,8 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.bakdata.deduplication.fusion.CommonConflictResolutions.*;
-import static com.bakdata.util.FunctionalClass.from;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

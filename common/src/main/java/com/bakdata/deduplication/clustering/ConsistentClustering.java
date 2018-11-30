@@ -64,7 +64,7 @@ public class ConsistentClustering<CID extends Comparable<CID>, T, I extends Comp
         return clustering.getClusterIdGenerator();
     }
 
-    public boolean noRecordInIndex(List<Cluster<CID, T>> clusters) {
+    private boolean noRecordInIndex(List<Cluster<CID, T>> clusters) {
         final Map<I, Cluster<CID, T>> clusterIndex = getInternalClosure().getClusterIndex();
         return clusters.stream().flatMap(cluster -> cluster.getElements().stream())
                 .allMatch(record -> clusterIndex.get(idExtractor.apply(record)) == null);

@@ -12,10 +12,12 @@ public class CompositeValue<T extends Comparable<?>> implements Comparable<Compo
     @Singular
     List<T> components;
 
+    @SafeVarargs
     public static <T extends Comparable<?>> CompositeValue<T> of(T... values) {
         return new CompositeValue<>(List.of(values));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public int compareTo(CompositeValue<T> o) {
         for (int index = 0; index < components.size(); index++) {

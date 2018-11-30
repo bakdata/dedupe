@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PersonDeduplicationTest {
-    static DateTimeFormatter BdayFormat = DateTimeFormatter.ofPattern("dd.MM.yy");
+    private final static DateTimeFormatter BdayFormat = DateTimeFormatter.ofPattern("dd.MM.yy");
 
     @Test
     void testDeduplication() throws IOException {

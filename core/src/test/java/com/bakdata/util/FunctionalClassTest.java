@@ -1,6 +1,5 @@
 package com.bakdata.util;
 
-import com.bakdata.util.FunctionalClass.Field;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +10,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.bakdata.util.FunctionalClass.from;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

@@ -20,9 +20,18 @@ The project consists of three parts
 - **common**: Implements common similarities and algorithms.
 - **examples**: Showcases different domains.
 
+# Building & executing tests #
+
+This project requires Java 11. To build and execute all tests, please run
+```bash
+./gradlew build
+```
+
+For IDEs, import the project (or the build.gradle file) as a gradle project. The project makes heavily use of [Lombok](http://projectlombok.org/), so make sure you have the appropriate IDE plugin. 
+
 # Using the framework #
 
-In this section, we cover the different configuration stages. Ultimately, we want to receive a *deduplication* instance where we can feed in the records and receive the results. In this section, we configure an online, pair-based deduplication.
+In this section, we cover the different configuration stages. Ultimately, we want to receive a *deduplication* instance where we can feed in the records and receive the results. In this section, we configure an online, pair-based deduplication. The runnable code can be found in [examples](examples).
 
 A pair-base deduplication consists of a *candidate selection* that chooses promising pairs to limit search space, a *classifier* that labels pairs as duplicate or non-duplicate, *clustering* that consolidates all pairs into plausible clusters, and *fusion* that provides a consisted representation of the found clusters.
 ```java
@@ -101,16 +110,17 @@ The next rule performs a weighted average of 3 different feature similarities. I
 To consolidate a list of duplicate pairs into a consistent cluster, an additional clustering needs to be performed. Often times, only transitive closure is applied, which is also available in this framework. However, for high precision use cases, transitive closure is not enough.
 
 ```java
-RefineCluster<CID, Person, String> refineCluster = RefineCluster.<Person, String>builder()
+RefineCluster<Long, Person, String> refineCluster = RefineCluster.<Long, Person, String>builder()
     .classifier(personClassifier)
+    .clusterIdGenerator(Cluster.longGenerator())
     .build();
 
-Clustering<CID, Person> refinedTransitiveClosure = RefinedTransitiveClosure.<Person, String>builder()
+Clustering<Long, Person> refinedTransitiveClosure = RefinedTransitiveClosure.<Long, Person, String>builder()
     .refineCluster(refineCluster)
     .idExtractor(Person::getId)
     .build();
 
-Clustering<CID, Person> personClustering = ConsistentClustering.<Person, String>builder()
+Clustering<Long, Person> personClustering = ConsistentClustering.<Long, Person, String>builder()
     .clustering(refinedTransitiveClosure)
     .idExtractor(Person::getId)
     .build();

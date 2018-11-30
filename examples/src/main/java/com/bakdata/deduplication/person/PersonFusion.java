@@ -4,7 +4,6 @@ import com.bakdata.deduplication.fusion.ConflictResolution;
 import com.bakdata.deduplication.fusion.ConflictResolutionFusion;
 import com.bakdata.deduplication.fusion.ConflictResolutions;
 import com.bakdata.deduplication.fusion.Fusion;
-import com.google.common.collect.Sets;
 import lombok.Value;
 import lombok.experimental.Delegate;
 
