@@ -13,7 +13,7 @@ import java.util.function.Function;
 @Value
 @RequiredArgsConstructor
 @Builder
-public class Cluster<CID, T> {
+public class Cluster<CID extends Comparable<CID>, T> {
     CID id;
 
     List<T> elements;

@@ -19,12 +19,13 @@ import java.util.stream.StreamSupport;
 
 @Value
 @Builder
-public class RefineCluster<CID, T, I extends Comparable<?>> {
+public class RefineCluster<CID extends Comparable<CID>, T, I extends Comparable<?>> {
     private static int MAX_SUB_CLUSTERS = 100;
     @Builder.Default
     int maxSmallClusterSize = 10;
     @NonNull
     Classifier<T> classifier;
+    @NonNull
     Function<Iterable<T>, CID> clusterIdGenerator;
 
     private static float getWeight(Classification classification) {

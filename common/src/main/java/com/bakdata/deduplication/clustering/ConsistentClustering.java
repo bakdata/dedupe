@@ -24,12 +24,15 @@ import java.util.stream.Collectors;
  */
 @Value
 @Builder
-public class ConsistentClustering<CID, T, I extends Comparable<I>> implements Clustering<CID, T> {
+public class ConsistentClustering<CID extends Comparable<CID>, T, I extends Comparable<I>> implements Clustering<CID, T> {
     @NonNull
     Clustering<CID, T> clustering;
     Function<T, I> idExtractor;
     @Getter(lazy = true, value = AccessLevel.PRIVATE)
-    TransitiveClosure<CID, T, I> internalClosure = TransitiveClosure.<CID, T, I>builder().idExtractor(idExtractor).build();
+    TransitiveClosure<CID, T, I> internalClosure = TransitiveClosure.<CID, T, I>builder()
+            .idExtractor(idExtractor)
+            .clusterIdGenerator(clustering.getClusterIdGenerator())
+            .build();
 
     @Override
     public List<Cluster<CID, T>> cluster(List<ClassifiedCandidate<T>> classified) {
@@ -54,6 +57,11 @@ public class ConsistentClustering<CID, T, I extends Comparable<I>> implements Cl
             getInternalClosure().removeCluster(clusters.get(0));
         }
         return transitiveClusters;
+    }
+
+    @Override
+    public Function<Iterable<T>, CID> getClusterIdGenerator() {
+        return clustering.getClusterIdGenerator();
     }
 
     public boolean noRecordInIndex(List<Cluster<CID, T>> clusters) {

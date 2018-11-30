@@ -13,9 +13,10 @@ import java.util.stream.Collectors;
 
 @Value
 @Builder
-public class TransitiveClosure<CID, T, I extends Comparable<I>> implements Clustering<CID, T> {
+public class TransitiveClosure<CID extends Comparable<CID>, T, I extends Comparable<I>> implements Clustering<CID, T> {
     @NonNull
     Function<T, I> idExtractor;
+    @NonNull
     Function<Iterable<T>, CID> clusterIdGenerator;
     @NonNull
     @Builder.Default
