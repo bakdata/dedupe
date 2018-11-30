@@ -4,7 +4,6 @@ import com.bakdata.deduplication.candidate_selection.Candidate;
 import com.bakdata.deduplication.classifier.Classification;
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -14,18 +13,17 @@ import java.util.stream.Collectors;
 
 @Value
 @Builder
-public class TransitiveClosure<T, I extends Comparable<I>> implements Clustering<T> {
+public class TransitiveClosure<CID, T, I extends Comparable<I>> implements Clustering<CID, T> {
     @NonNull
     Function<T, I> idExtractor;
-    @Builder.Default
-    Function<Iterable<T>, ?> clusterIdGenerator = Cluster.intGenerator();
+    Function<Iterable<T>, CID> clusterIdGenerator;
     @NonNull
     @Builder.Default
-    Map<I, Cluster<T>> clusterIndex = new HashMap<>();
+    Map<I, Cluster<CID, T>> clusterIndex = new HashMap<>();
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public List<Cluster<T>> cluster(List<ClassifiedCandidate<T>> classified) {
+    public List<Cluster<CID, T>> cluster(List<ClassifiedCandidate<T>> classified) {
         final List<Candidate<T>> duplicates = classified.stream()
                 .filter(classifiedCandidate -> classifiedCandidate.getClassification().getResult() == Classification.ClassificationResult.DUPLICATE)
                 .map(ClassifiedCandidate::getCandidate)
@@ -33,8 +31,8 @@ public class TransitiveClosure<T, I extends Comparable<I>> implements Clustering
         return clusterDuplicates(duplicates);
     }
 
-    public List<Cluster<T>> clusterDuplicates(List<Candidate<T>> duplicates) {
-        List<Cluster<T>> changedClusters = new ArrayList<>();
+    public List<Cluster<CID, T>> clusterDuplicates(List<Candidate<T>> duplicates) {
+        List<Cluster<CID, T>> changedClusters = new ArrayList<>();
 
         // apply in-memory transitive closure
         for (Candidate<T> candidate : duplicates) {
@@ -42,7 +40,7 @@ public class TransitiveClosure<T, I extends Comparable<I>> implements Clustering
             var rightCluster = clusterIndex.get(idExtractor.apply(candidate.getOldRecord()));
             if (leftCluster == null && rightCluster == null) {
                 List<T> elements = List.of(candidate.getNewRecord(), candidate.getOldRecord());
-                Cluster<T> newCluster = new Cluster<>(clusterIdGenerator.apply(elements), elements);
+                Cluster<CID, T> newCluster = new Cluster<>(clusterIdGenerator.apply(elements), elements);
                 clusterIndex.put(idExtractor.apply(candidate.getNewRecord()), newCluster);
                 clusterIndex.put(idExtractor.apply(candidate.getOldRecord()), newCluster);
                 changedClusters.add(newCluster);
@@ -59,7 +57,7 @@ public class TransitiveClosure<T, I extends Comparable<I>> implements Clustering
                 clusterIndex.put(idExtractor.apply(candidate.getOldRecord()), leftCluster);
                 changedClusters.add(leftCluster);
             } else { // merge
-                final Cluster<T> merged = leftCluster.merge(clusterIdGenerator, rightCluster);
+                final Cluster<CID, T> merged = leftCluster.merge(clusterIdGenerator, rightCluster);
                 for (T person : merged.getElements()) {
                     clusterIndex.put(idExtractor.apply(person), merged);
                 }
@@ -76,11 +74,11 @@ public class TransitiveClosure<T, I extends Comparable<I>> implements Clustering
                 .collect(Collectors.toList());
     }
 
-    public void removeCluster(Cluster<T> cluster) {
+    public void removeCluster(Cluster<CID, T> cluster) {
         final List<I> recordIds = cluster.getElements().stream()
                 .map(record -> idExtractor.apply(record))
                 .collect(Collectors.toList());
-        final Map<Integer, List<Cluster<T>>> referredCluster = recordIds.stream()
+        final Map<Integer, List<Cluster<CID, T>>> referredCluster = recordIds.stream()
                 .map(recordId -> clusterIndex.get(recordId))
                 .collect(Collectors.groupingBy(System::identityHashCode));
         if(referredCluster.size() != 1 || !referredCluster.values().iterator().next().equals(cluster)) {

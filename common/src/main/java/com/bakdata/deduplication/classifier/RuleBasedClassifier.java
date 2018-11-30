@@ -34,11 +34,13 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
             .build();
     @Singular
     List<Rule<T>> rules;
+    @Builder.Default
+    Classification defaultClassification = UNKNOWN;
 
     @Override
     public Classification classify(Candidate<T> candidate) {
         SimilarityContext context = new SimilarityContext();
-        var classification = UNKNOWN;
+        var classification = defaultClassification;
         for (Rule<T> rule : rules) {
             Optional<Classification> optClassification = evaluateRule(rule, candidate, context);
             if (optClassification.map(cl -> !cl.getResult().isUnknown()).orElse(false)) {
@@ -92,19 +94,26 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
         }
 
         public RuleBasedClassifierBuilder<T> positiveRule(String name, SimilarityMeasure<T> similarityMeasure) {
-            return rule(new Rule<>(name, similarityMeasure));
+            return rule(new Rule<>(name, similarityMeasure.unknownIf(s -> s <= 0)));
         }
 
         public RuleBasedClassifierBuilder<T> negativeRule(String name, BiPredicate<T, T> applicablePredicate,
                                                           SimilarityMeasure<T> similarityMeasure) {
             return negativeRule(name, (left, right, context) ->
-                    applicablePredicate.test(left, right) ? -similarityMeasure.getSimilarity(left, right, context) : DOES_NOT_APPLY);
+                    applicablePredicate.test(left, right) ? similarityMeasure.getSimilarity(left, right, context) : DOES_NOT_APPLY);
         }
 
         public RuleBasedClassifierBuilder<T> negativeRule(String name, SimilarityMeasure<T> similarityMeasure) {
-            return rule(new Rule<>(name, (left, right, context) -> -similarityMeasure.getSimilarity(left, right, context)));
+            final SimilarityMeasure<T> negativeSim = (left, right, context) -> -similarityMeasure.getSimilarity(left, right, context);
+            return rule(new Rule<>(name, negativeSim.unknownIf(s -> s >= 0)));
         }
 
+        public RuleBasedClassifierBuilder<T> defaultResult(Classification.ClassificationResult result) {
+            return defaultClassification(Classification.builder()
+                    .confidence(0)
+                    .result(result)
+                    .build());
+        }
     }
 
     @Value

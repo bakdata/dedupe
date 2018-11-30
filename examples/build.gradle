@@ -1,5 +1,5 @@
 dependencies {
     implementation project(':common')
 
-    testImplementation 'org.apache.commons:commons-csv:1.6' 
+    testImplementation group: 'org.apache.commons', name: 'commons-csv', version: '1.6'
 }

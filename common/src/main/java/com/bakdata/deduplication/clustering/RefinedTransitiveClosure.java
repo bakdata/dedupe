@@ -11,29 +11,29 @@ import java.util.stream.Collectors;
 
 @Value
 @Builder
-public class RefinedTransitiveClosure<T, I extends Comparable<I>> implements Clustering<T> {
+public class RefinedTransitiveClosure<CID, T, I extends Comparable<I>> implements Clustering<CID, T> {
     @NonNull
-    RefineCluster<T, I> refineCluster;
+    RefineCluster<CID, T, I> refineCluster;
 
     @NonNull
-    Map<I, Cluster<T>> oldClusterIndex;
+    Map<I, Cluster<CID, T>> oldClusterIndex;
 
     @NonNull
-    TransitiveClosure<T, I> closure;
+    TransitiveClosure<CID, T, I> closure;
 
     @NonNull
     Function<T, I> idExtractor;
 
     @Override
-    public List<Cluster<T>> cluster(List<ClassifiedCandidate<T>> classified) {
-        final List<Cluster<T>> transitiveClosure = closure.cluster(classified);
-        final List<Cluster<T>> refinedClusters = refineCluster.refine(transitiveClosure, classified);
+    public List<Cluster<CID, T>> cluster(List<ClassifiedCandidate<T>> classified) {
+        final List<Cluster<CID, T>> transitiveClosure = closure.cluster(classified);
+        final List<Cluster<CID, T>> refinedClusters = refineCluster.refine(transitiveClosure, classified);
 
-        List<Cluster<T>> changedClusters = new ArrayList<>();
-        for (Cluster<T> refinedCluster : refinedClusters) {
+        List<Cluster<CID, T>> changedClusters = new ArrayList<>();
+        for (Cluster<CID, T> refinedCluster : refinedClusters) {
             for (T element : refinedCluster.getElements()) {
                 final I id = idExtractor.apply(element);
-                final Cluster<T> oldCluster = oldClusterIndex.put(id, refinedCluster);
+                final Cluster<CID, T> oldCluster = oldClusterIndex.put(id, refinedCluster);
                 if(oldCluster == null || !getClusterId(oldCluster).equals(getClusterId(refinedCluster))) {
                     changedClusters.add(refinedCluster);
                 }
@@ -49,13 +49,13 @@ public class RefinedTransitiveClosure<T, I extends Comparable<I>> implements Clu
                 .collect(Collectors.toList());
     }
 
-    private I getClusterId(Cluster<T> cluster) {
+    private I getClusterId(Cluster<CID, T> cluster) {
         return idExtractor.apply(cluster.get(0));
     }
 
-    public static class RefinedTransitiveClosureBuilder<T, I extends Comparable<I>> {
-        public RefinedTransitiveClosure<T, I> build() {
-            Map<I, Cluster<T>> oldClusterIndex = this.oldClusterIndex != null ? this.oldClusterIndex : new HashMap<>();
+    public static class RefinedTransitiveClosureBuilder<CID, T, I extends Comparable<I>> {
+        public RefinedTransitiveClosure<CID, T, I> build() {
+            Map<I, Cluster<CID, T>> oldClusterIndex = this.oldClusterIndex != null ? this.oldClusterIndex : new HashMap<>();
             var refineCluster = Objects.requireNonNull(this.refineCluster);
             var tc = new TransitiveClosure<>(idExtractor, refineCluster.getClusterIdGenerator(), new HashMap<>());
             return new RefinedTransitiveClosure<>(refineCluster, oldClusterIndex, tc, idExtractor);

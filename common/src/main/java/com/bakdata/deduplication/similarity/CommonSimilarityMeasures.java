@@ -21,6 +21,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.bakdata.deduplication.similarity.SimilarityMeasure.UNKNOWN;
+
 @SuppressWarnings("WeakerAccess")
 public class CommonSimilarityMeasures {
 
@@ -34,7 +36,11 @@ public class CommonSimilarityMeasures {
         return ((left, right, context) -> left.equals(right) ? 1 : 0);
     }
 
-    public static <T, C extends Collection<T>> SimilarityMeasure<C> jaccard() {
+    public static <T> SimilarityMeasure<T> inequality() {
+        return ((left, right, context) -> left.equals(right) ? 0 : 1);
+    }
+
+    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> jaccard() {
         return (left, right, context) -> {
             @SuppressWarnings("unchecked")
             final Set<T> leftSet = left instanceof Set ? (Set<T>) left : new HashSet<>(left);
@@ -53,7 +59,51 @@ public class CommonSimilarityMeasures {
         return new SimilarityScoreMeasure<>(new JaroWinklerDistance());
     }
 
-    public static SimilarityTransformation<String, String> colognePhoneitic() {
+    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> mongeElkan(SimilarityMeasure<T> pairMeasure) {
+        return mongeElkan(pairMeasure, Integer.MAX_VALUE / 2);
+    }
+
+
+    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> cosine() {
+        return (left, right, context) -> {
+            if(left == null || right == null) {
+                return UNKNOWN;
+            }
+            final Map<T, Long> leftHistogram = left.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+            final Map<T, Long> rightHistogram = right.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+            float dotProduct = 0;
+            for (Map.Entry<T, Long> leftEntry : leftHistogram.entrySet()) {
+                final Long rightCount = rightHistogram.get(leftEntry.getKey());
+                if(rightCount != null) {
+                    dotProduct += leftEntry.getValue() * rightCount;
+                }
+            }
+            return dotProduct / getLength(leftHistogram) / getLength(rightHistogram);
+        };
+    }
+
+    private static <T> float getLength(Map<T, Long> histogram) {
+        return (float) Math.sqrt(histogram.values().stream().mapToDouble(count -> count * count).sum());
+    }
+
+
+    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> mongeElkan(SimilarityMeasure<T> pairMeasure, int maxPositionDiff) {
+        return new MongeElkan<>(pairMeasure, maxPositionDiff, 0);
+    }
+
+    public static <T> SimilarityMeasure<T> negate(SimilarityMeasure<T> measure) {
+        return (left, right, context) -> 1 - measure.getSimilarity(left, right, context);
+    }
+
+    private static <T, C extends Collection<? extends T>> List<T> ensureList(C leftCollection) {
+        return leftCollection instanceof List ? (List<T>) leftCollection : List.copyOf(leftCollection);
+    }
+
+    public static <T, C extends List<? extends T>> SimilarityMeasure<C> positionWise(SimilarityMeasure<T> pairMeasure) {
+        return mongeElkan(pairMeasure, 0);
+    }
+
+    public static SimilarityTransformation<String, String> colognePhonetic() {
         return codec(new ColognePhonetic());
     }
 
@@ -62,7 +112,19 @@ public class CommonSimilarityMeasures {
         if (measures.length == 0) {
             throw new IllegalArgumentException();
         }
-        return (left, right, context) -> (float) Arrays.stream(measures).mapToDouble(m -> m.getSimilarity(left, right, context)).max().getAsDouble();
+        return (left, right, context) -> {
+            if(left == null || right == null) {
+                return UNKNOWN;
+            }
+            float max = -1;
+            for (int i = 0; max < 1 && i < measures.length; i++) {
+                float similarity = measures[i].getSimilarity(left, right, context);
+                if (!Float.isNaN(similarity)) {
+                    max = Math.max(similarity, max);
+                }
+            }
+            return max == -1 ? Float.NaN : max;
+        };
     }
 
     public static <T extends Temporal> SimilarityMeasure<T> maxDiff(int diff, TemporalUnit unit) {
@@ -75,7 +137,19 @@ public class CommonSimilarityMeasures {
         if (measures.length == 0) {
             throw new IllegalArgumentException();
         }
-        return (left, right, context) -> (float) Arrays.stream(measures).mapToDouble(m -> m.getSimilarity(left, right, context)).min().getAsDouble();
+        return (left, right, context) ->  {
+            if(left == null || right == null) {
+                return UNKNOWN;
+            }
+            float min = 2;
+            for (int i = 0; min < 1 && i < measures.length; i++) {
+                float similarity = measures[i].getSimilarity(left, right, context);
+                if (!Float.isNaN(similarity)) {
+                    min = Math.min(similarity, min);
+                }
+            }
+            return min == 2 ? Float.NaN : min;
+        };
     }
 
     public static <T extends CharSequence> SimilarityTransformation<T, List<CharSequence>> ngram(int n) {
@@ -100,7 +174,7 @@ public class CommonSimilarityMeasures {
         return (s, context) -> encoder.encode(s);
     }
 
-    public static <T extends CharSequence> SimilarityTransformation<T, List<String>> tokenize() {
+    public static <T extends CharSequence> SimilarityTransformation<T, List<String>> words() {
         return (t, context) -> Lists.newArrayList(WHITE_SPACE_SPLITTER.split(t));
     }
 
@@ -190,7 +264,18 @@ public class CommonSimilarityMeasures {
             var weightedSims = weightedSimilarities.stream()
                 .map(ws -> ws.getMeasure().getSimilarity(left, right, context) * ws.getWeight())
                 .collect(Collectors.toList());
-            return aggregator.apply(weightedSims, getWeights());
+            final List<Float> weights = getWeights();
+            List<Float> adjustedWeights = null;
+            for (int i = 0; i < weightedSims.size(); i++) {
+                if(weightedSims.get(i).isNaN()) {
+                    if(adjustedWeights == null) {
+                        adjustedWeights = new ArrayList<>(weights);
+                    }
+                    adjustedWeights.set(i, 0f);
+                    weightedSims.set(i, 0f);
+                }
+            }
+            return aggregator.apply(weightedSims, adjustedWeights == null ? weights : adjustedWeights);
         }
 
         @Value
@@ -207,6 +292,40 @@ public class CommonSimilarityMeasures {
             public WeightedAggregationBuilder<R> add(float weight, SimilarityMeasure<R> measure) {
                 return weightedSimilarity(new WeightedSimilarity<>(weight, measure));
             }
+        }
+    }
+
+    @Value
+    private static class MongeElkan<C extends Collection<? extends T>, T> implements SimilarityMeasure<C> {
+        private final SimilarityMeasure<T> pairMeasure;
+        private final int maxPositionDiff;
+        private final float cutoff;
+
+        @Override
+        public float getSimilarity(C leftCollection, C rightCollection, SimilarityContext context) {
+            if (leftCollection.isEmpty() || rightCollection.isEmpty()) {
+                return 0;
+            }
+            List<T> leftList = ensureList(leftCollection);
+            List<T> rightList = ensureList(rightCollection);
+            // when cutoff is .9 and |left| = 3, then on average each element has .1 buffer
+            // as soon as the current sum + buffer < index, the cutoff threshold cannot be passed (buffer used up)
+            float cutoffBuffer = (1 - cutoff) * leftCollection.size();
+            float sum = 0;
+            for (int leftIndex = 0; leftIndex < leftCollection.size() && (cutoffBuffer + sum) >= leftIndex; leftIndex++) {
+                float max = 0;
+                for (int rightIndex = Math.max(0, leftIndex - maxPositionDiff),
+                     rightMax = Math.min(rightCollection.size(), leftIndex + maxPositionDiff); max < 1.0 && rightIndex < rightMax; rightIndex++) {
+                    max = Math.max(max, pairMeasure.getSimilarity(leftList.get(leftIndex), rightList.get(rightIndex), context));
+                }
+                sum += max;
+            }
+            return CutoffSimiliarityMeasure.cutoff(sum / leftCollection.size(), cutoff);
+        }
+
+        @Override
+        public SimilarityMeasure<C> cutoff(float threshold) {
+            return new MongeElkan<>(pairMeasure, maxPositionDiff, threshold);
         }
     }
 }

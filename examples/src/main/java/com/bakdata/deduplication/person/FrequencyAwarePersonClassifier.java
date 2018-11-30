@@ -23,7 +23,7 @@ import static com.bakdata.deduplication.similarity.CommonSimilarityMeasures.*;
 
 @Value
 public class FrequencyAwarePersonClassifier implements Classifier<Person> {
-    static DateTimeFormatter ISO_FORMAT = DateTimeFormatter.ISO_DATE;
+    static DateTimeFormatter ISO_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
     static float THRESHOLD = .9f;
 
     @Delegate
@@ -73,7 +73,7 @@ public class FrequencyAwarePersonClassifier implements Classifier<Person> {
     private static SimilarityMeasure<Person> createSimilarityMeasure(float firstNameWeight, float lastNameWeight, float threshold) {
         return CommonSimilarityMeasures.<Person>weightedAverage()
             .add(firstNameWeight, Person::getFirstName, max(levenshtein().cutoff(.5f), jaroWinkler()))
-            .add(lastNameWeight, Person::getLastName, max(equality().of(colognePhoneitic()), levenshtein().cutoff(.5f), jaroWinkler()))
+            .add(lastNameWeight, Person::getLastName, max(equality().of(colognePhonetic()), levenshtein().cutoff(.5f), jaroWinkler()))
             .add(1, Person::getGender, equality())
             .add(2, Person::getBirthDate, max(levenshtein().of(ISO_FORMAT::format), maxDiff(2, ChronoUnit.DAYS)))
             .build()

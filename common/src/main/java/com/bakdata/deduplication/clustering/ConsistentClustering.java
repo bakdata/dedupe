@@ -24,16 +24,16 @@ import java.util.stream.Collectors;
  */
 @Value
 @Builder
-public class ConsistentClustering<T, I extends Comparable<I>> implements Clustering<T> {
+public class ConsistentClustering<CID, T, I extends Comparable<I>> implements Clustering<CID, T> {
     @NonNull
-    Clustering<T> clustering;
+    Clustering<CID, T> clustering;
     Function<T, I> idExtractor;
     @Getter(lazy = true, value = AccessLevel.PRIVATE)
-    TransitiveClosure<T, I> internalClosure = TransitiveClosure.<T, I>builder().idExtractor(idExtractor).build();
+    TransitiveClosure<CID, T, I> internalClosure = TransitiveClosure.<CID, T, I>builder().idExtractor(idExtractor).build();
 
     @Override
-    public List<Cluster<T>> cluster(List<ClassifiedCandidate<T>> classified) {
-        final List<Cluster<T>> clusters = clustering.cluster(classified);
+    public List<Cluster<CID, T>> cluster(List<ClassifiedCandidate<T>> classified) {
+        final List<Cluster<CID, T>> clusters = clustering.cluster(classified);
         if (clusters.isEmpty()) {
             return clusters;
         }
@@ -45,7 +45,7 @@ public class ConsistentClustering<T, I extends Comparable<I>> implements Cluster
         final List<Candidate<T>> candidates = clusters.stream()
                 .flatMap(cluster -> cluster.getElements().stream().map(record -> new Candidate<>(firstElement, record)))
                 .collect(Collectors.toList());
-        final List<Cluster<T>> transitiveClusters = getInternalClosure().clusterDuplicates(candidates);
+        final List<Cluster<CID, T>> transitiveClusters = getInternalClosure().clusterDuplicates(candidates);
         if (transitiveClusters.size() != 1) {
             throw new IllegalStateException("Expected exactly one transitive cluster");
         }
@@ -56,8 +56,8 @@ public class ConsistentClustering<T, I extends Comparable<I>> implements Cluster
         return transitiveClusters;
     }
 
-    public boolean noRecordInIndex(List<Cluster<T>> clusters) {
-        final Map<I, Cluster<T>> clusterIndex = getInternalClosure().getClusterIndex();
+    public boolean noRecordInIndex(List<Cluster<CID, T>> clusters) {
+        final Map<I, Cluster<CID, T>> clusterIndex = getInternalClosure().getClusterIndex();
         return clusters.stream().flatMap(cluster -> cluster.getElements().stream())
                 .allMatch(record -> clusterIndex.get(idExtractor.apply(record)) == null);
     }
