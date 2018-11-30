@@ -95,6 +95,7 @@ public class CommonSimilarityMeasures {
         return (left, right, context) -> 1 - measure.getSimilarity(left, right, context);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T, C extends Collection<? extends T>> List<T> ensureList(C leftCollection) {
         return leftCollection instanceof List ? (List<T>) leftCollection : List.copyOf(leftCollection);
     }
@@ -142,7 +143,7 @@ public class CommonSimilarityMeasures {
                 return UNKNOWN;
             }
             float min = 2;
-            for (int i = 0; min < 1 && i < measures.length; i++) {
+            for (int i = 0; min > 0 && i < measures.length; i++) {
                 float similarity = measures[i].getSimilarity(left, right, context);
                 if (!Float.isNaN(similarity)) {
                     min = Math.min(similarity, min);

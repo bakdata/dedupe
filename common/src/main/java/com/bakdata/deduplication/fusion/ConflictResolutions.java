@@ -1,6 +1,5 @@
 package com.bakdata.deduplication.fusion;
 
-import com.bakdata.deduplication.fusion.CommonConflictResolutions.TaggedResolution;
 import com.bakdata.util.FunctionalClass;
 import com.bakdata.util.ObjectUtils;
 import lombok.Value;
@@ -22,7 +21,7 @@ public class ConflictResolutions {
         return Merge.builder(ctor);
     }
 
-    public static final <T> Merge.MergeBuilder<T> merge(Class<T> clazz) {
+    public static <T> Merge.MergeBuilder<T> merge(Class<T> clazz) {
         return Merge.builder(clazz);
     }
 
@@ -31,6 +30,7 @@ public class ConflictResolutions {
         private final Supplier<R> ctor;
         private final List<FieldMerge<?, R>> fieldMerges;
 
+        @SuppressWarnings("unchecked")
         public static <R> MergeBuilder<R> builder(Supplier<R> ctor) {
             return new MergeBuilder<>(ctor, FunctionalClass.from((Class<R>) ctor.get().getClass()));
         }
@@ -137,8 +137,8 @@ public class ConflictResolutions {
                 final var last = mergeBuilder.getLast();
                 ResolutionTag tag;
                 // auto tag previous merge if it is not tagged already
-                if (last.getResolution() instanceof TaggedResolution) {
-                    tag = ((TaggedResolution<?, ?>) last.getResolution()).getResolutionTag();
+                if (last.getResolution() instanceof CommonConflictResolutions.TaggedResolution) {
+                    tag = ((CommonConflictResolutions.TaggedResolution<?, ?>) last.getResolution()).getResolutionTag();
                 } else {
                     var fieldMerges = mergeBuilder.getFieldMerges();
                     tag = new ResolutionTag<>("tag-" + System.identityHashCode(fieldMerges) + "-" + fieldMerges.size());

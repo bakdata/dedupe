@@ -1,7 +1,6 @@
 package com.bakdata.deduplication.clustering;
 
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
-import lombok.NonNull;
 
 import java.util.List;
 import java.util.function.Function;

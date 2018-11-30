@@ -48,7 +48,7 @@ public class Cluster<CID extends Comparable<CID>, T> {
     }
 
     private static Function<Iterable<?>, Integer> INT_GENERATOR = new Function<>() {
-        AtomicInteger id = new AtomicInteger();
+        private final AtomicInteger id = new AtomicInteger();
 
         @Override
         public Integer apply(Iterable<?> objects) {
@@ -56,12 +56,13 @@ public class Cluster<CID extends Comparable<CID>, T> {
         }
     };
 
+    @SuppressWarnings("unchecked")
     public static <T> Function<Iterable<T>, Integer> intGenerator() {
         return (Function) INT_GENERATOR;
     }
 
     private static Function<Iterable<?>, Long> LONG_GENERATOR = new Function<>() {
-        AtomicLong id = new AtomicLong();
+        private final AtomicLong id = new AtomicLong();
 
         @Override
         public Long apply(Iterable<?> objects) {
@@ -69,7 +70,7 @@ public class Cluster<CID extends Comparable<CID>, T> {
         }
     };
 
-
+    @SuppressWarnings("unchecked")
     public static <T> Function<Iterable<T>, Long> longGenerator() {
         return (Function) LONG_GENERATOR;
     }

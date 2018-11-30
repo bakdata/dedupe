@@ -42,7 +42,7 @@ public class RefinedTransitiveClosure<CID extends Comparable<CID>, T, I extends 
 
         // return the changed clusters but remove multiple occurences of the same cluster
         return changedClusters.stream()
-                .collect(Collectors.groupingBy(cluster -> getClusterId(cluster)))
+                .collect(Collectors.groupingBy(this::getClusterId))
                 .values()
                 .stream()
                 .map(clusters -> clusters.get(0))

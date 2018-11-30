@@ -7,7 +7,10 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -77,12 +80,12 @@ public class TransitiveClosure<CID extends Comparable<CID>, T, I extends Compara
 
     public void removeCluster(Cluster<CID, T> cluster) {
         final List<I> recordIds = cluster.getElements().stream()
-                .map(record -> idExtractor.apply(record))
+                .map(idExtractor::apply)
                 .collect(Collectors.toList());
-        final Map<Integer, List<Cluster<CID, T>>> referredCluster = recordIds.stream()
-                .map(recordId -> clusterIndex.get(recordId))
-                .collect(Collectors.groupingBy(System::identityHashCode));
-        if(referredCluster.size() != 1 || !referredCluster.values().iterator().next().equals(cluster)) {
+        final Map<CID, List<Cluster<CID, T>>> referredCluster = recordIds.stream()
+                .map(clusterIndex::get)
+                .collect(Collectors.groupingBy(Cluster::getId));
+        if(referredCluster.size() != 1 || !referredCluster.values().iterator().next().get(0).equals(cluster)) {
             throw new IllegalArgumentException("Provided cluster is not known " + cluster);
         }
         this.clusterIndex.keySet().removeAll(recordIds);

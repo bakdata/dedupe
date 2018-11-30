@@ -10,7 +10,6 @@ buildscript {
 }
 
 subprojects {
-
     apply plugin: 'java-library'
     apply plugin: 'io.franzbecker.gradle-lombok'
 

@@ -154,7 +154,7 @@ public class CommonConflictResolutions {
 
     public static <T> ConflictResolution<T, T> preferSource(List<Source> sourcePriority) {
         return ((values, context) -> values.stream()
-                .map(AnnotatedValue::getSource)
+                .<Source>map(AnnotatedValue::getSource)
                 .min(Comparator.comparingInt(sourcePriority::indexOf))
                 .map(source -> values.stream().filter(v -> v.getSource().equals(source)).collect(Collectors.toList()))
                 .orElse(List.of()));
