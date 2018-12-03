@@ -1,3 +1,27 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2018 bakdata GmbH
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package com.bakdata.deduplication.similarity;
 
 import com.google.common.base.Splitter;
@@ -44,10 +68,8 @@ public class CommonSimilarityMeasures {
 
     public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> jaccard() {
         return (left, right, context) -> {
-            @SuppressWarnings("unchecked")
-            final Set<T> leftSet = left instanceof Set ? (Set<T>) left : new HashSet<>(left);
-            @SuppressWarnings("unchecked")
-            final Set<T> rightSet = left instanceof Set ? (Set<T>) right : new HashSet<>(right);
+            @SuppressWarnings("unchecked") final Set<T> leftSet = left instanceof Set ? (Set<T>) left : new HashSet<>(left);
+            @SuppressWarnings("unchecked") final Set<T> rightSet = left instanceof Set ? (Set<T>) right : new HashSet<>(right);
             final long intersectCount = leftSet.stream().filter(rightSet::contains).count();
             return (float) intersectCount / (rightSet.size() + leftSet.size() - intersectCount);
         };
@@ -68,7 +90,7 @@ public class CommonSimilarityMeasures {
 
     public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> cosine() {
         return (left, right, context) -> {
-            if(left == null || right == null) {
+            if (left == null || right == null) {
                 return unknown();
             }
             final Map<T, Long> leftHistogram = left.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
@@ -76,7 +98,7 @@ public class CommonSimilarityMeasures {
             float dotProduct = 0;
             for (Map.Entry<T, Long> leftEntry : leftHistogram.entrySet()) {
                 final Long rightCount = rightHistogram.get(leftEntry.getKey());
-                if(rightCount != null) {
+                if (rightCount != null) {
                     dotProduct += leftEntry.getValue() * rightCount;
                 }
             }
@@ -116,7 +138,7 @@ public class CommonSimilarityMeasures {
             throw new IllegalArgumentException();
         }
         return (left, right, context) -> {
-            if(left == null || right == null) {
+            if (left == null || right == null) {
                 return unknown();
             }
             float max = -1;
@@ -132,7 +154,7 @@ public class CommonSimilarityMeasures {
 
     public static <T extends Temporal> SimilarityMeasure<T> maxDiff(int diff, TemporalUnit unit) {
         return (left, right, context) ->
-            Math.max(0, 1 - (float) Math.abs(left.until(right, unit)) / diff);
+                Math.max(0, 1 - (float) Math.abs(left.until(right, unit)) / diff);
     }
 
     @SafeVarargs
@@ -140,8 +162,8 @@ public class CommonSimilarityMeasures {
         if (measures.length == 0) {
             throw new IllegalArgumentException();
         }
-        return (left, right, context) ->  {
-            if(left == null || right == null) {
+        return (left, right, context) -> {
+            if (left == null || right == null) {
                 return unknown();
             }
             float min = 2;
@@ -157,8 +179,8 @@ public class CommonSimilarityMeasures {
 
     public static <T extends CharSequence> SimilarityTransformation<T, List<CharSequence>> ngram(int n) {
         return (t, context) -> IntStream.range(0, t.length() - n + 1)
-            .mapToObj(i -> t.subSequence(i, i + n))
-            .collect(Collectors.toList());
+                .mapToObj(i -> t.subSequence(i, i + n))
+                .collect(Collectors.toList());
     }
 
     public static SimilarityTransformation<String, String> soundex() {
@@ -195,7 +217,7 @@ public class CommonSimilarityMeasures {
 
     public static <T> WeightedAggregation.WeightedAggregationBuilder<T> weightedAverage() {
         return weightedAggregation((weightedSims, weights) ->
-            (float) (weightedSims.stream().mapToDouble(sim -> sim).sum() / weights.stream().mapToDouble(w -> w).sum()));
+                (float) (weightedSims.stream().mapToDouble(sim -> sim).sum() / weights.stream().mapToDouble(w -> w).sum()));
     }
 
     static int getMaxLen(CharSequence left, CharSequence right) {
@@ -212,7 +234,7 @@ public class CommonSimilarityMeasures {
         @Override
         public float getSimilarity(CharSequence left, CharSequence right, SimilarityContext context) {
             final float distance = this.score.apply(left, right).floatValue();
-            if(distance == -1) {
+            if (distance == -1) {
                 return 0;
             }
             return 1f - distance / getMaxLen(left, right);
@@ -265,12 +287,12 @@ public class CommonSimilarityMeasures {
         @Override
         public float getSimilarity(R left, R right, SimilarityContext context) {
             var weightedSims = weightedSimilarities.stream()
-                .map(ws -> ws.getMeasure().getSimilarity(left, right, context) * ws.getWeight())
-                .collect(Collectors.toList());
+                    .map(ws -> ws.getMeasure().getSimilarity(left, right, context) * ws.getWeight())
+                    .collect(Collectors.toList());
             List<Float> adjustedWeights = null;
             for (int i = 0; i < weightedSims.size(); i++) {
-                if(weightedSims.get(i).isNaN()) {
-                    if(adjustedWeights == null) {
+                if (weightedSims.get(i).isNaN()) {
+                    if (adjustedWeights == null) {
                         adjustedWeights = new ArrayList<>(getWeights());
                     }
                     adjustedWeights.set(i, 0f);
