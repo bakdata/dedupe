@@ -1,5 +1,6 @@
 package com.bakdata.deduplication.fusion;
 
+import com.bakdata.util.FunctionalClass;
 import com.google.common.collect.Sets;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,8 +15,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import com.bakdata.deduplication.fusion.ConflictResolutions.*;
+import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.*;
 
 class ConflictResolutionsTest {
 
@@ -143,7 +148,7 @@ class ConflictResolutionsTest {
     @Test
     void testFieldFromWrongField() {
         assertThatExceptionOfType(RuntimeException.class)
-            .isThrownBy(() -> create().field(from(Person.class).field("i")))
+            .isThrownBy(() -> create().field(FunctionalClass.from(Person.class).field("i")))
             .withCauseInstanceOf(IntrospectionException.class)
             .withMessageContaining("Method not found: isI");
     }
@@ -179,7 +184,7 @@ class ConflictResolutionsTest {
     @Test
     void testNestedFieldFromField() {
         FieldMergeBuilder<String, Person> nestedField = createWithId()
-            .field(from(Person.class).field("firstName"));
+            .field(FunctionalClass.from(Person.class).field("firstName"));
         testNestedField(nestedField);
     }
 
@@ -200,7 +205,7 @@ class ConflictResolutionsTest {
     @Test
     void testNestedFieldFromWrongField() {
         assertThatExceptionOfType(RuntimeException.class)
-            .isThrownBy(() -> createWithId().field(from(Person.class).field("fistName")))
+            .isThrownBy(() -> createWithId().field(FunctionalClass.from(Person.class).field("fistName")))
             .withCauseInstanceOf(IntrospectionException.class)
             .withMessageContaining("Method not found: isFistName");
     }
@@ -240,6 +245,7 @@ class ConflictResolutionsTest {
 
     private static final class PersonWithoutDefaultConstructor {
 
+        @SuppressWarnings("unused")
         private PersonWithoutDefaultConstructor(String foo) {
 
         }

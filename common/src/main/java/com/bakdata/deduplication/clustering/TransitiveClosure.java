@@ -16,18 +16,18 @@ import java.util.stream.Collectors;
 
 @Value
 @Builder
-public class TransitiveClosure<CID extends Comparable<CID>, T, I extends Comparable<I>> implements Clustering<CID, T> {
+public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<I>> implements Clustering<C, T> {
     @NonNull
     Function<T, I> idExtractor;
     @NonNull
-    Function<Iterable<T>, CID> clusterIdGenerator;
+    Function<Iterable<T>, C> clusterIdGenerator;
     @NonNull
     @Builder.Default
-    Map<I, Cluster<CID, T>> clusterIndex = new HashMap<>();
+    Map<I, Cluster<C, T>> clusterIndex = new HashMap<>();
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public List<Cluster<CID, T>> cluster(List<ClassifiedCandidate<T>> classified) {
+    public List<Cluster<C, T>> cluster(List<ClassifiedCandidate<T>> classified) {
         final List<Candidate<T>> duplicates = classified.stream()
                 .filter(classifiedCandidate -> classifiedCandidate.getClassification().getResult() == Classification.ClassificationResult.DUPLICATE)
                 .map(ClassifiedCandidate::getCandidate)
@@ -35,8 +35,8 @@ public class TransitiveClosure<CID extends Comparable<CID>, T, I extends Compara
         return clusterDuplicates(duplicates);
     }
 
-    public List<Cluster<CID, T>> clusterDuplicates(List<Candidate<T>> duplicates) {
-        List<Cluster<CID, T>> changedClusters = new ArrayList<>();
+    public List<Cluster<C, T>> clusterDuplicates(List<Candidate<T>> duplicates) {
+        List<Cluster<C, T>> changedClusters = new ArrayList<>();
 
         // apply in-memory transitive closure
         for (Candidate<T> candidate : duplicates) {
@@ -44,7 +44,7 @@ public class TransitiveClosure<CID extends Comparable<CID>, T, I extends Compara
             var rightCluster = clusterIndex.get(idExtractor.apply(candidate.getOldRecord()));
             if (leftCluster == null && rightCluster == null) {
                 List<T> elements = List.of(candidate.getNewRecord(), candidate.getOldRecord());
-                Cluster<CID, T> newCluster = new Cluster<>(clusterIdGenerator.apply(elements), elements);
+                Cluster<C, T> newCluster = new Cluster<>(clusterIdGenerator.apply(elements), elements);
                 clusterIndex.put(idExtractor.apply(candidate.getNewRecord()), newCluster);
                 clusterIndex.put(idExtractor.apply(candidate.getOldRecord()), newCluster);
                 changedClusters.add(newCluster);
@@ -61,7 +61,7 @@ public class TransitiveClosure<CID extends Comparable<CID>, T, I extends Compara
                 clusterIndex.put(idExtractor.apply(candidate.getOldRecord()), leftCluster);
                 changedClusters.add(leftCluster);
             } else { // merge
-                final Cluster<CID, T> merged = leftCluster.merge(clusterIdGenerator, rightCluster);
+                final Cluster<C, T> merged = leftCluster.merge(clusterIdGenerator, rightCluster);
                 for (T person : merged.getElements()) {
                     clusterIndex.put(idExtractor.apply(person), merged);
                 }
@@ -78,11 +78,11 @@ public class TransitiveClosure<CID extends Comparable<CID>, T, I extends Compara
                 .collect(Collectors.toList());
     }
 
-    public void removeCluster(Cluster<CID, T> cluster) {
+    public void removeCluster(Cluster<C, T> cluster) {
         final List<I> recordIds = cluster.getElements().stream()
                 .map(idExtractor::apply)
                 .collect(Collectors.toList());
-        final Map<CID, List<Cluster<CID, T>>> referredCluster = recordIds.stream()
+        final Map<C, List<Cluster<C, T>>> referredCluster = recordIds.stream()
                 .map(clusterIndex::get)
                 .collect(Collectors.groupingBy(Cluster::getId));
         if(referredCluster.size() != 1 || !referredCluster.values().iterator().next().get(0).equals(cluster)) {

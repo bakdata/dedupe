@@ -11,7 +11,7 @@ import java.text.Normalizer;
 
 @Value
 public class PersonCandidateSelection implements OnlineCandidateSelection<Person> {
-    static int WINDOW_SIZE = 20;
+    public static final int WINDOW_SIZE = 20;
     @Delegate
     OnlineCandidateSelection<Person> candidateSelection = OnlineSortedNeighborhoodMethod.<Person>builder()
             .defaultWindowSize(WINDOW_SIZE)

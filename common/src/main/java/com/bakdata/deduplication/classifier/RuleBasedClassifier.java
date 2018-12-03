@@ -27,8 +27,8 @@ import java.util.function.BiPredicate;
 @Value
 @Builder
 public class RuleBasedClassifier<T> implements Classifier<T> {
-    static float DOES_NOT_APPLY = Float.NaN;
-    static Classification UNKNOWN = Classification.builder()
+    public static final float DOES_NOT_APPLY = Float.NaN;
+    public static final Classification UNKNOWN = Classification.builder()
             .confidence(0)
             .result(Classification.ClassificationResult.UNKNOWN)
             .build();
@@ -42,12 +42,9 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
         SimilarityContext context = new SimilarityContext();
         var classification = defaultClassification;
         for (Rule<T> rule : rules) {
-            Optional<Classification> optClassification = evaluateRule(rule, candidate, context);
-            if (optClassification.map(cl -> !cl.getResult().isUnknown()).orElse(false)) {
-                classification = optClassification.get();
-                if (!classification.getResult().isAmbiguous()) {
-                    break;
-                }
+            classification = evaluateRule(rule, candidate, context).orElse(classification);
+            if (!classification.getResult().isAmbiguous()) {
+                break;
             }
         }
         if(!context.getExceptions().isEmpty()) {

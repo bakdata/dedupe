@@ -33,7 +33,7 @@ public class FunctionalClass<R> {
             Constructor<R> ctor = clazz.getDeclaredConstructor();
             return new FunctionalConstructor<>(ctor)::invoke;
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -41,7 +41,7 @@ public class FunctionalClass<R> {
         try {
             return new PropertyDescriptor(name, clazz);
         } catch (IntrospectionException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 

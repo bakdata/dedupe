@@ -6,7 +6,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface SimilarityMeasure<T> {
-    float UNKNOWN = Float.NaN;
+    static float unknown() {
+        return Float.NaN;
+    }
+
+    static boolean isUnknown(float value) {
+        return Float.isNaN(value);
+    }
 
     static float scaleWithThreshold(float similarity, float min) {
         float scaled = (similarity - min) / (1 - min);
@@ -15,11 +21,11 @@ public interface SimilarityMeasure<T> {
 
     float getSimilarity(T left, T right, SimilarityContext context);
 
-    default <Outer> SimilarityMeasure<Outer> of(SimilarityTransformation<Outer, ? extends T> extractor) {
+    default <O> SimilarityMeasure<O> of(SimilarityTransformation<O, ? extends T> extractor) {
         return new SimilarityPath<>(extractor, this);
     }
 
-    default <Outer> SimilarityMeasure<Outer> of(Function<Outer, ? extends T> extractor) {
+    default <O> SimilarityMeasure<O> of(Function<O, ? extends T> extractor) {
         return of((outer, context) -> extractor.apply(outer));
     }
 
@@ -35,7 +41,7 @@ public interface SimilarityMeasure<T> {
     default SimilarityMeasure<T> unknownIf(Predicate<Float> scorePredicate) {
         return (left, right, context) -> {
             final float similarity = getSimilarity(left, right, context);
-            return scorePredicate.test(similarity) ? UNKNOWN : similarity;
+            return scorePredicate.test(similarity) ? unknown() : similarity;
         };
     }
 
