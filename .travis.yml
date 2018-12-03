@@ -7,7 +7,7 @@ addons:
 jdk:
 - oraclejdk11
 script:
-- "./gradlew sonarqube"
+- "./gradlew jacocoMerge sonarqube"
 cache:
   directories:
   - "$HOME/.m2/repository"
