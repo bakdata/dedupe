@@ -3,6 +3,7 @@ package com.bakdata.deduplication.fusion;
 import com.bakdata.util.FunctionalClass;
 import com.bakdata.util.ObjectUtils;
 import lombok.Value;
+import lombok.experimental.UtilityClass;
 import lombok.experimental.Wither;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-//TODO move to core without moving CommonConflictResolutions if possible
+@UtilityClass
 public class ConflictResolutions {
 
     public static <T> Merge.MergeBuilder<T> merge(Supplier<T> ctor) {
@@ -93,6 +94,7 @@ public class ConflictResolutions {
                 this.fieldMerges.set(this.fieldMerges.size() - 1, fieldMerge);
             }
 
+            @SuppressWarnings("squid:S1452")
             FieldMerge<?, R> getLast() {
                 if (fieldMerges.isEmpty()) {
                     throw new IllegalStateException();

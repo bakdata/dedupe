@@ -1,0 +1,16 @@
+language: java
+install: true
+addons:
+  sonarcloud:
+    organization: bakdata
+    token: $SONAR_TOKEN
+jdk:
+- oraclejdk11
+script:
+- "./gradlew sonarqube"
+cache:
+  directories:
+  - "$HOME/.m2/repository"
+  - "$HOME/.sonar/cache"
+  - "$HOME/.gradle"
+  - ".gradle"

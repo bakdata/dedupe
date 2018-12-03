@@ -1,6 +1,7 @@
 package com.bakdata.deduplication.fusion;
 
 import lombok.Value;
+import lombok.experimental.UtilityClass;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -9,8 +10,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
+@UtilityClass
 public class CommonConflictResolutions {
-    private final static ThreadLocalRandom random = ThreadLocalRandom.current();
+    private static final ThreadLocalRandom random = ThreadLocalRandom.current();
 
     public static <T> ConflictResolution<T, T> corresponding(ResolutionTag<?> resolutionTag) {
         return ((values, context) -> {

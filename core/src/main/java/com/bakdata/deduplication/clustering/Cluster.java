@@ -13,12 +13,12 @@ import java.util.function.Function;
 @Value
 @RequiredArgsConstructor
 @Builder
-public class Cluster<CID extends Comparable<CID>, T> {
-    CID id;
+public class Cluster<C extends Comparable<C>, T> {
+    C id;
 
     List<T> elements;
 
-    public Cluster(CID id) {
+    public Cluster(C id) {
         this(id, new ArrayList<>());
     }
 
@@ -38,7 +38,7 @@ public class Cluster<CID extends Comparable<CID>, T> {
         return this.elements.contains(record);
     }
 
-    public Cluster<CID, T> merge(Function<Iterable<T>, CID> idGenerator, Cluster<CID, T> other) {
+    public Cluster<C, T> merge(Function<Iterable<T>, C> idGenerator, Cluster<C, T> other) {
         if(other == this) {
             return this;
         }
@@ -47,7 +47,8 @@ public class Cluster<CID extends Comparable<CID>, T> {
         return new Cluster<>(idGenerator.apply(concatElements), concatElements);
     }
 
-    private static Function<Iterable<?>, Integer> INT_GENERATOR = new Function<>() {
+    @SuppressWarnings("squid:S4276")
+    private static final Function<Iterable<?>, Integer> INT_GENERATOR = new Function<>() {
         private final AtomicInteger id = new AtomicInteger();
 
         @Override
@@ -61,7 +62,8 @@ public class Cluster<CID extends Comparable<CID>, T> {
         return (Function) INT_GENERATOR;
     }
 
-    private static Function<Iterable<?>, Long> LONG_GENERATOR = new Function<>() {
+    @SuppressWarnings("squid:S4276")
+    private static final Function<Iterable<?>, Long> LONG_GENERATOR = new Function<>() {
         private final AtomicLong id = new AtomicLong();
 
         @Override

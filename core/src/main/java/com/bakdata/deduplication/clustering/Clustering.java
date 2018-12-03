@@ -5,8 +5,8 @@ import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 import java.util.List;
 import java.util.function.Function;
 
-public interface Clustering<CID extends Comparable<CID>, T> {
-    List<Cluster<CID, T>> cluster(List<ClassifiedCandidate<T>> classified);
+public interface Clustering<C extends Comparable<C>, T> {
+    List<Cluster<C, T>> cluster(List<ClassifiedCandidate<T>> classified);
 
-    Function<Iterable<T>, CID> getClusterIdGenerator();
+    Function<Iterable<T>, C> getClusterIdGenerator();
 }

@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import static com.bakdata.util.ObjectUtils.isNonEmpty;
 
 @Value
-public class ResolutionPath<T, C, R>  implements ConflictResolution<T, R> {
+public class ResolutionPath<T, R>  implements ConflictResolution<T, R> {
     Function<T, R> extractor;
     ConflictResolution<R, R> resolution;
 

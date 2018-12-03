@@ -6,19 +6,24 @@ buildscript {
     dependencies {
         classpath 'io.franzbecker:gradle-lombok:1.14'
         classpath 'net.researchgate:gradle-release:2.6.0'
+        classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.2'
     }
 }
+
+apply plugin: 'org.sonarqube'
+apply plugin: 'jacoco'
 
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'io.franzbecker.gradle-lombok'
+
 
     lombok {
         version = '1.18.4'
         sha256 = ""
     }
 
-    // build fails for java 11
+    // build fails for java 11, let's wait for a newer lombok version
     sourceCompatibility = 1.10
     targetCompatibility = 1.10
 
@@ -41,5 +46,13 @@ subprojects {
         }
 
         systemProperty 'java.util.logging.config.file', 'src/test/resources/logging.properties'
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.projectName", "Dedupe"
+        property "sonar.projectKey", "bakdata-dedupe"
     }
 }

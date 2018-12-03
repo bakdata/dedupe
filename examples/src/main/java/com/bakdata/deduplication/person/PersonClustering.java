@@ -6,7 +6,7 @@ import lombok.experimental.Delegate;
 
 @Value
 public class PersonClustering implements Clustering<Long, Person> {
-    RefineCluster<Long, Person, String> refineCluster = RefineCluster.<Long, Person, String>builder()
+    RefineCluster<Long, Person> refineCluster = RefineCluster.<Long, Person>builder()
             .classifier(new PersonClassifier())
             .clusterIdGenerator(Cluster.longGenerator())
             .build();

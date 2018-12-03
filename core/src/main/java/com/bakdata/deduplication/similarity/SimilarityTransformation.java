@@ -3,6 +3,7 @@ package com.bakdata.deduplication.similarity;
 import java.util.Objects;
 
 public interface SimilarityTransformation<T, R> {
+    @SuppressWarnings("squid:S00112")
     R transform(T t, SimilarityContext context) throws Exception;
 
     default <V> SimilarityTransformation<T, V> andThen(SimilarityTransformation<? super R, ? extends V> after) {

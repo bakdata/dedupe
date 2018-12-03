@@ -10,5 +10,5 @@ public class Source {
     float weight;
 
     @Getter
-    private static Source Calculated = new Source("calculated", Float.NaN);
+    private static final Source Calculated = new Source("calculated", Float.NaN);
 }

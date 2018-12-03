@@ -1,5 +1,6 @@
 package com.bakdata.util;
 
+import com.bakdata.util.FunctionalClass.Field;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.bakdata.util.FunctionalClass.from;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -26,7 +28,7 @@ class FunctionalClassTest {
     void testGetConstructorWithException() {
         Supplier<PersonWithExceptionConstructor> ctor = from(PersonWithExceptionConstructor.class)
             .getConstructor();
-        assertThatExceptionOfType(RuntimeException.class)
+        assertThatExceptionOfType(IllegalStateException.class)
             .isThrownBy(ctor::get)
             .withMessage("Foo");
     }
@@ -43,7 +45,7 @@ class FunctionalClassTest {
 
     @Test
     void testGetGetterForMissingField() {
-        assertThatExceptionOfType(RuntimeException.class)
+        assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> from(Person.class).field("i"))
             .withCauseInstanceOf(IntrospectionException.class)
             .withMessageContaining("Method not found: isI");
@@ -57,7 +59,7 @@ class FunctionalClassTest {
             private String id;
 
             public String getId() {
-                throw new RuntimeException("Foo");
+                throw new UnsupportedOperationException("Foo");
             }
         }
 
@@ -66,7 +68,7 @@ class FunctionalClassTest {
         Field<PersonWithExceptionGetter, Object> id = from(PersonWithExceptionGetter.class)
             .field("id");
         Function<PersonWithExceptionGetter, Object> getter = id.getGetter();
-        assertThatExceptionOfType(RuntimeException.class)
+        assertThatExceptionOfType(UnsupportedOperationException.class)
             .isThrownBy(() -> getter.apply(person))
             .withMessage("Foo");
     }
@@ -136,14 +138,14 @@ class FunctionalClassTest {
             private String id;
 
             public void setId(String id) {
-                throw new RuntimeException("Foo");
+                throw new UnsupportedOperationException("Foo");
             }
         }
 
         PersonWithExceptionSetter person = new PersonWithExceptionSetter();
         BiConsumer<PersonWithExceptionSetter, Object> setter = from(PersonWithExceptionSetter.class)
             .field("id").getSetter();
-        assertThatExceptionOfType(RuntimeException.class)
+        assertThatExceptionOfType(UnsupportedOperationException.class)
             .isThrownBy(() -> setter.accept(person, "foo"))
             .withMessage("Foo");
     }
@@ -152,7 +154,7 @@ class FunctionalClassTest {
     static class PersonWithExceptionConstructor {
 
         public PersonWithExceptionConstructor() {
-            throw new RuntimeException("Foo");
+            throw new IllegalStateException("Foo");
         }
     }
 

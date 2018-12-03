@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PersonDeduplicationTest {
-    private final static DateTimeFormatter BdayFormat = DateTimeFormatter.ofPattern("dd.MM.yy");
+    private static final DateTimeFormatter BDAY_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yy");
 
     @Test
     void testDeduplication() throws IOException {
@@ -39,19 +39,18 @@ class PersonDeduplicationTest {
 
     private List<Person> parseCsv(String resourceName) throws IOException {
         final CSVFormat format = CSVFormat.newFormat('\t').withFirstRecordAsHeader().withQuote('"');
-        try(var parser = CSVParser.parse(PersonDeduplicationTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8, format)) {
+        try (var parser = CSVParser.parse(PersonDeduplicationTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8, format)) {
             return parser.getRecords()
                     .stream()
                     .map(record -> Person.builder()
-        .id(record.get("id"))
+                            .id(record.get("id"))
                             .firstName(record.get("firstname_full"))
                             .lastName(record.get("lastname"))
-                            .birthDate(LocalDate.parse(record.get("birthdate"), BdayFormat))
+                            .birthDate(LocalDate.parse(record.get("birthdate"), BDAY_FORMAT))
                             .gender(Gender.valueOf(record.get("gender").toUpperCase()))
                             .lastModified(LocalDateTime.now())
-                    .build())
+                            .build())
                     .collect(Collectors.toList());
-
         }
     }
 }

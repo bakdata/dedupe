@@ -3,6 +3,7 @@ package com.bakdata.deduplication.similarity;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import lombok.*;
+import lombok.experimental.UtilityClass;
 import org.apache.commons.codec.StringEncoder;
 import org.apache.commons.codec.language.ColognePhonetic;
 import org.apache.commons.codec.language.RefinedSoundex;
@@ -21,9 +22,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.bakdata.deduplication.similarity.SimilarityMeasure.UNKNOWN;
+import static com.bakdata.deduplication.similarity.SimilarityMeasure.unknown;
 
 @SuppressWarnings("WeakerAccess")
+@UtilityClass
 public class CommonSimilarityMeasures {
 
     private static final Splitter WHITE_SPACE_SPLITTER = Splitter.on(Pattern.compile("\\s+"));
@@ -67,7 +69,7 @@ public class CommonSimilarityMeasures {
     public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> cosine() {
         return (left, right, context) -> {
             if(left == null || right == null) {
-                return UNKNOWN;
+                return unknown();
             }
             final Map<T, Long> leftHistogram = left.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
             final Map<T, Long> rightHistogram = right.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
@@ -115,7 +117,7 @@ public class CommonSimilarityMeasures {
         }
         return (left, right, context) -> {
             if(left == null || right == null) {
-                return UNKNOWN;
+                return unknown();
             }
             float max = -1;
             for (int i = 0; max < 1 && i < measures.length; i++) {
@@ -140,7 +142,7 @@ public class CommonSimilarityMeasures {
         }
         return (left, right, context) ->  {
             if(left == null || right == null) {
-                return UNKNOWN;
+                return unknown();
             }
             float min = 2;
             for (int i = 0; min > 0 && i < measures.length; i++) {
@@ -209,11 +211,11 @@ public class CommonSimilarityMeasures {
 
         @Override
         public float getSimilarity(CharSequence left, CharSequence right, SimilarityContext context) {
-            final float score = this.score.apply(left, right).floatValue();
-            if(score == -1) {
+            final float distance = this.score.apply(left, right).floatValue();
+            if(distance == -1) {
                 return 0;
             }
-            return 1f - score / getMaxLen(left, right);
+            return 1f - distance / getMaxLen(left, right);
         }
     }
 
@@ -265,18 +267,17 @@ public class CommonSimilarityMeasures {
             var weightedSims = weightedSimilarities.stream()
                 .map(ws -> ws.getMeasure().getSimilarity(left, right, context) * ws.getWeight())
                 .collect(Collectors.toList());
-            final List<Float> weights = getWeights();
             List<Float> adjustedWeights = null;
             for (int i = 0; i < weightedSims.size(); i++) {
                 if(weightedSims.get(i).isNaN()) {
                     if(adjustedWeights == null) {
-                        adjustedWeights = new ArrayList<>(weights);
+                        adjustedWeights = new ArrayList<>(getWeights());
                     }
                     adjustedWeights.set(i, 0f);
                     weightedSims.set(i, 0f);
                 }
             }
-            return aggregator.apply(weightedSims, adjustedWeights == null ? weights : adjustedWeights);
+            return aggregator.apply(weightedSims, adjustedWeights == null ? getWeights() : adjustedWeights);
         }
 
         @Value

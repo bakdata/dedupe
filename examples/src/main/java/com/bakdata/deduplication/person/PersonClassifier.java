@@ -13,7 +13,7 @@ import static com.bakdata.deduplication.similarity.CommonSimilarityMeasures.*;
 
 @Value
 public class PersonClassifier implements Classifier<Person> {
-    static DateTimeFormatter ISO_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
+    public static final DateTimeFormatter ISO_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
 
     @Delegate
     Classifier<Person> classifier = RuleBasedClassifier.<Person>builder()
