@@ -55,8 +55,8 @@ public class PersonFusion implements Fusion<Person> {
 
     private static Set<String> fusionIdWithPersonId(Person p) {
         if (p.getFusedIds().isEmpty()) {
-            return Set.of(p.id);
+            return Set.of(p.getId());
         }
-        return p.fusedIds;
+        return p.getFusedIds();
     }
 }
