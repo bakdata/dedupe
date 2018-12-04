@@ -12,7 +12,7 @@ buildscript {
 
 apply plugin: 'org.sonarqube'
 
-def allTestCoverageFile = "$buildDir/jacoco/allTestCoverage.exec"
+// def allTestCoverageFile = "$buildDir/jacoco/allTestCoverage.exec"
 allprojects {
     apply plugin: 'java-library'
     apply plugin: 'io.franzbecker.gradle-lombok'
@@ -56,22 +56,23 @@ allprojects {
         properties {
             property "sonar.projectName", "Dedupe"
             property "sonar.projectKey", "bakdata-dedupe"
-            property "sonar.jacoco.reportPaths", allTestCoverageFile
+            property "sonar.jacoco.reportPaths", jacocoMerge.destinationFile
         }
     }
 
     jacocoTestReport.dependsOn(test)
 }
 
-//jacocoTestReport{
-//    executionData = project.fileTree(dir: '.', include:'**/build/jacoco/*.exec')
-//    classDirectories = project.fileTree(dir: '.', include:'**/build/classes/main/**/*', excludes: [])
-//    sourceDirectories = project.fileTree(dir: '.', include:'**/src/main/java/**/*')
-//}
-
 task jacocoMerge(type: JacocoMerge) {
     dependsOn subprojects.jacocoTestReport
 
-    destinationFile = file(allTestCoverageFile)
-    executionData = project.fileTree(dir: '.', include:'**/build/jacoco/test.exec')
+    executionData subprojects.test
 }
+
+tasks.sonarqube.dependsOn(jacocoMerge)
+//jacocoTestReport {
+//    dependsOn jacocoMerge
+//    executionData = files(jacocoMerge.destinationFile)
+//    sourceDirectories = files(subprojects.sourceSets.main.java.sourceDirectories)
+//    classDirectories = files(subprojects.sourceSets.main.output)
+//}
