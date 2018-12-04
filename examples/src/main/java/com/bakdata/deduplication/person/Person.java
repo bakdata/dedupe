@@ -39,17 +39,17 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class Person {
-    String id;
-    String firstName;
-    String lastName;
-    LocalDate birthDate;
-    Gender gender;
+    private String id;
+    private String firstName;
+    private String lastName;
+    private LocalDate birthDate;
+    private Gender gender;
     // lineage
-    String source;
-    String originalId;
-    LocalDateTime lastModified;
+    private String source;
+    private String originalId;
+    private LocalDateTime lastModified;
     // fusion information
     @Builder.Default
-    Set<String> fusedIds = new HashSet<>();
+    private Set<String> fusedIds = new HashSet<>();
 }
 

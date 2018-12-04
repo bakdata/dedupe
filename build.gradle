@@ -11,16 +11,20 @@ buildscript {
 }
 
 apply plugin: 'org.sonarqube'
-apply plugin: 'jacoco'
 
-subprojects {
+// def allTestCoverageFile = "$buildDir/jacoco/allTestCoverage.exec"
+allprojects {
     apply plugin: 'java-library'
     apply plugin: 'io.franzbecker.gradle-lombok'
-
+    apply plugin: 'jacoco'
 
     lombok {
         version = '1.18.4'
         sha256 = ""
+    }
+
+    jacoco {
+        toolVersion = "0.8.2"
     }
 
     // build fails for java 11, let's wait for a newer lombok version
@@ -33,7 +37,6 @@ subprojects {
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.0'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.0'
         testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
-        testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '2.23.0'
     }
 
     repositories {
@@ -45,14 +48,31 @@ subprojects {
             showStandardStreams = true
         }
 
+        useJUnitPlatform()
         systemProperty 'java.util.logging.config.file', 'src/test/resources/logging.properties'
     }
+
+    sonarqube {
+        properties {
+            property "sonar.projectName", "Dedupe"
+            property "sonar.projectKey", "bakdata-dedupe"
+            property "sonar.jacoco.reportPaths", jacocoMerge.destinationFile
+        }
+    }
+
+    jacocoTestReport.dependsOn(test)
 }
 
-sonarqube {
-    properties {
-        property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.projectName", "Dedupe"
-        property "sonar.projectKey", "bakdata-dedupe"
-    }
+task jacocoMerge(type: JacocoMerge) {
+    dependsOn subprojects.jacocoTestReport
+
+    executionData subprojects.test
 }
+
+tasks.sonarqube.dependsOn(jacocoMerge)
+//jacocoTestReport {
+//    dependsOn jacocoMerge
+//    executionData = files(jacocoMerge.destinationFile)
+//    sourceDirectories = files(subprojects.sourceSets.main.java.sourceDirectories)
+//    classDirectories = files(subprojects.sourceSets.main.output)
+//}
