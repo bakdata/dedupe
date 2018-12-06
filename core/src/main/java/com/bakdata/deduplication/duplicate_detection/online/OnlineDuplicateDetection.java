@@ -22,22 +22,12 @@
  * SOFTWARE.
  *
  */
-package com.bakdata.deduplication.deduplication;
+package com.bakdata.deduplication.duplicate_detection.online;
 
-import com.bakdata.deduplication.classifier.ClassifiedCandidate;
+import com.bakdata.deduplication.clustering.Cluster;
 
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.List;
 
-public interface HardPairHandler<T> extends Function<ClassifiedCandidate<T>, Optional<ClassifiedCandidate<T>>> {
-    static <T> HardPairHandler<T> ignore() {
-        return classifiedCandidate -> Optional.empty();
-    }
-
-    @Override
-    default Optional<ClassifiedCandidate<T>> apply(ClassifiedCandidate<T> classifiedCandidate) {
-        return hardPairFound(classifiedCandidate);
-    }
-
-    Optional<ClassifiedCandidate<T>> hardPairFound(ClassifiedCandidate<T> classifiedCandidate);
+public interface OnlineDuplicateDetection<C extends Comparable<C>, T> {
+    List<Cluster<C, T>> deduplicate(T newRecord);
 }

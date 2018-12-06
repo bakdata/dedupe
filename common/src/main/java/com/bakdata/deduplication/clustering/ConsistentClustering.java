@@ -34,9 +34,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Wraps another clustering and keeps clusters together, when the wrapped clustering would split it.<br/>
+ * Wraps another clustering and keeps clusters together, when the wrapped clustering would split it.<br>
  * Example: consider a stable marriage-based clustering where A1-B have been previously matched and subsequently clustered.
- * If a strong A2-B would replace that pair and thus split the cluster, this consistent clustering returns a cluster [A1, A2, B] instead.<br/>
+ * If a strong A2-B would replace that pair and thus split the cluster, this consistent clustering returns a cluster [A1, A2, B] instead.<br>
  * <p>
  * This clustering is similar to {@link TransitiveClosure} but allows the wrapped clustering to split temporary (=not-returned) clusters. Thus, in the example above, we have the following two situations:
  * - If A1-B and A2-B would be passed in the same invocation of {@link #cluster(List)}, only cluster [A2, B] would be returned.
@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
  */
 @Value
 @Builder
-public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparable<I>> implements Clustering<C, T> {
+public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparable<? super I>> implements Clustering<C, T> {
     @NonNull
     Clustering<C, T> clustering;
     Function<T, I> idExtractor;

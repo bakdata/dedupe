@@ -24,6 +24,7 @@
  */
 package com.bakdata.deduplication.person;
 
+import com.bakdata.deduplication.duplicate_detection.HardPairHandler;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,7 @@ class PersonDeduplicationTest {
 
     @Test
     void testDeduplication() throws IOException {
-        final PersonDeduplication deduplication = new PersonDeduplication(hardPair -> Optional.empty(), Optional::of);
+        final PersonDeduplication deduplication = new PersonDeduplication(HardPairHandler.ignore(), Optional::of);
 
         // no fusion on the non-duplicated customers
         for (Person customer : parseCsv("/customer.csv")) {

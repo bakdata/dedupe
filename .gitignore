@@ -1,5 +1,5 @@
-.idea/
-*.iml
+.*
+!.gitignore
 build/
 out/
-.gradle/
+secrets.tar

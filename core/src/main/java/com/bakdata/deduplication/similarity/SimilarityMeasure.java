@@ -39,8 +39,10 @@ public interface SimilarityMeasure<T> {
     }
 
     static float scaleWithThreshold(float similarity, float min) {
-        float scaled = (similarity - min) / (1 - min);
-        return Math.max(Math.min(scaled, 1), -1);
+        if(similarity >= min) {
+            return (similarity - min) / (1 - min);
+        }
+        return -(min - similarity) / min;
     }
 
     float getSimilarity(T left, T right, SimilarityContext context);
@@ -58,8 +60,18 @@ public interface SimilarityMeasure<T> {
     }
 
     default SimilarityMeasure<T> scaleWithThreshold(float min) {
-        final SimilarityMeasure<T> cutoff = cutoff(min);
-        return (left, right, context) -> scaleWithThreshold(cutoff.getSimilarity(left, right, context), min);
+        return (left, right, context) -> scaleWithThreshold(getSimilarity(left, right, context), min);
+    }
+
+    default SimilarityMeasure<T> signum() {
+        return (left, right, context) -> Math.signum(getSimilarity(left, right, context));
+    }
+
+    default SimilarityMeasure<T> asBoost() {
+        return (left, right, context) -> {
+            final float similarity = getSimilarity(left, right, context);
+            return similarity <= 0 ? unknown() : 1f;
+        };
     }
 
     default SimilarityMeasure<T> unknownIf(Predicate<Float> scorePredicate) {

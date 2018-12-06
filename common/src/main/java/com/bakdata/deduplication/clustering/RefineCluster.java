@@ -96,7 +96,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
     }
 
     /**
-     * Performs perfect clustering by maximizing intra-cluster similarity and minimizing inter-cluster similarity.<br/>
+     * Performs perfect clustering by maximizing intra-cluster similarity and minimizing inter-cluster similarity.<br>
      * Quite compute-heavy for larger clusters as we perform
      * <li>a complete pair-wise comparison (expensive and quadratic)</li>
      * <li>and compare EACH possible clustering (cheap and exponential).</li>

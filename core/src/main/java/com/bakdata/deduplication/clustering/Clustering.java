@@ -32,5 +32,7 @@ import java.util.function.Function;
 public interface Clustering<C extends Comparable<C>, T> {
     List<Cluster<C, T>> cluster(List<ClassifiedCandidate<T>> classified);
 
-    Function<Iterable<T>, C> getClusterIdGenerator();
+    default Function<Iterable<T>, C> getClusterIdGenerator() {
+        throw new UnsupportedOperationException();
+    }
 }

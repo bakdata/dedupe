@@ -38,6 +38,11 @@ public class CompositeValue<T extends Comparable<?>> implements Comparable<Compo
 
     @SafeVarargs
     public static <T extends Comparable<?>> CompositeValue<T> of(T... values) {
+        for (T value : values) {
+            if(value == null) {
+                return null;
+            }
+        }
         return new CompositeValue<>(List.of(values));
     }
 

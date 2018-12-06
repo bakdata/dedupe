@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package com.bakdata.deduplication.deduplication.online;
+package com.bakdata.deduplication.duplicate_detection.online;
 
 import com.bakdata.deduplication.candidate_selection.online.OnlineCandidateSelection;
 import com.bakdata.deduplication.classifier.Classification;
@@ -30,33 +30,25 @@ import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 import com.bakdata.deduplication.classifier.Classifier;
 import com.bakdata.deduplication.clustering.Cluster;
 import com.bakdata.deduplication.clustering.Clustering;
-import com.bakdata.deduplication.deduplication.HardFusionHandler;
 import com.bakdata.deduplication.duplicate_detection.HardPairHandler;
-import com.bakdata.deduplication.fusion.FusedValue;
-import com.bakdata.deduplication.fusion.Fusion;
-import com.google.common.collect.MoreCollectors;
 import lombok.Builder;
 import lombok.Value;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Value
 @Builder
-public class OnlinePairBasedDeduplication<T> implements OnlineDeduplication<T> {
+public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> implements OnlineDuplicateDetection<C, T> {
     OnlineCandidateSelection<T> candidateSelection;
     Classifier<T> classifier;
-    Clustering<?, T> clustering;
-    Fusion<T> fusion;
+    Clustering<C, T> clustering;
     @Builder.Default
     HardPairHandler<T> hardPairHandler = HardPairHandler.ignore();
-    @Builder.Default
-    HardFusionHandler<T> hardFusionHandler = HardFusionHandler.dontFuse();
 
     @Override
-    public T deduplicate(T newRecord) {
+    public List<Cluster<C, T>> deduplicate(T newRecord) {
         var classified = candidateSelection.getCandidates(newRecord)
                 .stream()
                 .map(candidate -> new ClassifiedCandidate<>(candidate, classifier.classify(candidate)))
@@ -68,16 +60,6 @@ public class OnlinePairBasedDeduplication<T> implements OnlineDeduplication<T> {
                         Stream.of(cc))
                 .collect(Collectors.toList());
 
-        final List<? extends Cluster<?, T>> clusters = clustering.cluster(handledPairs);
-        if (clusters.isEmpty()) {
-            return newRecord;
-        }
-
-        Cluster<?, T> mainCluster = clusters.stream().filter(c -> c.contains(newRecord)).collect(MoreCollectors.onlyElement());
-
-        return Optional.of(fusion.fuse(mainCluster))
-                .flatMap(hardFusionHandler::handlePartiallyFusedValue)
-                .map(FusedValue::getValue)
-                .orElse(newRecord);
+        return clustering.cluster(handledPairs);
     }
 }
