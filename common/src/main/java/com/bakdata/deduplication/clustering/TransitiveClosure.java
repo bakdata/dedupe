@@ -27,6 +27,7 @@ package com.bakdata.deduplication.clustering;
 import com.bakdata.deduplication.candidate_selection.Candidate;
 import com.bakdata.deduplication.classifier.Classification;
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
+import com.google.common.collect.Lists;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
@@ -40,7 +41,7 @@ import java.util.stream.Collectors;
 
 @Value
 @Builder
-public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<I>> implements Clustering<C, T> {
+public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>> implements Clustering<C, T> {
     @NonNull
     Function<T, I> idExtractor;
     @NonNull
@@ -67,7 +68,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
             var leftCluster = clusterIndex.get(idExtractor.apply(candidate.getNewRecord()));
             var rightCluster = clusterIndex.get(idExtractor.apply(candidate.getOldRecord()));
             if (leftCluster == null && rightCluster == null) {
-                List<T> elements = List.of(candidate.getNewRecord(), candidate.getOldRecord());
+                List<T> elements = Lists.newArrayList(candidate.getNewRecord(), candidate.getOldRecord());
                 Cluster<C, T> newCluster = new Cluster<>(clusterIdGenerator.apply(elements), elements);
                 clusterIndex.put(idExtractor.apply(candidate.getNewRecord()), newCluster);
                 clusterIndex.put(idExtractor.apply(candidate.getOldRecord()), newCluster);

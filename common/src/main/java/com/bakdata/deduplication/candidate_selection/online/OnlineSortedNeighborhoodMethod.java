@@ -27,9 +27,11 @@ package com.bakdata.deduplication.candidate_selection.online;
 import com.bakdata.deduplication.candidate_selection.Candidate;
 import com.bakdata.deduplication.candidate_selection.SortingKey;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Singular;
 import lombok.Value;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
@@ -49,6 +51,7 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
     }
 
     @Value
+    @EqualsAndHashCode(exclude = "index")
     public static class Pass<T> {
         SortingKey<T> sortingKey;
         int windowSize;
@@ -56,6 +59,9 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
 
         List<Candidate<T>> getCandidates(T newRecord) {
             final Comparable<?> newKey = sortingKey.getKeyExtractor().apply(newRecord);
+            if(newKey == null) {
+                return List.of();
+            }
             final Stream<T> largerRecords = index.tailMap(newKey).values().stream().flatMap(List::stream).limit(windowSize / 2);
             final Stream<T> smallerRecords = index.descendingMap().tailMap(newKey).values().stream().flatMap(List::stream).limit(windowSize / 2);
             final List<Candidate<T>> candidates = Stream.concat(smallerRecords, largerRecords)
@@ -75,6 +81,17 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
 
         public OnlineSortedNeighborhoodMethodBuilder<T> sortingKey(SortingKey<T> sortingKey) {
             return sortingKey(sortingKey, defaultWindowSize);
+        }
+
+        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(Collection<? extends SortingKey<T>> sortingKeys) {
+            return sortingKeys(sortingKeys, defaultWindowSize);
+        }
+
+        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(Collection<? extends SortingKey<T>> sortingKeys, int windowSize) {
+            for (SortingKey<T> sortingKey : sortingKeys) {
+                sortingKey(sortingKey, windowSize);
+            }
+            return this;
         }
     }
 }

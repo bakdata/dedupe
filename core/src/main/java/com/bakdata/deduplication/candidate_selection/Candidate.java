@@ -30,4 +30,11 @@ import lombok.Value;
 public class Candidate<T> {
     T newRecord;
     T oldRecord;
+
+    public static <T extends Comparable<? super T>> Candidate<T> normalized(T record1, T record2) {
+        if(record1.compareTo(record2) <= 0) {
+            return new Candidate<>(record1, record2);
+        }
+        return new Candidate<>(record2, record1);
+    }
 }

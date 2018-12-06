@@ -38,12 +38,12 @@ import java.util.function.BiPredicate;
 
 /**
  * Successively applies a list of rules to the record and returns the respective {@link Classification} with the following cases:
- * <li>
- * <ul>If any rule classifies the pair unambiguously as {@link Classification.ClassificationResult#DUPLICATE} or {@link Classification.ClassificationResult#NON_DUPLICATE}, the classification is immediately returned.</ul>
- * <ul>If some rule classifies the pair as {@link Classification.ClassificationResult#POSSIBLE_DUPLICATE}, the remaining rules with be evaluated to see if an unambiguous classification will be reached, in which case that classification is returned. If the results are only ambiguous, the last {@code POSSIBLE_DUPLICATE} classification will be returned.</ul>
- * <ul>If no rule can be applied, the result is {@link #UNKNOWN}.</ul>
- * </li>
- * <p>
+ * <ul>
+ * <li>If any rule classifies the pair unambiguously as {@link Classification.ClassificationResult#DUPLICATE} or {@link Classification.ClassificationResult#NON_DUPLICATE}, the classification is immediately returned.</li>
+ * <li>If some rule classifies the pair as {@link Classification.ClassificationResult#POSSIBLE_DUPLICATE}, the remaining rules with be evaluated to see if an unambiguous classification will be reached, in which case that classification is returned. If the results are only ambiguous, the last {@code POSSIBLE_DUPLICATE} classification will be returned.</li>
+ * <li>If no rule can be applied, the result is {@link #UNKNOWN}.</li>
+ * </ul>
+ * <br>
  * The {@code Classification} will contain a description naming the triggered rule and converts the rule score into a confidence score.
  *
  * @param <T>
@@ -64,7 +64,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     @Override
     public Classification classify(Candidate<T> candidate) {
         SimilarityContext context = new SimilarityContext();
-        var classification = defaultClassification;
+        Classification classification = defaultClassification;
         for (Rule<T> rule : rules) {
             classification = evaluateRule(rule, candidate, context).orElse(classification);
             if (!classification.getResult().isAmbiguous()) {
@@ -74,7 +74,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
         if (!context.getExceptions().isEmpty()) {
             throw createException(candidate, context);
         }
-        return classification;
+        return classification.getResult().isAmbiguous() ? defaultClassification : classification;
     }
 
     private SimilarityException createException(Candidate<T> candidate, SimilarityContext context) {
@@ -129,11 +129,8 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
             return rule(new Rule<>(name, negativeSim.unknownIf(s -> s >= 0)));
         }
 
-        public RuleBasedClassifierBuilder<T> defaultResult(Classification.ClassificationResult result) {
-            return defaultClassification(Classification.builder()
-                    .confidence(0)
-                    .result(result)
-                    .build());
+        public RuleBasedClassifierBuilder<T> defaultRule(SimilarityMeasure<T> similarityMeasure) {
+            return rule(new Rule<>("default", similarityMeasure));
         }
     }
 

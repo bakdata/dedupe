@@ -22,29 +22,22 @@
  * SOFTWARE.
  *
  */
-package com.bakdata.deduplication.person;
+package com.bakdata.deduplication.duplicate_detection;
 
-import com.bakdata.deduplication.deduplication.HardFusionHandler;
-import com.bakdata.deduplication.deduplication.online.OnlineDeduplication;
-import com.bakdata.deduplication.deduplication.online.OnlinePairBasedDeduplication;
-import com.bakdata.deduplication.duplicate_detection.HardPairHandler;
-import lombok.Value;
-import lombok.experimental.Delegate;
+import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 
-@Value
-public class PersonDeduplication implements OnlineDeduplication<Person> {
-    @Delegate()
-    OnlinePairBasedDeduplication<Person> deduplication;
+import java.util.Optional;
+import java.util.function.Function;
 
-    public PersonDeduplication(HardPairHandler<Person> hardPairHandler,
-                               HardFusionHandler<Person> hardFusionHandler) {
-        this.deduplication = OnlinePairBasedDeduplication.<Person>builder()
-                .classifier(new PersonClassifier())
-                .candidateSelection(new PersonCandidateSelection())
-                .clustering(new PersonClustering())
-                .fusion(new PersonFusion())
-                .hardFusionHandler(hardFusionHandler)
-                .hardPairHandler(hardPairHandler)
-                .build();
+public interface HardPairHandler<T> extends Function<ClassifiedCandidate<T>, Optional<ClassifiedCandidate<T>>> {
+    static <T> HardPairHandler<T> ignore() {
+        return classifiedCandidate -> Optional.empty();
     }
+
+    @Override
+    default Optional<ClassifiedCandidate<T>> apply(ClassifiedCandidate<T> classifiedCandidate) {
+        return hardPairFound(classifiedCandidate);
+    }
+
+    Optional<ClassifiedCandidate<T>> hardPairFound(ClassifiedCandidate<T> classifiedCandidate);
 }

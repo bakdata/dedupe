@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 @Value
 @Builder
-public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comparable<I>> implements Clustering<C, T> {
+public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>> implements Clustering<C, T> {
     @NonNull
     RefineCluster<C, T> refineCluster;
 
@@ -82,7 +82,7 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
         return closure.getClusterIdGenerator();
     }
 
-    public static class RefinedTransitiveClosureBuilder<C extends Comparable<C>, T, I extends Comparable<I>> {
+    public static class RefinedTransitiveClosureBuilder<C extends Comparable<C>, T, I extends Comparable<? super I>> {
         public RefinedTransitiveClosure<C, T, I> build() {
             Map<I, Cluster<C, T>> oldClusterIndex = this.oldClusterIndex != null ? this.oldClusterIndex : new HashMap<>();
             var refineCluster = Objects.requireNonNull(this.refineCluster);
