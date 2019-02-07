@@ -28,16 +28,15 @@ import com.bakdata.deduplication.candidate_selection.Candidate;
 import com.bakdata.deduplication.classifier.Classification;
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 import com.google.common.collect.Lists;
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.Value;
 
 @Value
 @Builder
@@ -50,28 +49,27 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
     @Builder.Default
     Map<I, Cluster<C, T>> clusterIndex = new HashMap<>();
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public List<Cluster<C, T>> cluster(List<ClassifiedCandidate<T>> classified) {
-        final List<Candidate<T>> duplicates = classified.stream()
+    public List<Cluster<C, T>> cluster(final List<ClassifiedCandidate<T>> classified) {
+        List<Candidate<T>> duplicates = classified.stream()
                 .filter(classifiedCandidate -> classifiedCandidate.getClassification().getResult() == Classification.ClassificationResult.DUPLICATE)
                 .map(ClassifiedCandidate::getCandidate)
                 .collect(Collectors.toList());
-        return clusterDuplicates(duplicates);
+        return this.clusterDuplicates(duplicates);
     }
 
-    public List<Cluster<C, T>> clusterDuplicates(List<Candidate<T>> duplicates) {
-        List<Cluster<C, T>> changedClusters = new ArrayList<>();
+    public List<Cluster<C, T>> clusterDuplicates(final List<Candidate<T>> duplicates) {
+        final List<Cluster<C, T>> changedClusters = new ArrayList<>();
 
         // apply in-memory transitive closure
-        for (Candidate<T> candidate : duplicates) {
-            var leftCluster = clusterIndex.get(idExtractor.apply(candidate.getNewRecord()));
-            var rightCluster = clusterIndex.get(idExtractor.apply(candidate.getOldRecord()));
+        for (final Candidate<T> candidate : duplicates) {
+            final var leftCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getNewRecord()));
+            final var rightCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getOldRecord()));
             if (leftCluster == null && rightCluster == null) {
-                List<T> elements = Lists.newArrayList(candidate.getNewRecord(), candidate.getOldRecord());
-                Cluster<C, T> newCluster = new Cluster<>(clusterIdGenerator.apply(elements), elements);
-                clusterIndex.put(idExtractor.apply(candidate.getNewRecord()), newCluster);
-                clusterIndex.put(idExtractor.apply(candidate.getOldRecord()), newCluster);
+                final List<T> elements = Lists.newArrayList(candidate.getNewRecord(), candidate.getOldRecord());
+                final Cluster<C, T> newCluster = new Cluster<>(this.clusterIdGenerator.apply(elements), elements);
+                this.clusterIndex.put(this.idExtractor.apply(candidate.getNewRecord()), newCluster);
+                this.clusterIndex.put(this.idExtractor.apply(candidate.getOldRecord()), newCluster);
                 changedClusters.add(newCluster);
             } else if (leftCluster == rightCluster) {
                 // nothing to do; already known duplicate
@@ -79,16 +77,16 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
                 changedClusters.add(leftCluster);
             } else if (leftCluster == null) {
                 rightCluster.add(candidate.getNewRecord());
-                clusterIndex.put(idExtractor.apply(candidate.getNewRecord()), rightCluster);
+                this.clusterIndex.put(this.idExtractor.apply(candidate.getNewRecord()), rightCluster);
                 changedClusters.add(rightCluster);
             } else if (rightCluster == null) {
                 leftCluster.add(candidate.getOldRecord());
-                clusterIndex.put(idExtractor.apply(candidate.getOldRecord()), leftCluster);
+                this.clusterIndex.put(this.idExtractor.apply(candidate.getOldRecord()), leftCluster);
                 changedClusters.add(leftCluster);
             } else { // merge
-                final Cluster<C, T> merged = leftCluster.merge(clusterIdGenerator, rightCluster);
-                for (T person : merged.getElements()) {
-                    clusterIndex.put(idExtractor.apply(person), merged);
+                Cluster<C, T> merged = leftCluster.merge(this.clusterIdGenerator, rightCluster);
+                for (final T person : merged.getElements()) {
+                    this.clusterIndex.put(this.idExtractor.apply(person), merged);
                 }
                 changedClusters.add(merged);
             }
@@ -103,12 +101,12 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
                 .collect(Collectors.toList());
     }
 
-    public void removeCluster(Cluster<C, T> cluster) {
-        final List<I> recordIds = cluster.getElements().stream()
-                .map(idExtractor::apply)
+    public void removeCluster(final Cluster<C, T> cluster) {
+        List<I> recordIds = cluster.getElements().stream()
+            .map(this.idExtractor)
                 .collect(Collectors.toList());
-        final Map<C, List<Cluster<C, T>>> referredCluster = recordIds.stream()
-                .map(clusterIndex::get)
+        Map<C, List<Cluster<C, T>>> referredCluster = recordIds.stream()
+                .map(this.clusterIndex::get)
                 .collect(Collectors.groupingBy(Cluster::getId));
         if (referredCluster.size() != 1 || !referredCluster.values().iterator().next().get(0).equals(cluster)) {
             throw new IllegalArgumentException("Provided cluster is not known " + cluster);

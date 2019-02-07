@@ -24,11 +24,11 @@
  */
 package com.bakdata.deduplication.candidate_selection;
 
+import java.util.List;
 import lombok.Builder;
+import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
-
-import java.util.List;
 
 @Value
 @Builder
@@ -37,9 +37,9 @@ public class CompositeValue<T extends Comparable<?>> implements Comparable<Compo
     List<T> components;
 
     @SafeVarargs
-    public static <T extends Comparable<?>> CompositeValue<T> of(T... values) {
-        for (T value : values) {
-            if(value == null) {
+    public static <T extends Comparable<?>> CompositeValue<T> of(final T... values) {
+        for (final T value : values) {
+            if (value == null) {
                 return null;
             }
         }
@@ -48,9 +48,9 @@ public class CompositeValue<T extends Comparable<?>> implements Comparable<Compo
 
     @SuppressWarnings("unchecked")
     @Override
-    public int compareTo(CompositeValue<T> o) {
-        for (int index = 0; index < components.size(); index++) {
-            int result = ((Comparable<Object>) components.get(index)).compareTo(o.components.get(index));
+    public int compareTo(@NonNull final CompositeValue<T> o) {
+        for (int index = 0; index < this.components.size(); index++) {
+            final int result = ((Comparable<Object>) this.components.get(index)).compareTo(o.components.get(index));
             if (result != 0) {
                 return result;
             }

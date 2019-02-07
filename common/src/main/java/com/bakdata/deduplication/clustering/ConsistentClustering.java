@@ -26,12 +26,15 @@ package com.bakdata.deduplication.clustering;
 
 import com.bakdata.deduplication.candidate_selection.Candidate;
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
-import lombok.*;
-
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Value;
 
 /**
  * Wraps another clustering and keeps clusters together, when the wrapped clustering would split it.<br>
@@ -54,43 +57,43 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
     Function<T, I> idExtractor;
     @Getter(lazy = true, value = AccessLevel.PRIVATE)
     TransitiveClosure<C, T, I> internalClosure = TransitiveClosure.<C, T, I>builder()
-            .idExtractor(idExtractor)
-            .clusterIdGenerator(clustering.getClusterIdGenerator())
+            .idExtractor(this.idExtractor)
+            .clusterIdGenerator(this.clustering.getClusterIdGenerator())
             .build();
 
     @Override
-    public List<Cluster<C, T>> cluster(List<ClassifiedCandidate<T>> classified) {
-        final List<Cluster<C, T>> clusters = clustering.cluster(classified);
+    public List<Cluster<C, T>> cluster(final List<ClassifiedCandidate<T>> classified) {
+        List<Cluster<C, T>> clusters = this.clustering.cluster(classified);
         if (clusters.isEmpty()) {
             return clusters;
         }
         // the returned cluster is not affected from this clustering
-        if (clusters.size() == 1 && noRecordInIndex(clusters)) {
+        if (clusters.size() == 1 && this.noRecordInIndex(clusters)) {
             return clusters;
         }
-        final T firstElement = clusters.get(0).get(0);
-        final List<Candidate<T>> candidates = clusters.stream()
+        T firstElement = clusters.get(0).get(0);
+        List<Candidate<T>> candidates = clusters.stream()
                 .flatMap(cluster -> cluster.getElements().stream().map(record -> new Candidate<>(firstElement, record)))
                 .collect(Collectors.toList());
-        final List<Cluster<C, T>> transitiveClusters = getInternalClosure().clusterDuplicates(candidates);
+        List<Cluster<C, T>> transitiveClusters = this.getInternalClosure().clusterDuplicates(candidates);
         if (transitiveClusters.size() != 1) {
             throw new IllegalStateException("Expected exactly one transitive cluster");
         }
         if (clusters.size() == 1 && clusters.get(0).equals(transitiveClusters.get(0))) {
             // previously split cluster have been remerged, so we can remove it from our internal closure
-            getInternalClosure().removeCluster(clusters.get(0));
+            this.getInternalClosure().removeCluster(clusters.get(0));
         }
         return transitiveClusters;
     }
 
     @Override
     public Function<Iterable<T>, C> getClusterIdGenerator() {
-        return clustering.getClusterIdGenerator();
+        return this.clustering.getClusterIdGenerator();
     }
 
-    private boolean noRecordInIndex(List<Cluster<C, T>> clusters) {
-        final Map<I, Cluster<C, T>> clusterIndex = getInternalClosure().getClusterIndex();
+    private boolean noRecordInIndex(final List<Cluster<C, T>> clusters) {
+        Map<I, Cluster<C, T>> clusterIndex = this.getInternalClosure().getClusterIndex();
         return clusters.stream().flatMap(cluster -> cluster.getElements().stream())
-                .allMatch(record -> clusterIndex.get(idExtractor.apply(record)) == null);
+                .allMatch(record -> clusterIndex.get(this.idExtractor.apply(record)) == null);
     }
 }

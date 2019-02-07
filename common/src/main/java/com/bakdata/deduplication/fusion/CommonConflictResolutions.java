@@ -24,32 +24,39 @@
  */
 package com.bakdata.deduplication.fusion;
 
-import lombok.Value;
-import lombok.experimental.UtilityClass;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import lombok.Value;
+import lombok.experimental.UtilityClass;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 @UtilityClass
 public class CommonConflictResolutions {
     private static final ThreadLocalRandom random = ThreadLocalRandom.current();
 
-    public static <T> ConflictResolution<T, T> corresponding(ResolutionTag<?> resolutionTag) {
+    public static <T> ConflictResolution<T, T> corresponding(final ResolutionTag<?> resolutionTag) {
         return ((values, context) -> {
             if (values.isEmpty()) {
                 return values;
             }
-            final Set<Source> sources = context.retrieveValues(resolutionTag).stream()
+            Set<Source> sources = context.retrieveValues(resolutionTag).stream()
                     .map(AnnotatedValue::getSource).collect(Collectors.toSet());
             return values.stream().filter(v -> sources.contains(v.getSource())).collect(Collectors.toList());
         });
     }
 
-    public static <T> ConflictResolution<T, T> saveAs(ConflictResolution<T, T> resolution, ResolutionTag<T> resolutionTag) {
+    public static <T> ConflictResolution<T, T> saveAs(final ConflictResolution<T, T> resolution, final ResolutionTag<T> resolutionTag) {
         return new TaggedResolution<>(resolution, resolutionTag);
     }
 
@@ -57,7 +64,7 @@ public class CommonConflictResolutions {
         return Comparator.comparing(AnnotatedValue::getValue);
     }
 
-    public static <T, A extends AnnotatedValue<T>> Comparator<A> comparator(Comparator<T> comparator) {
+    public static <T, A extends AnnotatedValue<T>> Comparator<A> comparator(final Comparator<T> comparator) {
         return Comparator.comparing(AnnotatedValue::getValue, comparator);
     }
 
@@ -110,7 +117,7 @@ public class CommonConflictResolutions {
             if (values.isEmpty()) {
                 return values;
             }
-            final ArrayList<AnnotatedValue<T>> sorted = new ArrayList<>(values);
+            ArrayList<AnnotatedValue<T>> sorted = new ArrayList<>(values);
             sorted.sort(comparator());
             // create copy of list of median value(s), such that original list is not referenced anymore
             return List.copyOf(sorted.subList((int) Math.floor(sorted.size() / 2.0), (int) Math.ceil(sorted.size() / 2.0)));
@@ -174,11 +181,11 @@ public class CommonConflictResolutions {
                         .collect(Collectors.toList()));
     }
 
-    public static <T> ConflictResolution<T, T> preferSource(Source... sourcePriority) {
+    public static <T> ConflictResolution<T, T> preferSource(final Source... sourcePriority) {
         return preferSource(List.of(sourcePriority));
     }
 
-    public static <T> ConflictResolution<T, T> preferSource(List<Source> sourcePriority) {
+    public static <T> ConflictResolution<T, T> preferSource(final List<Source> sourcePriority) {
         return ((values, context) -> values.stream()
                 .map(AnnotatedValue::getSource)
                 .min(Comparator.comparingInt(sourcePriority::indexOf))
@@ -194,10 +201,11 @@ public class CommonConflictResolutions {
         return unionAll(ArrayList::new);
     }
 
-    public static <E, T extends Collection<E>, R extends Collection<E>> TerminalConflictResolution<T, R> unionAll(Supplier<? extends R> ctor) {
+    public static <E, T extends Collection<E>, R extends Collection<E>> TerminalConflictResolution<T, R> unionAll(
+        final Supplier<? extends R> ctor) {
         return (annotatedValues, context) -> {
-            final R collection = ctor.get();
-            for (AnnotatedValue<T> annotatedValue : annotatedValues) {
+            R collection = ctor.get();
+            for (final AnnotatedValue<T> annotatedValue : annotatedValues) {
                 collection.addAll(annotatedValue.getValue());
             }
             return Optional.of(AnnotatedValue.calculated(collection));
@@ -208,7 +216,7 @@ public class CommonConflictResolutions {
         return (annotatedValues, context) -> annotatedValues;
     }
 
-    public static <T, R> ConflictResolution<T, R> transform(Function<T, R> transform) {
+    public static <T, R> ConflictResolution<T, R> transform(final Function<T, R> transform) {
         return (annotatedValues, context) -> annotatedValues.stream()
                 .map(annotatedValue -> annotatedValue.withValue(transform.apply(annotatedValue.getValue())))
                 .collect(Collectors.toList());
@@ -226,9 +234,9 @@ public class CommonConflictResolutions {
         private final ResolutionTag<R> resolutionTag;
 
         @Override
-        public List<AnnotatedValue<R>> resolvePartially(List<AnnotatedValue<T>> values, FusionContext context) {
-            final List<AnnotatedValue<R>> annotatedValues = resolution.resolvePartially(values, context);
-            context.storeValues(resolutionTag, annotatedValues);
+        public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> values, final FusionContext context) {
+            List<AnnotatedValue<R>> annotatedValues = this.resolution.resolvePartially(values, context);
+            context.storeValues(this.resolutionTag, annotatedValues);
             return annotatedValues;
         }
     }

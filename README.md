@@ -1,6 +1,6 @@
 [![Build status](https://travis-ci.org/bakdata/dedupe.svg?branch=master)](https://travis-ci.org/bakdata/dedupe/) 
-[![Sonarcloud status](https://sonarcloud.io/api/project_badges/measure?project=bakdata-dedupe&metric=alert_status)](https://sonarcloud.io/dashboard?id=bakdata-dedupe)
-[![Code coverage](https://sonarcloud.io/api/project_badges/measure?project=bakdata-dedupe&metric=coverage)](https://sonarcloud.io/dashboard?id=bakdata-dedupe)
+[![Sonarcloud status](https://sonarcloud.io/api/project_badges/measure?project=com.bakdata.dedupe%3Adedupe&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.bakdata.dedupe%3Adedupe)
+[![Code coverage](https://sonarcloud.io/api/project_badges/measure?project=com.bakdata.dedupe%3Adedupe&metric=coverage)](https://sonarcloud.io/dashboard?id=com.bakdata.dedupe%3Adedupe)
 
 Java DSL for (online) deduplication
 ===================================

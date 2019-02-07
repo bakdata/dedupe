@@ -46,7 +46,7 @@ public class Classification {
         @Getter
         final boolean ambiguous;
 
-        boolean isUnknown() {
+        public boolean isUnknown() {
             return this == UNKNOWN;
         }
     }

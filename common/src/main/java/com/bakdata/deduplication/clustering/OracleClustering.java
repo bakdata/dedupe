@@ -1,16 +1,17 @@
 package com.bakdata.deduplication.clustering;
 
-import com.bakdata.deduplication.candidate_selection.Candidate;
 import com.bakdata.deduplication.classifier.Classification;
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
-import com.bakdata.deduplication.classifier.Classifier;
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Value
 public class OracleClustering<C extends Comparable<C>, T, I> implements Clustering<C, T> {
@@ -20,16 +21,17 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
     @NonNull
     Function<T, I> idExtractor;
     @Getter(lazy = true)
-    Map<I, Cluster<C, T>> idToCluster = goldClusters.stream()
+    Map<I, Cluster<C, T>> idToCluster = this.goldClusters.stream()
             .flatMap(cluster ->
-                    cluster.getElements().stream().map(e -> new AbstractMap.SimpleEntry<>(idExtractor.apply(e), cluster)))
+                cluster.getElements().stream()
+                    .map(e -> new AbstractMap.SimpleEntry<>(this.idExtractor.apply(e), cluster)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 
     @Override
-    public List<Cluster<C, T>> cluster(List<ClassifiedCandidate<T>> classified) {
+    public List<Cluster<C, T>> cluster(final List<ClassifiedCandidate<T>> classified) {
         return classified.stream()
-                .map(getIdToCluster()::get)
+            .map(candidate -> this.getIdToCluster().get(idExtractor.apply(candidate.getCandidate().getOldRecord())))
                 .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());

@@ -24,13 +24,12 @@
  */
 package com.bakdata.deduplication.fusion;
 
-import lombok.Value;
+import static com.bakdata.util.ObjectUtils.isNonEmpty;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.bakdata.util.ObjectUtils.isNonEmpty;
+import lombok.Value;
 
 @Value
 public class ResolutionPath<T, R> implements ConflictResolution<T, R> {
@@ -38,11 +37,11 @@ public class ResolutionPath<T, R> implements ConflictResolution<T, R> {
     ConflictResolution<R, R> resolution;
 
     @Override
-    public List<AnnotatedValue<R>> resolvePartially(List<AnnotatedValue<T>> annotatedValues, FusionContext context) {
-        final List<AnnotatedValue<R>> fieldValues = annotatedValues.stream()
-                .map(ar -> ar.withValue(extractor.apply(ar.getValue())))
-                .filter(ar -> isNonEmpty(ar.getValue()))
-                .collect(Collectors.toList());
-        return resolution.resolvePartially(fieldValues, context);
+    public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> annotatedValues, final FusionContext context) {
+        List<AnnotatedValue<R>> fieldValues = annotatedValues.stream()
+            .map(ar -> ar.withValue(this.extractor.apply(ar.getValue())))
+            .filter(ar -> isNonEmpty(ar.getValue()))
+            .collect(Collectors.toList());
+        return this.resolution.resolvePartially(fieldValues, context);
     }
 }

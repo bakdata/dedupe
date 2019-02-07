@@ -29,17 +29,31 @@ import com.bakdata.deduplication.classifier.Classification;
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 import com.bakdata.deduplication.classifier.Classifier;
 import com.google.common.primitives.Bytes;
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
-import lombok.experimental.Wither;
-
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.PriorityQueue;
+import java.util.Random;
+import java.util.Set;
+import java.util.Spliterators;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.Value;
+import lombok.experimental.Wither;
 
 @Value
 @Builder
@@ -52,7 +66,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
     @NonNull
     Function<Iterable<T>, C> clusterIdGenerator;
 
-    private static float getWeight(Classification classification) {
+    private static float getWeight(final Classification classification) {
         switch (classification.getResult()) {
             case DUPLICATE:
                 return classification.getConfidence();
@@ -65,34 +79,35 @@ public class RefineCluster<C extends Comparable<C>, T> {
         }
     }
 
-    public List<Cluster<C, T>> refine(List<Cluster<C, T>> transitiveClosure, Iterable<ClassifiedCandidate<T>> knownClassifications) {
-        final Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex = getRelevantClassificationIndex(knownClassifications);
+    public List<Cluster<C, T>> refine(final List<Cluster<C, T>> transitiveClosure, final Iterable<ClassifiedCandidate<T>> knownClassifications) {
+        Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex = this.getRelevantClassificationIndex(knownClassifications);
         return transitiveClosure.stream()
-                .flatMap(cluster -> refineCluster(cluster, getRelevantClassifications(cluster, relevantClassificationIndex)))
+                .flatMap(cluster -> this.refineCluster(cluster,
+                    this.getRelevantClassifications(cluster, relevantClassificationIndex)))
                 .collect(Collectors.toList());
     }
 
-    private List<ClassifiedCandidate<T>> getRelevantClassifications(Cluster<C, T> cluster, Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex) {
+    private List<ClassifiedCandidate<T>> getRelevantClassifications(final Cluster<C, T> cluster, final Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex) {
         return cluster.getElements().stream()
                 .flatMap(record -> relevantClassificationIndex.getOrDefault(record, List.of()).stream()
                         .filter(classifiedCandidate -> cluster.contains(classifiedCandidate.getCandidate().getOldRecord())))
                 .collect(Collectors.toList());
     }
 
-    private Map<T, List<ClassifiedCandidate<T>>> getRelevantClassificationIndex(Iterable<ClassifiedCandidate<T>> knownClassifications) {
-        Map<T, List<ClassifiedCandidate<T>>> relevantClassifications = new HashMap<>();
-        for (ClassifiedCandidate<T> knownClassification : knownClassifications) {
-            final Candidate<T> candidate = knownClassification.getCandidate();
+    private Map<T, List<ClassifiedCandidate<T>>> getRelevantClassificationIndex(final Iterable<ClassifiedCandidate<T>> knownClassifications) {
+        final Map<T, List<ClassifiedCandidate<T>>> relevantClassifications = new HashMap<>();
+        for (final ClassifiedCandidate<T> knownClassification : knownClassifications) {
+            Candidate<T> candidate = knownClassification.getCandidate();
             relevantClassifications.computeIfAbsent(candidate.getNewRecord(), r -> new LinkedList<>()).add(knownClassification);
         }
         return relevantClassifications;
     }
 
-    private byte[] refineBigCluster(Cluster<C, T> cluster, List<ClassifiedCandidate<T>> knownClassifications) {
-        final List<WeightedEdge> duplicates = toWeightedEdges(knownClassifications, cluster);
-        final int desiredNumEdges = getNumEdges(maxSmallClusterSize);
+    private byte[] refineBigCluster(final Cluster<C, T> cluster, final List<ClassifiedCandidate<T>> knownClassifications) {
+        List<WeightedEdge> duplicates = this.toWeightedEdges(knownClassifications, cluster);
+        int desiredNumEdges = this.getNumEdges(this.maxSmallClusterSize);
 
-        return greedyCluster(cluster, getWeightedEdges(cluster, duplicates, desiredNumEdges));
+        return this.greedyCluster(cluster, this.getWeightedEdges(cluster, duplicates, desiredNumEdges));
     }
 
     /**
@@ -103,28 +118,29 @@ public class RefineCluster<C extends Comparable<C>, T> {
      *
      * @return the best clustering
      */
-    private byte[] refineSmallCluster(Cluster<C, T> cluster, List<ClassifiedCandidate<T>> knownClassifications) {
-        float[][] weightMatrix = getKnownWeightMatrix(cluster, knownClassifications);
+    private byte[] refineSmallCluster(final Cluster<C, T> cluster, final List<ClassifiedCandidate<T>> knownClassifications) {
+        final float[][] weightMatrix = this.getKnownWeightMatrix(cluster, knownClassifications);
 
-        final int n = cluster.size();
+        int n = cluster.size();
         for (int rowIndex = 0; rowIndex < n; rowIndex++) {
             for (int colIndex = rowIndex + 1; colIndex < n; colIndex++) {
                 if (Float.isNaN(weightMatrix[rowIndex][colIndex])) {
                     weightMatrix[rowIndex][colIndex] =
-                            getWeight(classifier.classify(new Candidate<>(cluster.get(rowIndex), cluster.get(colIndex))));
+                            getWeight(this.classifier.classify(new Candidate<>(cluster.get(rowIndex), cluster.get(colIndex))));
                 }
             }
         }
 
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new ClusteringGenerator((byte) n), 0), false)
-                .map(clustering -> new AbstractMap.SimpleEntry<>(clustering.clone(), scoreClustering(clustering, weightMatrix)))
+                .map(clustering -> new AbstractMap.SimpleEntry<>(clustering.clone(),
+                    this.scoreClustering(clustering, weightMatrix)))
                 .max(Comparator.comparingDouble(Map.Entry::getValue))
                 .map(Map.Entry::getKey)
                 .orElseThrow(() -> new IllegalStateException("Non-empty clusters should have one valid clustering"));
     }
 
-    private List<WeightedEdge> toWeightedEdges(List<ClassifiedCandidate<T>> knownClassifications, Cluster<C, T> cluster) {
-        final Map<T, Integer> clusterIndex =
+    private List<WeightedEdge> toWeightedEdges(final List<ClassifiedCandidate<T>> knownClassifications, final Cluster<C, T> cluster) {
+        Map<T, Integer> clusterIndex =
                 IntStream.range(0, cluster.size()).boxed().collect(Collectors.toMap(cluster::get, i -> i));
 
         return knownClassifications.stream()
@@ -135,72 +151,72 @@ public class RefineCluster<C extends Comparable<C>, T> {
                 .collect(Collectors.toList());
     }
 
-    private float[][] getKnownWeightMatrix(Cluster<C, T> cluster, List<ClassifiedCandidate<T>> knownClassifications) {
-        var n = cluster.size();
-        var weightMatrix = new float[n][n];
-        for (var row : weightMatrix) {
+    private float[][] getKnownWeightMatrix(final Cluster<C, T> cluster, final List<ClassifiedCandidate<T>> knownClassifications) {
+        final var n = cluster.size();
+        final var weightMatrix = new float[n][n];
+        for (final var row : weightMatrix) {
             Arrays.fill(row, Float.NaN);
         }
 
-        var clusterIndex =
+        final var clusterIndex =
                 IntStream.range(0, n).boxed().collect(Collectors.toMap(cluster::get, i -> i));
-        for (ClassifiedCandidate<T> knownClassification : knownClassifications) {
-            var firstIndex = clusterIndex.get(knownClassification.getCandidate().getNewRecord());
-            var secondIndex = clusterIndex.get(knownClassification.getCandidate().getOldRecord());
+        for (final ClassifiedCandidate<T> knownClassification : knownClassifications) {
+            final var firstIndex = clusterIndex.get(knownClassification.getCandidate().getNewRecord());
+            final var secondIndex = clusterIndex.get(knownClassification.getCandidate().getOldRecord());
             weightMatrix[Math.min(firstIndex, secondIndex)][Math.max(firstIndex, secondIndex)] =
                     getWeight(knownClassification.getClassification());
         }
         return weightMatrix;
     }
 
-    private Stream<Cluster<C, T>> refineCluster(Cluster<C, T> cluster, List<ClassifiedCandidate<T>> knownClassifications) {
+    private Stream<Cluster<C, T>> refineCluster(final Cluster<C, T> cluster, final List<ClassifiedCandidate<T>> knownClassifications) {
         if (cluster.size() <= 2) {
             return Stream.of(cluster);
         }
 
-        byte[] bestClustering;
-        if (cluster.size() > maxSmallClusterSize) {
+        final byte[] bestClustering;
+        if (cluster.size() > this.maxSmallClusterSize) {
             // large cluster with high probability of error
-            bestClustering = refineBigCluster(cluster, knownClassifications);
+            bestClustering = this.refineBigCluster(cluster, knownClassifications);
 
         } else {
-            bestClustering = refineSmallCluster(cluster, knownClassifications);
+            bestClustering = this.refineSmallCluster(cluster, knownClassifications);
         }
 
-        return getSubClusters(bestClustering, cluster);
+        return this.getSubClusters(bestClustering, cluster);
     }
 
-    private Stream<Cluster<C, T>> getSubClusters(byte[] bestClustering, Cluster<C, T> cluster) {
-        final Map<Byte, List<T>> subClusters = IntStream.range(0, bestClustering.length)
+    private Stream<Cluster<C, T>> getSubClusters(final byte[] bestClustering, final Cluster<C, T> cluster) {
+        Map<Byte, List<T>> subClusters = IntStream.range(0, bestClustering.length)
                 .mapToObj(index -> new AbstractMap.SimpleEntry<>(bestClustering[index], cluster.get(index)))
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
         return subClusters.values().stream()
-                .map(records -> new Cluster<>(clusterIdGenerator.apply(records), records));
+                .map(records -> new Cluster<>(this.clusterIdGenerator.apply(records), records));
     }
 
-    private byte[] greedyCluster(Cluster<C, T> cluster, List<WeightedEdge> edges) {
+    private byte[] greedyCluster(final Cluster<C, T> cluster, final List<WeightedEdge> edges) {
 
-        final PriorityQueue<WeightedEdge> queue = new PriorityQueue<>(Comparator.comparing(WeightedEdge::getWeight));
+        PriorityQueue<WeightedEdge> queue = new PriorityQueue<>(Comparator.comparing(WeightedEdge::getWeight));
         queue.addAll(edges);
 
-        float[][] weightMatrix = new float[cluster.size()][cluster.size()];
-        for (WeightedEdge edge : edges) {
+        final float[][] weightMatrix = new float[cluster.size()][cluster.size()];
+        for (final WeightedEdge edge : edges) {
             weightMatrix[edge.left][edge.right] = edge.weight;
         }
 
         // start with each publication in its own cluster
         byte[] clustering = Bytes.toArray(IntStream.range(0, cluster.size()).boxed().collect(Collectors.toList()));
         float score = 0;
-        for (WeightedEdge edge : queue) {
-            final byte[] newClustering = clustering.clone();
-            final byte newClusterId = newClustering[edge.left];
-            final byte oldClusterId = newClustering[edge.right];
+        for (final WeightedEdge edge : queue) {
+            byte[] newClustering = clustering.clone();
+            byte newClusterId = newClustering[edge.left];
+            byte oldClusterId = newClustering[edge.right];
             for (int i = 0; i < newClustering.length; i++) {
                 if (newClustering[i] == oldClusterId) {
                     newClustering[i] = newClusterId;
                 }
             }
-            final float newScore = scoreClustering(newClustering, weightMatrix);
+            float newScore = this.scoreClustering(newClustering, weightMatrix);
             if (newScore > score) {
                 score = newScore;
                 clustering = newClustering;
@@ -210,30 +226,30 @@ public class RefineCluster<C extends Comparable<C>, T> {
     }
 
 
-    private List<WeightedEdge> getRandomEdges(int potentialNumEdges, int desiredNumEdges) {
-        List<WeightedEdge> weightedEdges;
+    private List<WeightedEdge> getRandomEdges(final int potentialNumEdges, final int desiredNumEdges) {
+        final List<WeightedEdge> weightedEdges;
         weightedEdges = new Random().ints(0, potentialNumEdges)
                 .distinct()
                 .limit(desiredNumEdges)
                 .mapToObj(i -> {
                     // reverse of Gaussian
                     int leftIndex = (int) (Math.sqrt(i + .25) - .5);
-                    int rightIndex = i - getNumEdges(leftIndex) + leftIndex;
+                    int rightIndex = i - this.getNumEdges(leftIndex) + leftIndex;
                     return WeightedEdge.of(leftIndex, rightIndex, Float.NaN);
                 })
                 .collect(Collectors.toList());
         return weightedEdges;
     }
 
-    private int getNumEdges(int n) {
+    private int getNumEdges(final int n) {
         return n * (n - 1) / 2;
     }
 
-    private List<WeightedEdge> addRandomEdges(List<WeightedEdge> edges, int desiredNumEdges) {
+    private List<WeightedEdge> addRandomEdges(final List<WeightedEdge> edges, final int desiredNumEdges) {
         // add random edges with distance 2..n of known edges (e.g., neighbors of known edges).
         List<WeightedEdge> lastAddedEdges;
-        Set<WeightedEdge> weightedEdges = new LinkedHashSet<>(edges);
-        for (int distance = 2; distance < maxSmallClusterSize && weightedEdges.size() < desiredNumEdges; distance++) {
+        final Set<WeightedEdge> weightedEdges = new LinkedHashSet<>(edges);
+        for (int distance = 2; distance < this.maxSmallClusterSize && weightedEdges.size() < desiredNumEdges; distance++) {
             lastAddedEdges = edges.stream()
                     .flatMap(e1 -> edges.stream().filter(e1::overlaps).map(e1::getTriangleEdge))
                     .filter(e -> !weightedEdges.contains(e))
@@ -248,32 +264,32 @@ public class RefineCluster<C extends Comparable<C>, T> {
         return new ArrayList<>(weightedEdges);
     }
 
-    private List<WeightedEdge> getWeightedEdges(Cluster<C, T> cluster, List<WeightedEdge> duplicates, int desiredNumEdges) {
-        final List<WeightedEdge> weightedEdges;
+    private List<WeightedEdge> getWeightedEdges(final Cluster<C, T> cluster, final List<WeightedEdge> duplicates, final int desiredNumEdges) {
+        List<WeightedEdge> weightedEdges;
         if (duplicates.isEmpty()) {
-            final int n = cluster.size();
-            weightedEdges = getRandomEdges(getNumEdges(n), desiredNumEdges);
+            int n = cluster.size();
+            weightedEdges = this.getRandomEdges(this.getNumEdges(n), desiredNumEdges);
         } else {
             Collections.shuffle(duplicates);
-            weightedEdges = addRandomEdges(duplicates, desiredNumEdges);
+            weightedEdges = this.addRandomEdges(duplicates, desiredNumEdges);
         }
 
         return weightedEdges.stream().map(weightedEdge -> {
             float weight = weightedEdge.getWeight();
             if (Float.isNaN(weight)) {
                 // calculate weight for dummy entry
-                final T left = cluster.get(weightedEdge.getLeft());
-                final T right = cluster.get(weightedEdge.getRight());
-                return weightedEdge.withWeight(getWeight(classifier.classify(new Candidate<>(left, right))));
+                T left = cluster.get(weightedEdge.getLeft());
+                T right = cluster.get(weightedEdge.getRight());
+                return weightedEdge.withWeight(getWeight(this.classifier.classify(new Candidate<>(left, right))));
             }
             return weightedEdge;
         }).collect(Collectors.toList());
     }
 
-    private float scoreClustering(byte[] partitions, float[][] weightMatrix) {
-        final int n = partitions.length;
-        int[] partitionSizes = new int[n];
-        for (byte clustering : partitions) {
+    private float scoreClustering(final byte[] partitions, final float[][] weightMatrix) {
+        int n = partitions.length;
+        final int[] partitionSizes = new int[n];
+        for (final byte clustering : partitions) {
             partitionSizes[clustering]++;
         }
 
@@ -296,22 +312,22 @@ public class RefineCluster<C extends Comparable<C>, T> {
         final byte[] clustering;
         boolean hasNext = true;
 
-        ClusteringGenerator(byte n) {
+        ClusteringGenerator(final byte n) {
             this.n = n;
-            clustering = new byte[n];
+            this.clustering = new byte[n];
         }
 
         @Override
         public boolean hasNext() {
-            if (hasNext) {
+            if (this.hasNext) {
                 return true;
             }
-            for (byte i = (byte) (n - (byte) 1); i > 0; i--) {
-                if (clustering[i] < n && !incrementWouldResultInSkippedInteger(i)) {
-                    clustering[i]++;
-                    Arrays.fill(clustering, i + 1, n, (byte) 0);
-                    hasNext = true;
-                    return hasNext;
+            for (byte i = (byte) (this.n - (byte) 1); i > 0; i--) {
+                if (this.clustering[i] < this.n && !this.incrementWouldResultInSkippedInteger(i)) {
+                    this.clustering[i]++;
+                    Arrays.fill(this.clustering, i + 1, this.n, (byte) 0);
+                    this.hasNext = true;
+                    return this.hasNext;
                 }
             }
             return false;
@@ -319,16 +335,16 @@ public class RefineCluster<C extends Comparable<C>, T> {
 
         @Override
         public byte[] next() {
-            if (!hasNext()) {
+            if (!this.hasNext()) {
                 throw new NoSuchElementException();
             }
-            hasNext = false;
-            return clustering;
+            this.hasNext = false;
+            return this.clustering;
         }
 
-        private boolean incrementWouldResultInSkippedInteger(byte i) {
+        private boolean incrementWouldResultInSkippedInteger(final byte i) {
             for (byte j = (byte) (i - 1); j >= 0; j--) {
-                if (clustering[i] <= clustering[j]) {
+                if (this.clustering[i] <= this.clustering[j]) {
                     return false;
                 }
             }
@@ -343,21 +359,21 @@ public class RefineCluster<C extends Comparable<C>, T> {
         @Wither
         float weight;
 
-        static WeightedEdge of(int leftIndex, int rightIndex, float weight) {
+        static WeightedEdge of(final int leftIndex, final int rightIndex, final float weight) {
             return new WeightedEdge(Math.min(leftIndex, rightIndex), Math.max(leftIndex, rightIndex), weight);
         }
 
-        WeightedEdge getTriangleEdge(WeightedEdge e) {
-            if (left < e.left) {
-                return new WeightedEdge(left, e.left + e.right - right, Float.NaN);
-            } else if (left == e.left) {
-                return new WeightedEdge(Math.min(right, e.right), Math.max(right, e.right), Float.NaN);
+        WeightedEdge getTriangleEdge(final WeightedEdge e) {
+            if (this.left < e.left) {
+                return new WeightedEdge(this.left, e.left + e.right - this.right, Float.NaN);
+            } else if (this.left == e.left) {
+                return new WeightedEdge(Math.min(this.right, e.right), Math.max(this.right, e.right), Float.NaN);
             }
-            return new WeightedEdge(e.left, left + right - e.right, Float.NaN);
+            return new WeightedEdge(e.left, this.left + this.right - e.right, Float.NaN);
         }
 
-        boolean overlaps(WeightedEdge e) {
-            return e.left == left || e.left == right || e.right == left || e.right == right;
+        boolean overlaps(final WeightedEdge e) {
+            return e.left == this.left || e.left == this.right || e.right == this.left || e.right == this.right;
         }
     }
 

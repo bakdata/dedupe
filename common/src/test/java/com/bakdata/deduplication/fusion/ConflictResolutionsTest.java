@@ -24,15 +24,21 @@
  */
 package com.bakdata.deduplication.fusion;
 
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.assumeEqualValue;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.latest;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.longest;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.max;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.min;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.union;
+import static com.bakdata.deduplication.fusion.CommonConflictResolutions.vote;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.AdditionalFieldMergeBuilder;
 import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.FieldMergeBuilder;
 import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.MergeBuilder;
 import com.bakdata.util.FunctionalClass;
 import com.google.common.collect.Sets;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-import org.junit.jupiter.api.Test;
-
 import java.beans.IntrospectionException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,10 +47,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import static com.bakdata.deduplication.fusion.CommonConflictResolutions.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
+import org.junit.jupiter.api.Test;
 
 class ConflictResolutionsTest {
 
@@ -57,23 +68,23 @@ class ConflictResolutionsTest {
                 .field(Person::getId, Person::setId).with(min());
     }
 
-    private static Set<String> fusionIdWithPersonId(Person p) {
+    private static Set<String> fusionIdWithPersonId(final Person p) {
         return Set.copyOf(Sets.union(p.getFusedIds(), Set.of(p.getId())));
     }
 
-    private static void testField(FieldMergeBuilder<String, Person> field) {
-        FieldMergeBuilder<String, Person> nestedField = field.with(min())
+    private static void testField(final FieldMergeBuilder<String, Person> field) {
+        final FieldMergeBuilder<String, Person> nestedField = field.with(min())
                 .field(Person::getFirstName, Person::setFirstName);
         testNestedField(nestedField);
     }
 
-    private static void testMerge(MergeBuilder<Person> merge) {
-        FieldMergeBuilder<String, Person> field = merge.field(Person::getId, Person::setId);
+    private static void testMerge(final MergeBuilder<Person> merge) {
+        final FieldMergeBuilder<String, Person> field = merge.field(Person::getId, Person::setId);
         testField(field);
     }
 
-    private static void testNestedField(FieldMergeBuilder<String, Person> nestedField) {
-        ConflictResolution<Person, Person> resolution = nestedField.with(longest()).then(vote())
+    private static void testNestedField(final FieldMergeBuilder<String, Person> nestedField) {
+        final ConflictResolution<Person, Person> resolution = nestedField.with(longest()).then(vote())
                 .field(Person::getLastName, Person::setLastName).correspondingToPrevious()
                 .field(Person::getGender, Person::setGender).with(assumeEqualValue())
                 .field(Person::getBirthDate, Person::setBirthDate).with(vote()).then(latest())
@@ -83,11 +94,11 @@ class ConflictResolutionsTest {
         testResolution(resolution);
     }
 
-    private static void testResolution(ConflictResolution<Person, Person> resolution) {
+    private static void testResolution(final ConflictResolution<Person, Person> resolution) {
         assertThat(resolution)
                 .isNotNull();
-        FusionContext context = new FusionContext();
-        Person person1 = Person.builder()
+        final FusionContext context = new FusionContext();
+        final Person person1 = Person.builder()
                 .id("id1")
                 .firstName("Joanna")
                 .lastName("Doe")
@@ -95,9 +106,9 @@ class ConflictResolutionsTest {
                 .birthDate(LocalDate.of(2017, Month.DECEMBER, 31))
                 .lastModified(LocalDateTime.MAX)
                 .build();
-        Source source1 = new Source("source1", 1.0f);
-        LocalDateTime dateTime = LocalDateTime.MIN;
-        Person person2 = Person.builder()
+        final Source source1 = new Source("source1", 1.0f);
+        final LocalDateTime dateTime = LocalDateTime.MIN;
+        final Person person2 = Person.builder()
                 .id("id2")
                 .firstName("John")
                 .lastName("Smith")
@@ -105,12 +116,12 @@ class ConflictResolutionsTest {
                 .birthDate(LocalDate.of(2018, Month.JANUARY, 1))
                 .lastModified(LocalDateTime.MIN)
                 .build();
-        Source source2 = new Source("source2", 2.0f);
-        List<AnnotatedValue<Person>> values = List.of(
+        final Source source2 = new Source("source2", 2.0f);
+        final List<AnnotatedValue<Person>> values = List.of(
                 new AnnotatedValue<>(person1, source1, dateTime),
                 new AnnotatedValue<>(person2, source2, dateTime));
-        Optional<Person> resolved = resolution.resolve(values, context);
-        Person expected = Person.builder()
+        final Optional<Person> resolved = resolution.resolve(values, context);
+        final Person expected = Person.builder()
                 .id("id1")
                 .firstName("Joanna")
                 .lastName("Doe")
@@ -122,7 +133,7 @@ class ConflictResolutionsTest {
         assertThat(resolved)
                 .isNotEmpty()
                 .hasValue(expected);
-        List<Exception> exceptions = context.getExceptions();
+        final List<Exception> exceptions = context.getExceptions();
         assertThat(exceptions)
                 .hasSize(1);
         assertThat(exceptions.get(0))
@@ -134,21 +145,21 @@ class ConflictResolutionsTest {
 
     @Test
     void testFieldFromField() {
-        FieldMergeBuilder<String, Person> field = create()
+        final FieldMergeBuilder<String, Person> field = create()
                 .field(FunctionalClass.from(Person.class).field("id"));
         testField(field);
     }
 
     @Test
     void testFieldFromGetterSetter() {
-        FieldMergeBuilder<String, Person> field = create()
+        final FieldMergeBuilder<String, Person> field = create()
                 .field(Person::getId, Person::setId);
         testField(field);
     }
 
     @Test
     void testFieldFromName() {
-        FieldMergeBuilder<String, Person> field = create()
+        final FieldMergeBuilder<String, Person> field = create()
                 .field("id");
         testField(field);
     }
@@ -187,7 +198,7 @@ class ConflictResolutionsTest {
 
     @Test
     void testFromClass() {
-        MergeBuilder<Person> merge = ConflictResolutions.merge(Person.class);
+        final MergeBuilder<Person> merge = ConflictResolutions.merge(Person.class);
         testMerge(merge);
     }
 
@@ -201,27 +212,27 @@ class ConflictResolutionsTest {
 
     @Test
     void testFromConstructor() {
-        MergeBuilder<Person> merge = ConflictResolutions.merge(Person::new);
+        final MergeBuilder<Person> merge = ConflictResolutions.merge(Person::new);
         testMerge(merge);
     }
 
     @Test
     void testNestedFieldFromField() {
-        FieldMergeBuilder<String, Person> nestedField = createWithId()
+        final FieldMergeBuilder<String, Person> nestedField = createWithId()
                 .field(FunctionalClass.from(Person.class).field("firstName"));
         testNestedField(nestedField);
     }
 
     @Test
     void testNestedFieldFromGetterSetter() {
-        FieldMergeBuilder<String, Person> nestedField = createWithId()
+        final FieldMergeBuilder<String, Person> nestedField = createWithId()
                 .field(Person::getFirstName, Person::setFirstName);
         testNestedField(nestedField);
     }
 
     @Test
     void testNestedFieldFromName() {
-        FieldMergeBuilder<String, Person> nestedField = createWithId()
+        final FieldMergeBuilder<String, Person> nestedField = createWithId()
                 .field("firstName");
         testNestedField(nestedField);
     }
@@ -270,7 +281,7 @@ class ConflictResolutionsTest {
     private static final class PersonWithoutDefaultConstructor {
 
         @SuppressWarnings("unused")
-        private PersonWithoutDefaultConstructor(String foo) {
+        private PersonWithoutDefaultConstructor(final String foo) {
 
         }
     }

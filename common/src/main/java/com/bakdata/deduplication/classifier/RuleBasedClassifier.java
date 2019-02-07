@@ -28,13 +28,12 @@ import com.bakdata.deduplication.candidate_selection.Candidate;
 import com.bakdata.deduplication.similarity.SimilarityContext;
 import com.bakdata.deduplication.similarity.SimilarityException;
 import com.bakdata.deduplication.similarity.SimilarityMeasure;
-import lombok.Builder;
-import lombok.Singular;
-import lombok.Value;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
+import lombok.Builder;
+import lombok.Singular;
+import lombok.Value;
 
 /**
  * Successively applies a list of rules to the record and returns the respective {@link Classification} with the following cases:
@@ -62,29 +61,29 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     Classification defaultClassification = UNKNOWN;
 
     @Override
-    public Classification classify(Candidate<T> candidate) {
-        SimilarityContext context = new SimilarityContext();
-        Classification classification = defaultClassification;
-        for (Rule<T> rule : rules) {
-            classification = evaluateRule(rule, candidate, context).orElse(classification);
+    public Classification classify(final Candidate<T> candidate) {
+        final SimilarityContext context = new SimilarityContext();
+        Classification classification = this.defaultClassification;
+        for (final Rule<T> rule : this.rules) {
+            classification = this.evaluateRule(rule, candidate, context).orElse(classification);
             if (!classification.getResult().isAmbiguous()) {
                 break;
             }
         }
         if (!context.getExceptions().isEmpty()) {
-            throw createException(candidate, context);
+            throw this.createException(candidate, context);
         }
-        return classification.getResult().isAmbiguous() ? defaultClassification : classification;
+        return classification.getResult().isAmbiguous() ? this.defaultClassification : classification;
     }
 
-    private SimilarityException createException(Candidate<T> candidate, SimilarityContext context) {
-        final SimilarityException fusionException = new SimilarityException("Could not classify candidate " + candidate,
+    private SimilarityException createException(final Candidate<T> candidate, final SimilarityContext context) {
+        SimilarityException fusionException = new SimilarityException("Could not classify candidate " + candidate,
                 context.getExceptions().get(0));
         context.getExceptions().stream().skip(1).forEach(fusionException::addSuppressed);
         return fusionException;
     }
 
-    private Optional<Classification> evaluateRule(Rule<T> rule, Candidate<T> candidate, SimilarityContext context) {
+    private Optional<Classification> evaluateRule(final Rule<T> rule, final Candidate<T> candidate, final SimilarityContext context) {
         return context.safeExecute(() -> rule.evaluate(candidate.getNewRecord(), candidate.getOldRecord(), context)).map(score -> {
             if (Float.isNaN(score)) {
                 return UNKNOWN;
@@ -108,29 +107,29 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
     public static class RuleBasedClassifierBuilder<T> {
 
-        public RuleBasedClassifierBuilder<T> positiveRule(String name, BiPredicate<T, T> applicablePredicate,
-                                                          SimilarityMeasure<T> similarityMeasure) {
-            return positiveRule(name, (left, right, context) ->
+        public RuleBasedClassifierBuilder<T> positiveRule(final String name, final BiPredicate<T, T> applicablePredicate,
+                                                          final SimilarityMeasure<T> similarityMeasure) {
+            return this.positiveRule(name, (left, right, context) ->
                     applicablePredicate.test(left, right) ? similarityMeasure.getSimilarity(left, right, context) : DOES_NOT_APPLY);
         }
 
-        public RuleBasedClassifierBuilder<T> positiveRule(String name, SimilarityMeasure<T> similarityMeasure) {
-            return rule(new Rule<>(name, similarityMeasure.unknownIf(s -> s <= 0)));
+        public RuleBasedClassifierBuilder<T> positiveRule(final String name, final SimilarityMeasure<T> similarityMeasure) {
+            return this.rule(new Rule<>(name, similarityMeasure.unknownIf(s -> s <= 0)));
         }
 
-        public RuleBasedClassifierBuilder<T> negativeRule(String name, BiPredicate<T, T> applicablePredicate,
-                                                          SimilarityMeasure<T> similarityMeasure) {
-            return negativeRule(name, (left, right, context) ->
+        public RuleBasedClassifierBuilder<T> negativeRule(final String name, final BiPredicate<T, T> applicablePredicate,
+                                                          final SimilarityMeasure<T> similarityMeasure) {
+            return this.negativeRule(name, (left, right, context) ->
                     applicablePredicate.test(left, right) ? similarityMeasure.getSimilarity(left, right, context) : DOES_NOT_APPLY);
         }
 
-        public RuleBasedClassifierBuilder<T> negativeRule(String name, SimilarityMeasure<T> similarityMeasure) {
-            final SimilarityMeasure<T> negativeSim = (left, right, context) -> -similarityMeasure.getSimilarity(left, right, context);
-            return rule(new Rule<>(name, negativeSim.unknownIf(s -> s >= 0)));
+        public RuleBasedClassifierBuilder<T> negativeRule(final String name, final SimilarityMeasure<T> similarityMeasure) {
+            SimilarityMeasure<T> negativeSim = (left, right, context) -> -similarityMeasure.getSimilarity(left, right, context);
+            return this.rule(new Rule<>(name, negativeSim.unknownIf(s -> s >= 0)));
         }
 
-        public RuleBasedClassifierBuilder<T> defaultRule(SimilarityMeasure<T> similarityMeasure) {
-            return rule(new Rule<>("default", similarityMeasure));
+        public RuleBasedClassifierBuilder<T> defaultRule(final SimilarityMeasure<T> similarityMeasure) {
+            return this.rule(new Rule<>("default", similarityMeasure));
         }
     }
 
@@ -139,8 +138,8 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
         String name;
         SimilarityMeasure<T> measure;
 
-        float evaluate(T left, T right, SimilarityContext context) {
-            return measure.getSimilarity(left, right, context);
+        float evaluate(final T left, final T right, final SimilarityContext context) {
+            return this.measure.getSimilarity(left, right, context);
         }
 
         @SuppressWarnings("SameReturnValue")

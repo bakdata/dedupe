@@ -1,11 +1,9 @@
 plugins {
-    // kotlin stuff
-    `kotlin-dsl`
+    `java-library`
     // release
     id("net.researchgate.release") version "2.6.0"
     id("com.bakdata.sonar") version "1.0.1"
     id("com.bakdata.sonatype") version "1.0.1"
-    id("io.franzbecker.gradle-lombok") version "1.14"
 }
 
 allprojects {
@@ -34,16 +32,10 @@ configure<com.bakdata.gradle.SonatypeSettings> {
 
 subprojects {
     apply(plugin = "java-library")
-    apply(plugin = "io.franzbecker.gradle-lombok")
-    lombok {
-        version = "1.18.4"
-        sha256 = ""
-    }
-
     // build fails for java 11, let"s wait for a newer lombok version
     configure<JavaPluginConvention> {
-        sourceCompatibility = org.gradle.api.JavaVersion.VERSION_1_10
-        targetCompatibility = org.gradle.api.JavaVersion.VERSION_1_10
+        sourceCompatibility = org.gradle.api.JavaVersion.VERSION_11
+        targetCompatibility = org.gradle.api.JavaVersion.VERSION_11
     }
 
     dependencies {
@@ -52,5 +44,10 @@ subprojects {
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.3.0")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.0")
         testImplementation(group= "org.assertj", name= "assertj-core", version= "3.11.1")
+
+        compileOnly("org.projectlombok:lombok:1.18.4")
+        annotationProcessor("org.projectlombok:lombok:1.18.4")
+        testCompileOnly("org.projectlombok:lombok:1.18.4")
+        testAnnotationProcessor("org.projectlombok:lombok:1.18.4")
     }
 }

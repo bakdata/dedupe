@@ -25,13 +25,16 @@
 package com.bakdata.deduplication.fusion;
 
 import com.bakdata.deduplication.clustering.Cluster;
-import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Singular;
+import lombok.Value;
 
 @Value
 @Builder
@@ -44,30 +47,30 @@ public class ConflictResolutionFusion<T> implements Fusion<T> {
     List<Source> sources;
     ConflictResolution<T, T> rootResolution;
     @Getter(lazy = true)
-    Map<String, Source> sourceByName = sources.stream().collect(Collectors.toMap(Source::getName, s -> s));
+    Map<String, Source> sourceByName = this.sources.stream().collect(Collectors.toMap(Source::getName, s -> s));
 
     @Override
-    public FusedValue<T> fuse(Cluster<?, T> cluster) {
+    public FusedValue<T> fuse(final Cluster<?, T> cluster) {
         if (cluster.size() < 2) {
             return new FusedValue<>(cluster.get(0), cluster, List.of());
         }
-        final List<AnnotatedValue<T>> conflictingValues = cluster.getElements().stream()
-                .map(e -> new AnnotatedValue<>(e, getSource(e), lastModifiedExtractor.apply(e)))
+        List<AnnotatedValue<T>> conflictingValues = cluster.getElements().stream()
+                .map(e -> new AnnotatedValue<>(e, this.getSource(e), this.lastModifiedExtractor.apply(e)))
                 .collect(Collectors.toList());
-        final FusionContext context = new FusionContext();
-        final T resolvedValue = context.safeExecute(() -> rootResolution.resolve(conflictingValues, context)).flatMap(r -> r)
-                .orElseThrow(() -> createException(conflictingValues, context));
+        FusionContext context = new FusionContext();
+        T resolvedValue = context.safeExecute(() -> this.rootResolution.resolve(conflictingValues, context)).flatMap(r -> r)
+                .orElseThrow(() -> this.createException(conflictingValues, context));
         return new FusedValue<>(resolvedValue, cluster, context.getExceptions());
     }
 
-    private FusionException createException(List<AnnotatedValue<T>> conflictingValues, FusionContext context) {
-        final FusionException fusionException = new FusionException("Could not resolve conflict in " + conflictingValues,
+    private FusionException createException(final List<AnnotatedValue<T>> conflictingValues, final FusionContext context) {
+        FusionException fusionException = new FusionException("Could not resolve conflict in " + conflictingValues,
                 context.getExceptions().get(0));
         context.getExceptions().stream().skip(1).forEach(fusionException::addSuppressed);
         return fusionException;
     }
 
-    private Source getSource(T e) {
-        return getSourceByName().computeIfAbsent(sourceExtractor.apply(e), name -> new Source(name, 1));
+    private Source getSource(final T e) {
+        return this.getSourceByName().computeIfAbsent(this.sourceExtractor.apply(e), name -> new Source(name, 1));
     }
 }

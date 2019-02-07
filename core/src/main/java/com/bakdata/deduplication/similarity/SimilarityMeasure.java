@@ -30,6 +30,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface SimilarityMeasure<T> {
+    @SuppressWarnings("SameReturnValue")
     static float unknown() {
         return Float.NaN;
     }

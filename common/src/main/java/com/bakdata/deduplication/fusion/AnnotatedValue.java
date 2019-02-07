@@ -24,22 +24,22 @@
  */
 package com.bakdata.deduplication.fusion;
 
-import lombok.Value;
-
 import java.time.LocalDateTime;
+import lombok.Value;
 
 @Value
 public class AnnotatedValue<T> {
+
     T value;
     Source source;
     LocalDateTime dateTime;
 
-    public static <T> AnnotatedValue<T> calculated(T value) {
+    public static <T> AnnotatedValue<T> calculated(final T value) {
         return new AnnotatedValue<>(value, Source.getCalculated(), LocalDateTime.now());
     }
 
     @SuppressWarnings("unchecked")
-    public <S> AnnotatedValue<S> withValue(S value) {
+    public <S> AnnotatedValue<S> withValue(final S value) {
         return this.value == value ? (AnnotatedValue<S>) this : new AnnotatedValue<>(value, this.source, this.dateTime);
     }
 }

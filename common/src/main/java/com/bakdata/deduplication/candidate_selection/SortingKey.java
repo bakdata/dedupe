@@ -24,10 +24,9 @@
  */
 package com.bakdata.deduplication.candidate_selection;
 
+import java.util.function.Function;
 import lombok.NonNull;
 import lombok.Value;
-
-import java.util.function.Function;
 
 @Value
 public class SortingKey<T> {
