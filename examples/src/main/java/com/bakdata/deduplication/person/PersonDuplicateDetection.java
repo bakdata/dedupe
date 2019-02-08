@@ -22,40 +22,25 @@
  * SOFTWARE.
  *
  */
-package com.bakdata.deduplication.deduplication.online;
+package com.bakdata.deduplication.person;
 
-import com.bakdata.deduplication.clustering.Cluster;
-import com.bakdata.deduplication.deduplication.HardFusionHandler;
+import com.bakdata.deduplication.duplicate_detection.HardPairHandler;
 import com.bakdata.deduplication.duplicate_detection.online.OnlineDuplicateDetection;
-import com.bakdata.deduplication.fusion.FusedValue;
-import com.bakdata.deduplication.fusion.Fusion;
-import com.google.common.collect.MoreCollectors;
-import java.util.List;
-import java.util.Optional;
-import lombok.Builder;
+import com.bakdata.deduplication.duplicate_detection.online.OnlinePairBasedDuplicateDetection;
 import lombok.Value;
+import lombok.experimental.Delegate;
 
 @Value
-@Builder
-public class OnlinePairBasedDeduplication<T> implements OnlineDeduplication<T> {
-    OnlineDuplicateDetection<?, T> duplicateDetection;
-    Fusion<T> fusion;
-    @Builder.Default
-    HardFusionHandler<T> hardFusionHandler = HardFusionHandler.dontFuse();
+public class PersonDuplicateDetection implements OnlineDuplicateDetection<Long, Person> {
+    @Delegate
+    OnlineDuplicateDetection<Long, Person> duplicateDetection;
 
-    @Override
-    public T deduplicate(final T newRecord) {
-        final List<? extends Cluster<?, T>> clusters = this.duplicateDetection.detectDuplicates(newRecord);
-        if (clusters.isEmpty()) {
-            return newRecord;
-        }
-
-        final Cluster<?, T> mainCluster =
-            clusters.stream().filter(c -> c.contains(newRecord)).collect(MoreCollectors.onlyElement());
-
-        return Optional.of(this.fusion.fuse(mainCluster))
-            .flatMap(this.hardFusionHandler::handlePartiallyFusedValue)
-                .map(FusedValue::getValue)
-                .orElse(newRecord);
+    public PersonDuplicateDetection(final HardPairHandler<Person> hardPairHandler) {
+        duplicateDetection = OnlinePairBasedDuplicateDetection.<Long, Person>builder()
+            .classifier(new PersonClassifier())
+            .candidateSelection(new PersonCandidateSelection())
+            .clustering(new PersonClustering())
+            .hardPairHandler(hardPairHandler)
+            .build();
     }
 }

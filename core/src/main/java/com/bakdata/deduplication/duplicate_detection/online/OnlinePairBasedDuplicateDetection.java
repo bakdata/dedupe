@@ -31,18 +31,21 @@ import com.bakdata.deduplication.classifier.Classifier;
 import com.bakdata.deduplication.clustering.Cluster;
 import com.bakdata.deduplication.clustering.Clustering;
 import com.bakdata.deduplication.duplicate_detection.HardPairHandler;
-import lombok.Builder;
-import lombok.Value;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.Value;
 
 @Value
 @Builder
 public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> implements OnlineDuplicateDetection<C, T> {
+    @NonNull
     OnlineCandidateSelection<T> candidateSelection;
+    @NonNull
     Classifier<T> classifier;
+    @NonNull
     Clustering<C, T> clustering;
     @Builder.Default
     HardPairHandler<T> hardPairHandler = HardPairHandler.ignore();

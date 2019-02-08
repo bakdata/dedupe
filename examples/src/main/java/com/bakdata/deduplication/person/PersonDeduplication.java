@@ -33,18 +33,15 @@ import lombok.experimental.Delegate;
 
 @Value
 public class PersonDeduplication implements OnlineDeduplication<Person> {
-    @Delegate()
-    OnlinePairBasedDeduplication<Person> deduplication;
+    @Delegate
+    OnlineDeduplication<Person> deduplication;
 
     public PersonDeduplication(final HardPairHandler<Person> hardPairHandler,
                                final HardFusionHandler<Person> hardFusionHandler) {
         this.deduplication = OnlinePairBasedDeduplication.<Person>builder()
-                .classifier(new PersonClassifier())
-                .candidateSelection(new PersonCandidateSelection())
-                .clustering(new PersonClustering())
+            .duplicateDetection(new PersonDuplicateDetection(hardPairHandler))
                 .fusion(new PersonFusion())
                 .hardFusionHandler(hardFusionHandler)
-                .hardPairHandler(hardPairHandler)
                 .build();
     }
 }

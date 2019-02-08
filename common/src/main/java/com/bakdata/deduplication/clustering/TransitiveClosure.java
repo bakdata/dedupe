@@ -43,7 +43,7 @@ import lombok.Value;
 @Builder
 public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>> implements Clustering<C, T> {
     @NonNull
-    Function<T, I> idExtractor;
+    Function<? super T, ? extends I> idExtractor;
     @NonNull
     Function<Iterable<T>, C> clusterIdGenerator;
     @NonNull

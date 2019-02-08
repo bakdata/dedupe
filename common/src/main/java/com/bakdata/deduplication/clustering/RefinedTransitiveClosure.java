@@ -49,12 +49,12 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
     TransitiveClosure<C, T, I> closure;
 
     @NonNull
-    Function<T, ? extends I> idExtractor;
+    Function<? super T, ? extends I> idExtractor;
 
     @java.beans.ConstructorProperties({"refineCluster", "oldClusterIndex", "closure", "idExtractor"})
     RefinedTransitiveClosure(final @NonNull RefineCluster<C, T> refineCluster,
         final Map<I, Cluster<C, T>> oldClusterIndex, final TransitiveClosure<C, T, I> closure,
-        final @NonNull Function<T, ? extends I> idExtractor) {
+        final @NonNull Function<? super T, ? extends I> idExtractor) {
         this.refineCluster = refineCluster;
         this.oldClusterIndex = oldClusterIndex != null ? oldClusterIndex : new HashMap<>();
         this.closure = closure != null ? closure
