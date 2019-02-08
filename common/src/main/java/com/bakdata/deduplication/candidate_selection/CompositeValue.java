@@ -48,7 +48,7 @@ public class CompositeValue<T extends Comparable<?>> implements Comparable<Compo
 
     @SuppressWarnings("unchecked")
     @Override
-    public int compareTo(@NonNull final CompositeValue<T> o) {
+    public int compareTo(final @NonNull CompositeValue<T> o) {
         for (int index = 0; index < this.components.size(); index++) {
             final int result = ((Comparable<Object>) this.components.get(index)).compareTo(o.components.get(index));
             if (result != 0) {

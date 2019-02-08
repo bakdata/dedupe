@@ -28,6 +28,7 @@ import com.bakdata.deduplication.clustering.Cluster;
 
 import java.util.List;
 
+@FunctionalInterface
 public interface OnlineDuplicateDetection<C extends Comparable<C>, T> {
-    List<Cluster<C, T>> deduplicate(T newRecord);
+    List<Cluster<C, T>> detectDuplicates(T newRecord);
 }

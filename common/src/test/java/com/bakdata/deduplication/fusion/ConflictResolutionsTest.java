@@ -295,7 +295,7 @@ class ConflictResolutionsTest {
     private static final class PersonWithoutSetter {
 
         @Getter
-        private String id;
+        private String id = null;
     }
 
 }

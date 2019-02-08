@@ -43,14 +43,14 @@ class FunctionalClassTest {
 
     @Test
     void testGetConstructor() {
-        Supplier<Person> ctor = from(Person.class).getConstructor();
+        final Supplier<Person> ctor = from(Person.class).getConstructor();
         assertThat(ctor.get())
                 .isNotNull();
     }
 
     @Test
     void testGetConstructorWithException() {
-        Supplier<PersonWithExceptionConstructor> ctor = from(PersonWithExceptionConstructor.class)
+        final Supplier<PersonWithExceptionConstructor> ctor = from(PersonWithExceptionConstructor.class)
                 .getConstructor();
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(ctor::get)
@@ -59,10 +59,10 @@ class FunctionalClassTest {
 
     @Test
     void testGetGetter() {
-        Person person = new Person();
+        final Person person = new Person();
         person.setId("foo");
-        Field<Person, Object> id = from(Person.class).field("id");
-        Function<Person, Object> getter = id.getGetter();
+        final Field<Person, Object> id = from(Person.class).field("id");
+        final Function<Person, Object> getter = id.getGetter();
         assertThat(getter.apply(person))
                 .isEqualTo("foo");
     }
@@ -87,11 +87,11 @@ class FunctionalClassTest {
             }
         }
 
-        PersonWithExceptionGetter person = new PersonWithExceptionGetter();
+        final PersonWithExceptionGetter person = new PersonWithExceptionGetter();
         person.setId("foo");
-        Field<PersonWithExceptionGetter, Object> id = from(PersonWithExceptionGetter.class)
+        final Field<PersonWithExceptionGetter, Object> id = from(PersonWithExceptionGetter.class)
                 .field("id");
-        Function<PersonWithExceptionGetter, Object> getter = id.getGetter();
+        final Function<PersonWithExceptionGetter, Object> getter = id.getGetter();
         assertThatExceptionOfType(UnsupportedOperationException.class)
                 .isThrownBy(() -> getter.apply(person))
                 .withMessage("Foo");
@@ -126,7 +126,7 @@ class FunctionalClassTest {
         class PersonWithoutSetter {
 
             @Getter
-            private String id;
+            private String id = null;
         }
 
         assertThatExceptionOfType(RuntimeException.class)
@@ -137,9 +137,9 @@ class FunctionalClassTest {
 
     @Test
     void testGetSetter() {
-        Person person = new Person();
-        Field<Person, Object> id = from(Person.class).field("id");
-        BiConsumer<Person, Object> setter = id.getSetter();
+        final Person person = new Person();
+        final Field<Person, Object> id = from(Person.class).field("id");
+        final BiConsumer<Person, Object> setter = id.getSetter();
         setter.accept(person, "foo");
         assertThat(person.getId())
                 .isEqualTo("foo");
@@ -161,13 +161,13 @@ class FunctionalClassTest {
 
             private String id;
 
-            public void setId(String id) {
+            public void setId(final String id) {
                 throw new UnsupportedOperationException("Foo");
             }
         }
 
-        PersonWithExceptionSetter person = new PersonWithExceptionSetter();
-        BiConsumer<PersonWithExceptionSetter, Object> setter = from(PersonWithExceptionSetter.class)
+        final PersonWithExceptionSetter person = new PersonWithExceptionSetter();
+        final BiConsumer<PersonWithExceptionSetter, Object> setter = from(PersonWithExceptionSetter.class)
                 .field("id").getSetter();
         assertThatExceptionOfType(UnsupportedOperationException.class)
                 .isThrownBy(() -> setter.accept(person, "foo"))
@@ -177,7 +177,7 @@ class FunctionalClassTest {
     //cannot inline this class because of NoSuchMethodException for constructor
     static class PersonWithExceptionConstructor {
 
-        public PersonWithExceptionConstructor() {
+        PersonWithExceptionConstructor() {
             throw new IllegalStateException("Foo");
         }
     }
@@ -185,7 +185,7 @@ class FunctionalClassTest {
     //cannot inline this class because of NoSuchMethodException for constructor
     static class PersonWithoutDefaultConstructor {
 
-        public PersonWithoutDefaultConstructor(Object foo) {
+        PersonWithoutDefaultConstructor(final Object foo) {
 
         }
     }

@@ -26,6 +26,7 @@ package com.bakdata.deduplication.clustering;
 
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,12 +49,12 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
     TransitiveClosure<C, T, I> closure;
 
     @NonNull
-    Function<T, I> idExtractor;
+    Function<T, ? extends I> idExtractor;
 
     @java.beans.ConstructorProperties({"refineCluster", "oldClusterIndex", "closure", "idExtractor"})
-    RefinedTransitiveClosure(@NonNull RefineCluster<C, T> refineCluster,
-        Map<I, Cluster<C, T>> oldClusterIndex, TransitiveClosure<C, T, I> closure,
-        @NonNull Function<T, I> idExtractor) {
+    RefinedTransitiveClosure(final @NonNull RefineCluster<C, T> refineCluster,
+        final Map<I, Cluster<C, T>> oldClusterIndex, final TransitiveClosure<C, T, I> closure,
+        final @NonNull Function<T, ? extends I> idExtractor) {
         this.refineCluster = refineCluster;
         this.oldClusterIndex = oldClusterIndex != null ? oldClusterIndex : new HashMap<>();
         this.closure = closure != null ? closure
@@ -63,14 +64,14 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
 
     @Override
     public List<Cluster<C, T>> cluster(final List<ClassifiedCandidate<T>> classified) {
-        List<Cluster<C, T>> transitiveClosure = this.closure.cluster(classified);
-        List<Cluster<C, T>> refinedClusters = this.refineCluster.refine(transitiveClosure, classified);
+        final List<Cluster<C, T>> transitiveClosure = this.closure.cluster(classified);
+        final List<Cluster<C, T>> refinedClusters = this.refineCluster.refine(transitiveClosure, classified);
 
-        final List<Cluster<C, T>> changedClusters = new ArrayList<>();
+        final Collection<Cluster<C, T>> changedClusters = new ArrayList<>();
         for (final Cluster<C, T> refinedCluster : refinedClusters) {
             for (final T element : refinedCluster.getElements()) {
-                I id = this.idExtractor.apply(element);
-                Cluster<C, T> oldCluster = this.oldClusterIndex.put(id, refinedCluster);
+                final I id = this.idExtractor.apply(element);
+                final Cluster<C, T> oldCluster = this.oldClusterIndex.put(id, refinedCluster);
                 if (oldCluster == null || !this.getClusterId(oldCluster).equals(this.getClusterId(refinedCluster))) {
                     changedClusters.add(refinedCluster);
                 }
@@ -86,7 +87,7 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
                 .collect(Collectors.toList());
     }
 
-    private I getClusterId(final Cluster<C, T> cluster) {
+    private I getClusterId(final Cluster<C, ? extends T> cluster) {
         return this.idExtractor.apply(cluster.get(0));
     }
 

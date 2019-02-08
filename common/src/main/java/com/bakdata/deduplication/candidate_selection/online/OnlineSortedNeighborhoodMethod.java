@@ -57,15 +57,16 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
         TreeMap<Comparable<?>, List<T>> index = new TreeMap<>();
 
         List<Candidate<T>> getCandidates(final T newRecord) {
-            Comparable<?> newKey = this.sortingKey.getKeyExtractor().apply(newRecord);
+            final Comparable<?> newKey = this.sortingKey.getKeyExtractor().apply(newRecord);
             if(newKey == null) {
                 return List.of();
             }
-            Stream<T> largerRecords = this.index.tailMap(newKey).values().stream().flatMap(List::stream).limit(
+            final Stream<T> largerRecords = this.index.tailMap(newKey).values().stream().flatMap(List::stream).limit(
                 this.windowSize / 2);
-            Stream<T> smallerRecords = this.index.descendingMap().tailMap(newKey).values().stream().flatMap(List::stream).limit(
+            final Stream<T> smallerRecords =
+                this.index.descendingMap().tailMap(newKey).values().stream().flatMap(List::stream).limit(
                 this.windowSize / 2);
-            List<Candidate<T>> candidates = Stream.concat(smallerRecords, largerRecords)
+            final List<Candidate<T>> candidates = Stream.concat(smallerRecords, largerRecords)
                     .map(oldRecord -> new Candidate<>(newRecord, oldRecord))
                     .collect(Collectors.toList());
             this.index.computeIfAbsent(newKey, key -> new LinkedList<>()).add(newRecord);
@@ -84,11 +85,12 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
             return this.sortingKey(sortingKey, this.defaultWindowSize);
         }
 
-        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(final Collection<? extends SortingKey<T>> sortingKeys) {
+        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(final Collection<SortingKey<T>> sortingKeys) {
             return this.sortingKeys(sortingKeys, this.defaultWindowSize);
         }
 
-        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(final Collection<? extends SortingKey<T>> sortingKeys, final int windowSize) {
+        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(final Iterable<SortingKey<T>> sortingKeys,
+            final int windowSize) {
             for (final SortingKey<T> sortingKey : sortingKeys) {
                 this.sortingKey(sortingKey, windowSize);
             }

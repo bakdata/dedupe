@@ -24,15 +24,14 @@
  */
 package com.bakdata.deduplication;
 
-import lombok.Getter;
-import lombok.Value;
-import lombok.extern.java.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
+import lombok.Getter;
+import lombok.Value;
+import lombok.extern.java.Log;
 
 @Value
 @Log
@@ -41,23 +40,23 @@ public class ExceptionContext {
     private final List<Exception> exceptions = new ArrayList<>();
 
     @SuppressWarnings("unused")
-    public <T> Optional<T> safeExecute(Callable<T> function) {
+    public <T> Optional<T> safeExecute(final Callable<? extends T> function) {
         try {
             return Optional.of(function.call());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.log(Level.FINE, "Suppressing exception", e);
-            exceptions.add(e);
+            this.exceptions.add(e);
             return Optional.empty();
         }
     }
 
     @SuppressWarnings("unused")
-    public void safeExecute(Runnable runnable) {
+    public void safeExecute(final Runnable runnable) {
         try {
             runnable.run();
-        } catch (Exception e) {
+        } catch (final RuntimeException e) {
             log.log(Level.FINE, "Suppressing exception", e);
-            exceptions.add(e);
+            this.exceptions.add(e);
         }
     }
 }

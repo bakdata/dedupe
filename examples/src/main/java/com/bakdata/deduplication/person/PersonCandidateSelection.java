@@ -28,14 +28,17 @@ import com.bakdata.deduplication.candidate_selection.CompositeValue;
 import com.bakdata.deduplication.candidate_selection.SortingKey;
 import com.bakdata.deduplication.candidate_selection.online.OnlineCandidateSelection;
 import com.bakdata.deduplication.candidate_selection.online.OnlineSortedNeighborhoodMethod;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
+import java.util.regex.Pattern;
 import lombok.Value;
 import lombok.experimental.Delegate;
-
-import java.text.Normalizer;
 
 @Value
 public class PersonCandidateSelection implements OnlineCandidateSelection<Person> {
     public static final int WINDOW_SIZE = 20;
+    private static final Pattern BRACED_TERMS = Pattern.compile("\\(.*?\\)");
+    private static final Pattern NON_ALPHA = Pattern.compile("[^\\p{Alnum}]");
     @Delegate
     OnlineCandidateSelection<Person> candidateSelection = OnlineSortedNeighborhoodMethod.<Person>builder()
             .defaultWindowSize(WINDOW_SIZE)
@@ -47,16 +50,16 @@ public class PersonCandidateSelection implements OnlineCandidateSelection<Person
                     person -> CompositeValue.of(person.getBirthDate(), normalize(person.getLastName()))))
             .build();
 
-    private static String normalize(String value) {
+    private static String normalize(final String value) {
         if (value == null) {
             return null;
         }
 
         // split umlauts into canonicals
-        return Normalizer.normalize(value.toLowerCase(), Normalizer.Form.NFD)
-                // remove everything in braces
-                .replaceAll("\\(.*?\\)", "")
-                // remove all non-alphanumericals
-                .replaceAll("[^\\p{Alnum}]", "");
+        // remove everything in braces
+        // remove all non-alphanumericals
+        final String nonBraced =
+            BRACED_TERMS.matcher(Normalizer.normalize(value.toLowerCase(), Form.NFD)).replaceAll("");
+        return NON_ALPHA.matcher(nonBraced).replaceAll("");
     }
 }

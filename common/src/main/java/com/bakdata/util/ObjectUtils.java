@@ -30,6 +30,6 @@ import lombok.experimental.UtilityClass;
 public class ObjectUtils {
 
     public static boolean isNonEmpty(final Object value) {
-        return value != null && !value.equals("");
+        return value != null && !"".equals(value);
     }
 }

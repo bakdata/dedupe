@@ -18,10 +18,10 @@ public class OracleClassifier<T> implements Classifier<T> {
     @NonNull
     Set<Candidate<T>> goldDuplicates;
     @Getter(lazy = true)
-    Set<Candidate<T>> symmetricDuplicates = calculateSymmetricDuplicates();
+    Set<Candidate<T>> symmetricDuplicates = this.calculateSymmetricDuplicates();
 
     private Set<Candidate<T>> calculateSymmetricDuplicates() {
-        return this.goldDuplicates.stream()
+        return this.getGoldDuplicates().stream()
             .flatMap(duplicate ->
                 Stream.of(duplicate, new Candidate<>(duplicate.getOldRecord(), duplicate.getNewRecord())))
             .collect(Collectors.toSet());

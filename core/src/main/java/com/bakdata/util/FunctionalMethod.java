@@ -39,12 +39,12 @@ public class FunctionalMethod<T> {
 
     @SneakyThrows
     @SuppressWarnings("unchecked")
-    public <R> R invoke(T t, Object... params) {
+    public <R> R invoke(final T t, final Object... params) {
         try {
-            return (R) method.invoke(t, params);
-        } catch (IllegalAccessException e) {
+            return (R) this.method.invoke(t, params);
+        } catch (final IllegalAccessException e) {
             throw new IllegalStateException(e);
-        } catch (InvocationTargetException e) {
+        } catch (final InvocationTargetException e) {
             throw e.getCause();
         }
     }

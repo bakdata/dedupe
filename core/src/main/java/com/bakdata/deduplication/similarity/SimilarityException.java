@@ -24,24 +24,24 @@
  */
 package com.bakdata.deduplication.similarity;
 
-@SuppressWarnings("WeakerAccess")
 public class SimilarityException extends RuntimeException {
     public SimilarityException() {
     }
 
-    public SimilarityException(String message) {
+    public SimilarityException(final String message) {
         super(message);
     }
 
-    public SimilarityException(String message, Throwable cause) {
+    public SimilarityException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public SimilarityException(Throwable cause) {
+    public SimilarityException(final Throwable cause) {
         super(cause);
     }
 
-    public SimilarityException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public SimilarityException(final String message, final Throwable cause, final boolean enableSuppression,
+        final boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

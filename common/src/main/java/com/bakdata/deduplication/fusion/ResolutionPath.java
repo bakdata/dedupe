@@ -38,7 +38,7 @@ public class ResolutionPath<T, R> implements ConflictResolution<T, R> {
 
     @Override
     public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> annotatedValues, final FusionContext context) {
-        List<AnnotatedValue<R>> fieldValues = annotatedValues.stream()
+        final List<AnnotatedValue<R>> fieldValues = annotatedValues.stream()
             .map(ar -> ar.withValue(this.extractor.apply(ar.getValue())))
             .filter(ar -> isNonEmpty(ar.getValue()))
             .collect(Collectors.toList());

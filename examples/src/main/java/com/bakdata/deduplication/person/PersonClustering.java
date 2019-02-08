@@ -36,13 +36,13 @@ public class PersonClustering implements Clustering<Long, Person> {
             .build();
 
     Clustering<Long, Person> refinedTransitiveClosure = RefinedTransitiveClosure.<Long, Person, String>builder()
-            .refineCluster(refineCluster)
+            .refineCluster(this.refineCluster)
             .idExtractor(Person::getId)
             .build();
 
     @Delegate
     Clustering<Long, Person> clustering = ConsistentClustering.<Long, Person, String>builder()
-            .clustering(refinedTransitiveClosure)
+            .clustering(this.refinedTransitiveClosure)
             .idExtractor(Person::getId)
             .build();
 }

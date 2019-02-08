@@ -56,7 +56,6 @@ import org.apache.commons.text.similarity.JaroWinklerDistance;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.apache.commons.text.similarity.SimilarityScore;
 
-@SuppressWarnings("WeakerAccess")
 @UtilityClass
 public class CommonSimilarityMeasures {
 
@@ -76,9 +75,11 @@ public class CommonSimilarityMeasures {
 
     public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> jaccard() {
         return (left, right, context) -> {
-            @SuppressWarnings("unchecked") Set<T> leftSet = left instanceof Set ? (Set<T>) left : new HashSet<>(left);
-            @SuppressWarnings("unchecked") Set<T> rightSet = left instanceof Set ? (Set<T>) right : new HashSet<>(right);
-            long intersectCount = leftSet.stream().filter(rightSet::contains).count();
+            @SuppressWarnings("unchecked") final Set<T> leftSet =
+                left instanceof Set ? (Set<T>) left : new HashSet<>(left);
+            @SuppressWarnings("unchecked") final Set<T> rightSet =
+                left instanceof Set ? (Set<T>) right : new HashSet<>(right);
+            final long intersectCount = leftSet.stream().filter(rightSet::contains).count();
             return (float) intersectCount / (rightSet.size() + leftSet.size() - intersectCount);
         };
     }
@@ -101,11 +102,13 @@ public class CommonSimilarityMeasures {
             if (left == null || right == null) {
                 return unknown();
             }
-            Map<T, Long> leftHistogram = left.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
-            Map<T, Long> rightHistogram = right.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+            final Map<T, Long> leftHistogram =
+                left.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+            final Map<T, Long> rightHistogram =
+                right.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
             float dotProduct = 0;
             for (final Map.Entry<T, Long> leftEntry : leftHistogram.entrySet()) {
-                Long rightCount = rightHistogram.get(leftEntry.getKey());
+                final Long rightCount = rightHistogram.get(leftEntry.getKey());
                 if (rightCount != null) {
                     dotProduct += leftEntry.getValue() * rightCount;
                 }
@@ -123,7 +126,7 @@ public class CommonSimilarityMeasures {
         return new MongeElkan<>(pairMeasure, maxPositionDiff, 0);
     }
 
-    public static <T> SimilarityMeasure<T> negate(final SimilarityMeasure<T> measure) {
+    public static <T> SimilarityMeasure<T> negate(final SimilarityMeasure<? super T> measure) {
         return (left, right, context) -> 1 - measure.getSimilarity(left, right, context);
     }
 
@@ -211,7 +214,7 @@ public class CommonSimilarityMeasures {
         return (t, context) -> Lists.newArrayList(WHITE_SPACE_SPLITTER.split(t));
     }
 
-    public static <T, R> SimilarityTransformation<T, R> transform(final Function<T, R> function) {
+    public static <T, R> SimilarityTransformation<T, R> transform(final Function<T, ? extends R> function) {
         return (t, context) -> function.apply(t);
     }
 
@@ -241,11 +244,11 @@ public class CommonSimilarityMeasures {
 
         @Override
         public float getSimilarity(final CharSequence left, final CharSequence right, final SimilarityContext context) {
-            float distance = this.score.apply(left, right).floatValue();
+            final float distance = this.score.apply(left, right).floatValue();
             if (distance == -1) {
                 return 0;
             }
-            return 1f - distance / getMaxLen(left, right);
+            return 1.0f - distance / getMaxLen(left, right);
         }
     }
 
@@ -303,8 +306,8 @@ public class CommonSimilarityMeasures {
                     if (adjustedWeights == null) {
                         adjustedWeights = new ArrayList<>(this.getWeights());
                     }
-                    adjustedWeights.set(i, 0f);
-                    weightedSims.set(i, 0f);
+                    adjustedWeights.set(i, 0.0f);
+                    weightedSims.set(i, 0.0f);
                 }
             }
             return this.aggregator.apply(weightedSims, adjustedWeights == null ? this.getWeights() : adjustedWeights);
@@ -317,7 +320,7 @@ public class CommonSimilarityMeasures {
         }
 
         public static class WeightedAggregationBuilder<R> {
-            public <T> WeightedAggregationBuilder<R> add(final float weight, final Function<R, T> extractor, final SimilarityMeasure<T> measure) {
+            public <T> WeightedAggregationBuilder<R> add(final float weight, final Function<R, ? extends T> extractor, final SimilarityMeasure<? super T> measure) {
                 return this.add(weight, measure.of(extractor));
             }
 

@@ -26,6 +26,7 @@ package com.bakdata.deduplication.clustering;
 
 import java.util.List;
 
+@FunctionalInterface
 public interface ClusterSplitHandler<C extends Comparable<C>, T> {
     boolean clusterSplit(Cluster<C, T> mainCluster, List<Cluster<C, T>> splitParts);
 }

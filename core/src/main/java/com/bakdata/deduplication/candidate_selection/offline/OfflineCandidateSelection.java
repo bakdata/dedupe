@@ -28,6 +28,7 @@ import com.bakdata.deduplication.candidate_selection.Candidate;
 
 import java.util.List;
 
+@FunctionalInterface
 public interface OfflineCandidateSelection<T> {
     List<Candidate<T>> getCandidates(List<T> newRecord);
 }

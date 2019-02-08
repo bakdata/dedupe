@@ -27,6 +27,7 @@ package com.bakdata.deduplication.fusion;
 import java.util.List;
 import java.util.Optional;
 
+@FunctionalInterface
 public interface TerminalConflictResolution<T, R> extends ConflictResolution<T, R> {
     default List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> values, final FusionContext context) {
         return this.resolveFully(values, context).map(List::of).orElse(List.of());

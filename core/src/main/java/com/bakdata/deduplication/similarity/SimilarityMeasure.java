@@ -24,22 +24,22 @@
  */
 package com.bakdata.deduplication.similarity;
 
-import lombok.Value;
-
 import java.util.function.Function;
 import java.util.function.Predicate;
+import lombok.Value;
 
+@FunctionalInterface
 public interface SimilarityMeasure<T> {
     @SuppressWarnings("SameReturnValue")
     static float unknown() {
         return Float.NaN;
     }
 
-    static boolean isUnknown(float value) {
+    static boolean isUnknown(final float value) {
         return Float.isNaN(value);
     }
 
-    static float scaleWithThreshold(float similarity, float min) {
+    static float scaleWithThreshold(final float similarity, final float min) {
         if(similarity >= min) {
             return (similarity - min) / (1 - min);
         }
@@ -48,36 +48,36 @@ public interface SimilarityMeasure<T> {
 
     float getSimilarity(T left, T right, SimilarityContext context);
 
-    default <O> SimilarityMeasure<O> of(SimilarityTransformation<O, ? extends T> extractor) {
+    default <O> SimilarityMeasure<O> of(final SimilarityTransformation<O, ? extends T> extractor) {
         return new SimilarityPath<>(extractor, this);
     }
 
-    default <O> SimilarityMeasure<O> of(Function<O, ? extends T> extractor) {
-        return of((outer, context) -> extractor.apply(outer));
+    default <O> SimilarityMeasure<O> of(final Function<O, ? extends T> extractor) {
+        return this.of((outer, context) -> extractor.apply(outer));
     }
 
-    default SimilarityMeasure<T> cutoff(float threshold) {
+    default SimilarityMeasure<T> cutoff(final float threshold) {
         return new CutoffSimiliarityMeasure<>(this, threshold);
     }
 
-    default SimilarityMeasure<T> scaleWithThreshold(float min) {
-        return (left, right, context) -> scaleWithThreshold(getSimilarity(left, right, context), min);
+    default SimilarityMeasure<T> scaleWithThreshold(final float min) {
+        return (left, right, context) -> scaleWithThreshold(this.getSimilarity(left, right, context), min);
     }
 
     default SimilarityMeasure<T> signum() {
-        return (left, right, context) -> Math.signum(getSimilarity(left, right, context));
+        return (left, right, context) -> Math.signum(this.getSimilarity(left, right, context));
     }
 
     default SimilarityMeasure<T> asBoost() {
         return (left, right, context) -> {
-            final float similarity = getSimilarity(left, right, context);
-            return similarity <= 0 ? unknown() : 1f;
+            final float similarity = this.getSimilarity(left, right, context);
+            return similarity <= 0 ? unknown() : 1.0f;
         };
     }
 
-    default SimilarityMeasure<T> unknownIf(Predicate<Float> scorePredicate) {
+    default SimilarityMeasure<T> unknownIf(final Predicate<Float> scorePredicate) {
         return (left, right, context) -> {
-            final float similarity = getSimilarity(left, right, context);
+            final float similarity = this.getSimilarity(left, right, context);
             return scorePredicate.test(similarity) ? unknown() : similarity;
         };
     }
@@ -87,21 +87,21 @@ public interface SimilarityMeasure<T> {
         SimilarityMeasure<T> inner;
         float threshold;
 
-        protected static float cutoff(float similarity, float min) {
+        protected static float cutoff(final float similarity, final float min) {
             return similarity < min ? 0 : similarity;
         }
 
         @Override
-        public float getSimilarity(T left, T right, SimilarityContext context) {
-            return cutoff(inner.getSimilarity(left, right, context), threshold);
+        public float getSimilarity(final T left, final T right, final SimilarityContext context) {
+            return cutoff(this.inner.getSimilarity(left, right, context), this.threshold);
         }
 
         @Override
-        public SimilarityMeasure<T> cutoff(float threshold) {
+        public SimilarityMeasure<T> cutoff(final float threshold) {
             if (threshold < this.threshold) {
                 return this;
             }
-            return new CutoffSimiliarityMeasure<>(inner, threshold);
+            return new CutoffSimiliarityMeasure<>(this.inner, threshold);
         }
     }
 }

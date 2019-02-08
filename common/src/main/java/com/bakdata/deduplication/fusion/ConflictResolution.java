@@ -28,11 +28,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@FunctionalInterface
 public interface ConflictResolution<T, R> {
     List<AnnotatedValue<R>> resolvePartially(List<AnnotatedValue<T>> values, FusionContext context);
 
     default Optional<R> resolve(final List<AnnotatedValue<T>> values, final FusionContext context) {
-        List<AnnotatedValue<R>> resolvedValues = this.resolvePartially(values, context);
+        final List<AnnotatedValue<R>> resolvedValues = this.resolvePartially(values, context);
         switch (resolvedValues.size()) {
             case 0:
                 return Optional.empty();

@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 import lombok.Value;
 import lombok.experimental.UtilityClass;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
 @UtilityClass
 public class CommonConflictResolutions {
     private static final ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -50,7 +49,7 @@ public class CommonConflictResolutions {
             if (values.isEmpty()) {
                 return values;
             }
-            Set<Source> sources = context.retrieveValues(resolutionTag).stream()
+            final Set<Source> sources = context.retrieveValues(resolutionTag).stream()
                     .map(AnnotatedValue::getSource).collect(Collectors.toSet());
             return values.stream().filter(v -> sources.contains(v.getSource())).collect(Collectors.toList());
         });
@@ -60,11 +59,11 @@ public class CommonConflictResolutions {
         return new TaggedResolution<>(resolution, resolutionTag);
     }
 
-    private static <T extends Comparable<? super T>, A extends AnnotatedValue<T>> Comparator<A> comparator() {
+    private static <T extends Comparable<? super T>> Comparator<AnnotatedValue<T>> comparator() {
         return Comparator.comparing(AnnotatedValue::getValue);
     }
 
-    public static <T, A extends AnnotatedValue<T>> Comparator<A> comparator(final Comparator<T> comparator) {
+    public static <T> Comparator<AnnotatedValue<T>> comparator(final Comparator<T> comparator) {
         return Comparator.comparing(AnnotatedValue::getValue, comparator);
     }
 
@@ -117,7 +116,7 @@ public class CommonConflictResolutions {
             if (values.isEmpty()) {
                 return values;
             }
-            ArrayList<AnnotatedValue<T>> sorted = new ArrayList<>(values);
+            final List<AnnotatedValue<T>> sorted = new ArrayList<>(values);
             sorted.sort(comparator());
             // create copy of list of median value(s), such that original list is not referenced anymore
             return List.copyOf(sorted.subList((int) Math.floor(sorted.size() / 2.0), (int) Math.ceil(sorted.size() / 2.0)));
@@ -204,7 +203,7 @@ public class CommonConflictResolutions {
     public static <E, T extends Collection<E>, R extends Collection<E>> TerminalConflictResolution<T, R> unionAll(
         final Supplier<? extends R> ctor) {
         return (annotatedValues, context) -> {
-            R collection = ctor.get();
+            final R collection = ctor.get();
             for (final AnnotatedValue<T> annotatedValue : annotatedValues) {
                 collection.addAll(annotatedValue.getValue());
             }
@@ -216,7 +215,7 @@ public class CommonConflictResolutions {
         return (annotatedValues, context) -> annotatedValues;
     }
 
-    public static <T, R> ConflictResolution<T, R> transform(final Function<T, R> transform) {
+    public static <T, R> ConflictResolution<T, R> transform(final Function<? super T, R> transform) {
         return (annotatedValues, context) -> annotatedValues.stream()
                 .map(annotatedValue -> annotatedValue.withValue(transform.apply(annotatedValue.getValue())))
                 .collect(Collectors.toList());
@@ -235,7 +234,7 @@ public class CommonConflictResolutions {
 
         @Override
         public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> values, final FusionContext context) {
-            List<AnnotatedValue<R>> annotatedValues = this.resolution.resolvePartially(values, context);
+            final List<AnnotatedValue<R>> annotatedValues = this.resolution.resolvePartially(values, context);
             context.storeValues(this.resolutionTag, annotatedValues);
             return annotatedValues;
         }

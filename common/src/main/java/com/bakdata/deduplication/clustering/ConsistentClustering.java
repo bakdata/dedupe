@@ -26,6 +26,7 @@ package com.bakdata.deduplication.clustering;
 
 import com.bakdata.deduplication.candidate_selection.Candidate;
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -63,7 +64,7 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
 
     @Override
     public List<Cluster<C, T>> cluster(final List<ClassifiedCandidate<T>> classified) {
-        List<Cluster<C, T>> clusters = this.clustering.cluster(classified);
+        final List<Cluster<C, T>> clusters = this.clustering.cluster(classified);
         if (clusters.isEmpty()) {
             return clusters;
         }
@@ -71,11 +72,11 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
         if (clusters.size() == 1 && this.noRecordInIndex(clusters)) {
             return clusters;
         }
-        T firstElement = clusters.get(0).get(0);
-        List<Candidate<T>> candidates = clusters.stream()
+        final T firstElement = clusters.get(0).get(0);
+        final List<Candidate<T>> candidates = clusters.stream()
                 .flatMap(cluster -> cluster.getElements().stream().map(record -> new Candidate<>(firstElement, record)))
                 .collect(Collectors.toList());
-        List<Cluster<C, T>> transitiveClusters = this.getInternalClosure().clusterDuplicates(candidates);
+        final List<Cluster<C, T>> transitiveClusters = this.getInternalClosure().clusterDuplicates(candidates);
         if (transitiveClusters.size() != 1) {
             throw new IllegalStateException("Expected exactly one transitive cluster");
         }
@@ -91,8 +92,8 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
         return this.clustering.getClusterIdGenerator();
     }
 
-    private boolean noRecordInIndex(final List<Cluster<C, T>> clusters) {
-        Map<I, Cluster<C, T>> clusterIndex = this.getInternalClosure().getClusterIndex();
+    private boolean noRecordInIndex(final Collection<Cluster<C, T>> clusters) {
+        final Map<I, Cluster<C, T>> clusterIndex = this.getInternalClosure().getClusterIndex();
         return clusters.stream().flatMap(cluster -> cluster.getElements().stream())
                 .allMatch(record -> clusterIndex.get(this.idExtractor.apply(record)) == null);
     }

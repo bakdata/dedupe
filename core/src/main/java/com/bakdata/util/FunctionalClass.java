@@ -43,46 +43,46 @@ public class FunctionalClass<R> {
     @NonNull
     Class<R> clazz;
 
-    public static <T> FunctionalClass<T> from(Class<T> clazz) {
+    public static <T> FunctionalClass<T> from(final Class<T> clazz) {
         return new FunctionalClass<>(clazz);
     }
 
-    public <F> Field<R, F> field(String name) {
-        PropertyDescriptor descriptor = getPropertyDescriptor(name);
+    public <F> Field<R, F> field(final String name) {
+        final PropertyDescriptor descriptor = this.getPropertyDescriptor(name);
         return new Field<>(descriptor);
     }
 
     public Supplier<R> getConstructor() {
         try {
-            Constructor<R> ctor = clazz.getDeclaredConstructor();
+            final Constructor<R> ctor = this.clazz.getDeclaredConstructor();
             return new FunctionalConstructor<>(ctor)::invoke;
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    private PropertyDescriptor getPropertyDescriptor(String name) {
+    private PropertyDescriptor getPropertyDescriptor(final String name) {
         try {
-            return new PropertyDescriptor(name, clazz);
-        } catch (IntrospectionException e) {
+            return new PropertyDescriptor(name, this.clazz);
+        } catch (final IntrospectionException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     @Value
-    public static class Field<R, F> {
+    public static final class Field<R, F> {
 
         @NonNull
         PropertyDescriptor descriptor;
 
         public Function<R, F> getGetter() {
-            Method getter = descriptor.getReadMethod();
+            final Method getter = this.descriptor.getReadMethod();
             return new FunctionalMethod<>(getter)::invoke;
         }
 
         public BiConsumer<R, F> getSetter() {
-            Method setter = descriptor.getWriteMethod();
+            final Method setter = this.descriptor.getWriteMethod();
             return new FunctionalMethod<>(setter)::invoke;
         }
 

@@ -24,24 +24,24 @@
  */
 package com.bakdata.deduplication.fusion;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
 public class FusionException extends RuntimeException {
     public FusionException() {
     }
 
-    public FusionException(String message) {
+    public FusionException(final String message) {
         super(message);
     }
 
-    public FusionException(String message, Throwable cause) {
+    public FusionException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public FusionException(Throwable cause) {
+    public FusionException(final Throwable cause) {
         super(cause);
     }
 
-    public FusionException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public FusionException(final String message, final Throwable cause, final boolean enableSuppression,
+        final boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

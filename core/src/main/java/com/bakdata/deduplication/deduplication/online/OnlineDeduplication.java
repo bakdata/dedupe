@@ -24,6 +24,7 @@
  */
 package com.bakdata.deduplication.deduplication.online;
 
+@FunctionalInterface
 public interface OnlineDeduplication<T> {
     T deduplicate(T newRecord);
 }

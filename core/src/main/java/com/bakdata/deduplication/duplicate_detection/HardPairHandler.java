@@ -29,14 +29,15 @@ import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 import java.util.Optional;
 import java.util.function.Function;
 
+@FunctionalInterface
 public interface HardPairHandler<T> extends Function<ClassifiedCandidate<T>, Optional<ClassifiedCandidate<T>>> {
     static <T> HardPairHandler<T> ignore() {
         return classifiedCandidate -> Optional.empty();
     }
 
     @Override
-    default Optional<ClassifiedCandidate<T>> apply(ClassifiedCandidate<T> classifiedCandidate) {
-        return hardPairFound(classifiedCandidate);
+    default Optional<ClassifiedCandidate<T>> apply(final ClassifiedCandidate<T> classifiedCandidate) {
+        return this.hardPairFound(classifiedCandidate);
     }
 
     Optional<ClassifiedCandidate<T>> hardPairFound(ClassifiedCandidate<T> classifiedCandidate);

@@ -28,6 +28,7 @@ import com.bakdata.util.FunctionalClass;
 import com.bakdata.util.ObjectUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -66,7 +67,7 @@ public class ConflictResolutions {
 
         @Override
         public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<R>> annotatedValues, final FusionContext context) {
-            R r = this.ctor.get();
+            final R r = this.ctor.get();
             for (final FieldMerge<?, R> fieldMerge : this.fieldMerges) {
                 fieldMerge.mergeInto(r, annotatedValues, context);
             }
@@ -80,13 +81,13 @@ public class ConflictResolutions {
             @Wither
             ConflictResolution<T, T> resolution;
 
-            void mergeInto(final R r, final List<AnnotatedValue<R>> annotatedValues, final FusionContext context) {
-                List<AnnotatedValue<T>> fieldValues = annotatedValues.stream()
+            void mergeInto(final R r, final Collection<AnnotatedValue<R>> annotatedValues, final FusionContext context) {
+                final List<AnnotatedValue<T>> fieldValues = annotatedValues.stream()
                         .map(ar -> ar.withValue(this.getter.apply(ar.getValue())))
                         .filter(ar -> ObjectUtils.isNonEmpty(ar.getValue()))
                         .collect(Collectors.toList());
                 context.safeExecute(() -> {
-                    Optional<T> resolvedValue = this.resolution.resolve(fieldValues, context);
+                    final Optional<T> resolvedValue = this.resolution.resolve(fieldValues, context);
                     resolvedValue.ifPresent(v -> this.setter.accept(r, v));
                 });
             }
@@ -159,7 +160,7 @@ public class ConflictResolutions {
 
             @SuppressWarnings("unchecked")
             public AdditionalFieldMergeBuilder<F, R> correspondingToPrevious() {
-                var last = this.mergeBuilder.getLast();
+                final var last = this.mergeBuilder.getLast();
                 final ResolutionTag tag;
                 // auto tag previous merge if it is not tagged already
                 if (last.getResolution() instanceof CommonConflictResolutions.TaggedResolution) {

@@ -29,6 +29,7 @@ import com.bakdata.deduplication.classifier.Classification;
 import com.bakdata.deduplication.classifier.ClassifiedCandidate;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,15 +52,15 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
 
     @Override
     public List<Cluster<C, T>> cluster(final List<ClassifiedCandidate<T>> classified) {
-        List<Candidate<T>> duplicates = classified.stream()
+        final List<Candidate<T>> duplicates = classified.stream()
                 .filter(classifiedCandidate -> classifiedCandidate.getClassification().getResult() == Classification.ClassificationResult.DUPLICATE)
                 .map(ClassifiedCandidate::getCandidate)
                 .collect(Collectors.toList());
         return this.clusterDuplicates(duplicates);
     }
 
-    public List<Cluster<C, T>> clusterDuplicates(final List<Candidate<T>> duplicates) {
-        final List<Cluster<C, T>> changedClusters = new ArrayList<>();
+    public List<Cluster<C, T>> clusterDuplicates(final Iterable<Candidate<T>> duplicates) {
+        final Collection<Cluster<C, T>> changedClusters = new ArrayList<>();
 
         // apply in-memory transitive closure
         for (final Candidate<T> candidate : duplicates) {
@@ -84,7 +85,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
                 this.clusterIndex.put(this.idExtractor.apply(candidate.getOldRecord()), leftCluster);
                 changedClusters.add(leftCluster);
             } else { // merge
-                Cluster<C, T> merged = leftCluster.merge(this.clusterIdGenerator, rightCluster);
+                final Cluster<C, T> merged = leftCluster.merge(this.clusterIdGenerator, rightCluster);
                 for (final T person : merged.getElements()) {
                     this.clusterIndex.put(this.idExtractor.apply(person), merged);
                 }
@@ -101,11 +102,11 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
                 .collect(Collectors.toList());
     }
 
-    public void removeCluster(final Cluster<C, T> cluster) {
-        List<I> recordIds = cluster.getElements().stream()
+    public void removeCluster(final Cluster<C, ? extends T> cluster) {
+        final List<I> recordIds = cluster.getElements().stream()
             .map(this.idExtractor)
                 .collect(Collectors.toList());
-        Map<C, List<Cluster<C, T>>> referredCluster = recordIds.stream()
+        final Map<C, List<Cluster<C, T>>> referredCluster = recordIds.stream()
                 .map(this.clusterIndex::get)
                 .collect(Collectors.groupingBy(Cluster::getId));
         if (referredCluster.size() != 1 || !referredCluster.values().iterator().next().get(0).equals(cluster)) {

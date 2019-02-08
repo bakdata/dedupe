@@ -31,7 +31,7 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
     @Override
     public List<Cluster<C, T>> cluster(final List<ClassifiedCandidate<T>> classified) {
         return classified.stream()
-            .map(candidate -> this.getIdToCluster().get(idExtractor.apply(candidate.getCandidate().getOldRecord())))
+            .map(candidate -> this.getIdToCluster().get(this.idExtractor.apply(candidate.getCandidate().getOldRecord())))
                 .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());

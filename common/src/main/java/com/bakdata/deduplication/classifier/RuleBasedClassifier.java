@@ -77,18 +77,19 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     }
 
     private SimilarityException createException(final Candidate<T> candidate, final SimilarityContext context) {
-        SimilarityException fusionException = new SimilarityException("Could not classify candidate " + candidate,
+        final SimilarityException fusionException = new SimilarityException("Could not classify candidate " + candidate,
                 context.getExceptions().get(0));
         context.getExceptions().stream().skip(1).forEach(fusionException::addSuppressed);
         return fusionException;
     }
 
-    private Optional<Classification> evaluateRule(final Rule<T> rule, final Candidate<T> candidate, final SimilarityContext context) {
+    private Optional<Classification> evaluateRule(final Rule<? super T> rule, final Candidate<? extends T> candidate,
+        final SimilarityContext context) {
         return context.safeExecute(() -> rule.evaluate(candidate.getNewRecord(), candidate.getOldRecord(), context)).map(score -> {
             if (Float.isNaN(score)) {
                 return UNKNOWN;
             }
-            if (score <= -0f) {
+            if (score <= -0.0f) {
                 return Classification.builder()
                         .result(Classification.ClassificationResult.NON_DUPLICATE)
                         .confidence(-score)
@@ -123,8 +124,10 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
                     applicablePredicate.test(left, right) ? similarityMeasure.getSimilarity(left, right, context) : DOES_NOT_APPLY);
         }
 
-        public RuleBasedClassifierBuilder<T> negativeRule(final String name, final SimilarityMeasure<T> similarityMeasure) {
-            SimilarityMeasure<T> negativeSim = (left, right, context) -> -similarityMeasure.getSimilarity(left, right, context);
+        public RuleBasedClassifierBuilder<T> negativeRule(final String name,
+            final SimilarityMeasure<? super T> similarityMeasure) {
+            final SimilarityMeasure<T> negativeSim =
+                (left, right, context) -> -similarityMeasure.getSimilarity(left, right, context);
             return this.rule(new Rule<>(name, negativeSim.unknownIf(s -> s >= 0)));
         }
 
@@ -138,13 +141,13 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
         String name;
         SimilarityMeasure<T> measure;
 
-        float evaluate(final T left, final T right, final SimilarityContext context) {
-            return this.measure.getSimilarity(left, right, context);
+        @SuppressWarnings("SameReturnValue")
+        protected static float doesNotApply() {
+            return DOES_NOT_APPLY;
         }
 
-        @SuppressWarnings("SameReturnValue")
-        protected float doesNotApply() {
-            return DOES_NOT_APPLY;
+        float evaluate(final T left, final T right, final SimilarityContext context) {
+            return this.measure.getSimilarity(left, right, context);
         }
     }
 }

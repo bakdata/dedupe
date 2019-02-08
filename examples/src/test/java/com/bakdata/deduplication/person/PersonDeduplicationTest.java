@@ -24,11 +24,11 @@
  */
 package com.bakdata.deduplication.person;
 
-import com.bakdata.deduplication.duplicate_detection.HardPairHandler;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
+import com.bakdata.deduplication.duplicate_detection.HardPairHandler;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -38,33 +38,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.junit.jupiter.api.Test;
 
 class PersonDeduplicationTest {
     private static final DateTimeFormatter BDAY_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yy");
 
-    @Test
-    void testDeduplication() throws IOException {
-        final PersonDeduplication deduplication = new PersonDeduplication(HardPairHandler.ignore(), Optional::of);
-
-        // no fusion on the non-duplicated customers
-        for (Person customer : parseCsv("/customer.csv")) {
-            final Person fusedPerson = deduplication.deduplicate(customer);
-            assertSame(customer, fusedPerson);
-        }
-
-        for (Person customer : parseCsv("/exact_duplicates.csv")) {
-            final Person fusedPerson = deduplication.deduplicate(customer);
-            assertNotSame(customer, fusedPerson);
-            // should be the same except for fusion id
-            assertEquals(customer, fusedPerson.toBuilder().fusedIds(Set.of()).build());
-        }
-    }
-
-    private List<Person> parseCsv(String resourceName) throws IOException {
+    private static List<Person> parseCsv(final String resourceName) throws IOException {
         final CSVFormat format = CSVFormat.newFormat('\t').withFirstRecordAsHeader().withQuote('"');
-        try (var parser = CSVParser.parse(PersonDeduplicationTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8, format)) {
+        try (final var parser = CSVParser
+            .parse(PersonDeduplicationTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8, format)) {
             return parser.getRecords()
                     .stream()
                     .map(record -> Person.builder()
@@ -76,6 +60,24 @@ class PersonDeduplicationTest {
                             .lastModified(LocalDateTime.now())
                             .build())
                     .collect(Collectors.toList());
+        }
+    }
+
+    @Test
+    void testDeduplication() throws IOException {
+        final PersonDeduplication deduplication = new PersonDeduplication(HardPairHandler.ignore(), Optional::of);
+
+        // no fusion on the non-duplicated customers
+        for (final Person customer : PersonDeduplicationTest.parseCsv("/customer.csv")) {
+            final Person fusedPerson = deduplication.deduplicate(customer);
+            assertSame(customer, fusedPerson);
+        }
+
+        for (final Person customer : PersonDeduplicationTest.parseCsv("/exact_duplicates.csv")) {
+            final Person fusedPerson = deduplication.deduplicate(customer);
+            assertNotSame(customer, fusedPerson);
+            // should be the same except for fusion id
+            assertEquals(customer, fusedPerson.toBuilder().fusedIds(Set.of()).build());
         }
     }
 }

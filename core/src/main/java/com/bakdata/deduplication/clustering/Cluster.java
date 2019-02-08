@@ -24,15 +24,14 @@
  */
 package com.bakdata.deduplication.clustering;
 
-import lombok.Builder;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import lombok.Builder;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
 @Value
 @RequiredArgsConstructor
@@ -40,26 +39,26 @@ import java.util.function.Function;
 public class Cluster<C extends Comparable<C>, T> {
     @SuppressWarnings("squid:S4276")
     private static final Function<Iterable<?>, Integer> INT_GENERATOR = new Function<>() {
-        private final AtomicInteger id = new AtomicInteger();
+        private final AtomicInteger nextId = new AtomicInteger();
 
         @Override
-        public Integer apply(Iterable<?> objects) {
-            return id.getAndIncrement();
+        public Integer apply(final Iterable<?> objects) {
+            return this.nextId.getAndIncrement();
         }
     };
     @SuppressWarnings("squid:S4276")
     private static final Function<Iterable<?>, Long> LONG_GENERATOR = new Function<>() {
-        private final AtomicLong id = new AtomicLong();
+        private final AtomicLong nextId = new AtomicLong();
 
         @Override
-        public Long apply(Iterable<?> objects) {
-            return id.getAndIncrement();
+        public Long apply(final Iterable<?> objects) {
+            return this.nextId.getAndIncrement();
         }
     };
     C id;
     List<T> elements;
 
-    public Cluster(C id) {
+    public Cluster(final C id) {
         this(id, new ArrayList<>());
     }
 
@@ -73,27 +72,27 @@ public class Cluster<C extends Comparable<C>, T> {
         return (Function) LONG_GENERATOR;
     }
 
-    public void add(T record) {
-        elements.add(record);
+    public void add(final T record) {
+        this.elements.add(record);
     }
 
     public int size() {
-        return elements.size();
+        return this.elements.size();
     }
 
-    public T get(int index) {
-        return elements.get(index);
+    public T get(final int index) {
+        return this.elements.get(index);
     }
 
-    public boolean contains(T record) {
+    public boolean contains(final T record) {
         return this.elements.contains(record);
     }
 
-    public Cluster<C, T> merge(Function<Iterable<T>, C> idGenerator, Cluster<C, T> other) {
+    public Cluster<C, T> merge(final Function<Iterable<T>, ? extends C> idGenerator, final Cluster<C, ? extends T> other) {
         if (other == this) {
             return this;
         }
-        final List<T> concatElements = new ArrayList<>(elements);
+        final List<T> concatElements = new ArrayList<>(this.elements);
         concatElements.addAll(other.getElements());
         return new Cluster<>(idGenerator.apply(concatElements), concatElements);
     }

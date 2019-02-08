@@ -36,8 +36,8 @@ public class PersonDeduplication implements OnlineDeduplication<Person> {
     @Delegate()
     OnlinePairBasedDeduplication<Person> deduplication;
 
-    public PersonDeduplication(HardPairHandler<Person> hardPairHandler,
-                               HardFusionHandler<Person> hardFusionHandler) {
+    public PersonDeduplication(final HardPairHandler<Person> hardPairHandler,
+                               final HardFusionHandler<Person> hardFusionHandler) {
         this.deduplication = OnlinePairBasedDeduplication.<Person>builder()
                 .classifier(new PersonClassifier())
                 .candidateSelection(new PersonCandidateSelection())

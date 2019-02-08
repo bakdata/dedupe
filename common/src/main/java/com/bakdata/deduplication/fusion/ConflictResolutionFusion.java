@@ -54,17 +54,17 @@ public class ConflictResolutionFusion<T> implements Fusion<T> {
         if (cluster.size() < 2) {
             return new FusedValue<>(cluster.get(0), cluster, List.of());
         }
-        List<AnnotatedValue<T>> conflictingValues = cluster.getElements().stream()
+        final List<AnnotatedValue<T>> conflictingValues = cluster.getElements().stream()
                 .map(e -> new AnnotatedValue<>(e, this.getSource(e), this.lastModifiedExtractor.apply(e)))
                 .collect(Collectors.toList());
-        FusionContext context = new FusionContext();
-        T resolvedValue = context.safeExecute(() -> this.rootResolution.resolve(conflictingValues, context)).flatMap(r -> r)
+        final FusionContext context = new FusionContext();
+        final T resolvedValue = context.safeExecute(() -> this.rootResolution.resolve(conflictingValues, context)).flatMap(r -> r)
                 .orElseThrow(() -> this.createException(conflictingValues, context));
         return new FusedValue<>(resolvedValue, cluster, context.getExceptions());
     }
 
     private FusionException createException(final List<AnnotatedValue<T>> conflictingValues, final FusionContext context) {
-        FusionException fusionException = new FusionException("Could not resolve conflict in " + conflictingValues,
+        final FusionException fusionException = new FusionException("Could not resolve conflict in " + conflictingValues,
                 context.getExceptions().get(0));
         context.getExceptions().stream().skip(1).forEach(fusionException::addSuppressed);
         return fusionException;

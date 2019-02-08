@@ -50,10 +50,10 @@ public class PersonFusion implements Fusion<Person> {
     Fusion<Person> fusion = ConflictResolutionFusion.<Person>builder()
             .sourceExtractor(Person::getSource)
             .lastModifiedExtractor(Person::getLastModified)
-            .rootResolution(personMerge)
+            .rootResolution(this.personMerge)
             .build();
 
-    private static Set<String> fusionIdWithPersonId(Person p) {
+    private static Set<String> fusionIdWithPersonId(final Person p) {
         if (p.getFusedIds().isEmpty()) {
             return Set.of(p.getId());
         }

@@ -29,14 +29,15 @@ import com.bakdata.deduplication.fusion.FusedValue;
 import java.util.Optional;
 import java.util.function.Function;
 
+@FunctionalInterface
 public interface HardFusionHandler<T> extends Function<FusedValue<T>, Optional<FusedValue<T>>> {
     static <T> HardFusionHandler<T> dontFuse() {
         return partiallyFusedValue -> Optional.empty();
     }
 
     @Override
-    default Optional<FusedValue<T>> apply(FusedValue<T> partiallyFusedValue) {
-        return handlePartiallyFusedValue(partiallyFusedValue);
+    default Optional<FusedValue<T>> apply(final FusedValue<T> partiallyFusedValue) {
+        return this.handlePartiallyFusedValue(partiallyFusedValue);
     }
 
     Optional<FusedValue<T>> handlePartiallyFusedValue(FusedValue<T> partiallyFusedValue);

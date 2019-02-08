@@ -26,13 +26,13 @@ package com.bakdata.deduplication.similarity;
 
 import java.util.Objects;
 
+@FunctionalInterface
 public interface SimilarityTransformation<T, R> {
-    @SuppressWarnings("squid:S00112")
     R transform(T t, SimilarityContext context) throws Exception;
 
-    default <V> SimilarityTransformation<T, V> andThen(SimilarityTransformation<? super R, ? extends V> after) {
+    default <V> SimilarityTransformation<T, V> andThen(final SimilarityTransformation<? super R, ? extends V> after) {
         Objects.requireNonNull(after);
-        var thisTransformation = this;
+        final var thisTransformation = this;
         return (t, context) -> after.transform(thisTransformation.transform(t, context), context);
     }
 }

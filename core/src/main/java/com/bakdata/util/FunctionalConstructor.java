@@ -38,12 +38,12 @@ public class FunctionalConstructor<T> {
     Constructor<T> ctor;
 
     @SneakyThrows
-    public T invoke(Object... params) {
+    public T invoke(final Object... params) {
         try {
-            return ctor.newInstance(params);
-        } catch (InstantiationException | IllegalAccessException e) {
+            return this.ctor.newInstance(params);
+        } catch (final InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
-        } catch (InvocationTargetException e) {
+        } catch (final InvocationTargetException e) {
             throw e.getCause();
         }
     }

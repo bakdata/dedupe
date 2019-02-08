@@ -48,18 +48,18 @@ public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> imple
     HardPairHandler<T> hardPairHandler = HardPairHandler.ignore();
 
     @Override
-    public List<Cluster<C, T>> deduplicate(T newRecord) {
-        var classified = candidateSelection.getCandidates(newRecord)
+    public List<Cluster<C, T>> detectDuplicates(final T newRecord) {
+        final var classified = this.candidateSelection.getCandidates(newRecord)
                 .stream()
-                .map(candidate -> new ClassifiedCandidate<>(candidate, classifier.classify(candidate)))
+                .map(candidate -> new ClassifiedCandidate<>(candidate, this.classifier.classify(candidate)))
                 .collect(Collectors.toList());
 
-        var handledPairs = classified.stream()
+        final var handledPairs = classified.stream()
                 .flatMap(cc -> cc.getClassification().getResult() == Classification.ClassificationResult.POSSIBLE_DUPLICATE ?
-                        hardPairHandler.apply(cc).stream() :
+                    this.hardPairHandler.apply(cc).stream() :
                         Stream.of(cc))
                 .collect(Collectors.toList());
 
-        return clustering.cluster(handledPairs);
+        return this.clustering.cluster(handledPairs);
     }
 }

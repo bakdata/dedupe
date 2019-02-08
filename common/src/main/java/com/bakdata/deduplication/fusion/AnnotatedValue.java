@@ -29,7 +29,6 @@ import lombok.Value;
 
 @Value
 public class AnnotatedValue<T> {
-
     T value;
     Source source;
     LocalDateTime dateTime;

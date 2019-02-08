@@ -31,7 +31,7 @@ public class Candidate<T> {
     T newRecord;
     T oldRecord;
 
-    public static <T extends Comparable<? super T>> Candidate<T> normalized(T record1, T record2) {
+    public static <T extends Comparable<? super T>> Candidate<T> normalized(final T record1, final T record2) {
         if(record1.compareTo(record2) <= 0) {
             return new Candidate<>(record1, record2);
         }
