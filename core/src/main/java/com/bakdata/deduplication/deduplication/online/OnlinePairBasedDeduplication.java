@@ -29,9 +29,9 @@ import com.bakdata.deduplication.deduplication.HardFusionHandler;
 import com.bakdata.deduplication.duplicate_detection.online.OnlineDuplicateDetection;
 import com.bakdata.deduplication.fusion.FusedValue;
 import com.bakdata.deduplication.fusion.Fusion;
-import com.google.common.collect.MoreCollectors;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Value;
 
@@ -50,10 +50,14 @@ public class OnlinePairBasedDeduplication<T> implements OnlineDeduplication<T> {
             return newRecord;
         }
 
-        final Cluster<?, T> mainCluster =
-            clusters.stream().filter(c -> c.contains(newRecord)).collect(MoreCollectors.onlyElement());
+        final List<? extends Cluster<?, T>> mainClusters =
+            clusters.stream().filter(c -> c.contains(newRecord)).collect(Collectors.toList());
+        if (mainClusters.size() != 1) {
+            throw new IllegalStateException(
+                "Expected exactly one cluster with the new record, but received " + clusters);
+        }
 
-        return Optional.of(this.fusion.fuse(mainCluster))
+        return Optional.of(this.fusion.fuse(mainClusters.get(0)))
             .flatMap(this.hardFusionHandler::handlePartiallyFusedValue)
                 .map(FusedValue::getValue)
                 .orElse(newRecord);
