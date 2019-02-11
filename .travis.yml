@@ -48,20 +48,17 @@ matrix:
       if: tag =~ ^\d+\.\d+\.\d+$
       script:
         - ./gradlew publishToNexus closeAndReleaseRepository -x test --stacktrace
-before_deploy:
-  - ./gradlew generateChangelog -Pchangelog.releaseVersion=${TRAVIS_TAG} -Pchangelog.sinceTag=${TRAVIS_TAG}
-  - brew install jshon
-  - export BODY=$(jshon -s "$(cat CHANGELOG.md)"))
 deploy:
   provider: releases
   api_key: ${GITHUB_TOKEN}
   file_glob: true
   file: "**/build/libs/*.jar"
   name: "Release ${TRAVIS_TAG}"
-  body: ${BODY}
   skip_cleanup: true
   on:
     tags: true
+after_deploy:
+  - travis/github_release.sh
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -69,6 +66,6 @@ cache:
   directories:
     - "$HOME/.m2/repository"
     - "$HOME/.sonar/cache"
-    - "$HOME/.gradle"
-    - "$HOME/.sonar"
+    - "$HOME/.gradle/caches/"
+    - "$HOME/.gradle/wrapper/"
     - ".gradle"
