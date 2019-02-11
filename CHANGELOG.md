@@ -1,6 +1,7 @@
 # Change Log
 
-## Unreleased (2019-02-11)
+## [1.1.0](https://github.com/bakdata/dedupe/tree/1.1.0) (2019-02-11)
+[Full Changelog](https://github.com/bakdata/dedupe/compare/1.0.1...1.1.0)
 
 **Implemented enhancements:**
 
