@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.candidate_selection.online;
 
@@ -46,7 +45,8 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
     int defaultWindowSize = 10;
 
     public List<Candidate<T>> getCandidates(final T newRecord) {
-        return this.passes.stream().flatMap(pass -> pass.getCandidates(newRecord).stream()).distinct().collect(Collectors.toList());
+        return this.passes.stream().flatMap(pass -> pass.getCandidates(newRecord).stream()).distinct()
+                .collect(Collectors.toList());
     }
 
     @Value
@@ -58,14 +58,14 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
 
         List<Candidate<T>> getCandidates(final T newRecord) {
             final Comparable<?> newKey = this.sortingKey.getKeyExtractor().apply(newRecord);
-            if(newKey == null) {
+            if (newKey == null) {
                 return List.of();
             }
             final Stream<T> largerRecords = this.index.tailMap(newKey).values().stream().flatMap(List::stream).limit(
-                this.windowSize / 2);
+                    this.windowSize / 2);
             final Stream<T> smallerRecords =
-                this.index.descendingMap().tailMap(newKey).values().stream().flatMap(List::stream).limit(
-                this.windowSize / 2);
+                    this.index.descendingMap().tailMap(newKey).values().stream().flatMap(List::stream).limit(
+                            this.windowSize / 2);
             final List<Candidate<T>> candidates = Stream.concat(smallerRecords, largerRecords)
                     .map(oldRecord -> new Candidate<>(newRecord, oldRecord))
                     .collect(Collectors.toList());
@@ -77,7 +77,8 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
     @SuppressWarnings({"WeakerAccess", "unused"})
     public static class OnlineSortedNeighborhoodMethodBuilder<T> {
 
-        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKey(final SortingKey<T> sortingKey, final int windowSize) {
+        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKey(final SortingKey<T> sortingKey,
+                final int windowSize) {
             return this.pass(new Pass<>(sortingKey, windowSize));
         }
 
@@ -90,7 +91,7 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
         }
 
         public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(final Iterable<SortingKey<T>> sortingKeys,
-            final int windowSize) {
+                final int windowSize) {
             for (final SortingKey<T> sortingKey : sortingKeys) {
                 this.sortingKey(sortingKey, windowSize);
             }

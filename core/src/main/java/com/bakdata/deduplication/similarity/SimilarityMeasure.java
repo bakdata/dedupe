@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,11 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.similarity;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
-import lombok.Value;
 
 @FunctionalInterface
 public interface SimilarityMeasure<T> {
@@ -40,7 +38,7 @@ public interface SimilarityMeasure<T> {
     }
 
     static float scaleWithThreshold(final float similarity, final float min) {
-        if(similarity >= min) {
+        if (similarity >= min) {
             return (similarity - min) / (1 - min);
         }
         return -(min - similarity) / min;
@@ -82,26 +80,4 @@ public interface SimilarityMeasure<T> {
         };
     }
 
-    @Value
-    class CutoffSimiliarityMeasure<T> implements SimilarityMeasure<T> {
-        SimilarityMeasure<T> inner;
-        float threshold;
-
-        protected static float cutoff(final float similarity, final float min) {
-            return similarity < min ? 0 : similarity;
-        }
-
-        @Override
-        public float getSimilarity(final T left, final T right, final SimilarityContext context) {
-            return cutoff(this.inner.getSimilarity(left, right, context), this.threshold);
-        }
-
-        @Override
-        public SimilarityMeasure<T> cutoff(final float threshold) {
-            if (threshold < this.threshold) {
-                return this;
-            }
-            return new CutoffSimiliarityMeasure<>(this.inner, threshold);
-        }
-    }
 }

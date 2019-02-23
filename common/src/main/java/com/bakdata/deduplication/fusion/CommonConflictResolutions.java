@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.fusion;
 
@@ -55,7 +54,8 @@ public class CommonConflictResolutions {
         });
     }
 
-    public static <T> ConflictResolution<T, T> saveAs(final ConflictResolution<T, T> resolution, final ResolutionTag<T> resolutionTag) {
+    public static <T> ConflictResolution<T, T> saveAs(final ConflictResolution<T, T> resolution,
+            final ResolutionTag<T> resolutionTag) {
         return new TaggedResolution<>(resolution, resolutionTag);
     }
 
@@ -69,7 +69,8 @@ public class CommonConflictResolutions {
 
     public static <T extends Comparable<? super T>> ConflictResolution<T, T> max() {
         return ((values, context) -> values.stream().max(comparator())
-                .map(max -> values.stream().filter(v -> v.getValue().equals(max.getValue())).collect(Collectors.toList()))
+                .map(max -> values.stream().filter(v -> v.getValue().equals(max.getValue()))
+                        .collect(Collectors.toList()))
                 .orElse(List.of()));
     }
 
@@ -91,7 +92,8 @@ public class CommonConflictResolutions {
     }
 
     public static <T extends Number> TerminalConflictResolution<T, T> random() {
-        return ((values, context) -> values.isEmpty() ? Optional.empty() : Optional.of(values.get(random.nextInt(values.size()))));
+        return ((values, context) -> values.isEmpty() ? Optional.empty()
+                : Optional.of(values.get(random.nextInt(values.size()))));
     }
 
     public static <T> TerminalConflictResolution<T, T> first() {
@@ -119,20 +121,23 @@ public class CommonConflictResolutions {
             final List<AnnotatedValue<T>> sorted = new ArrayList<>(values);
             sorted.sort(comparator());
             // create copy of list of median value(s), such that original list is not referenced anymore
-            return List.copyOf(sorted.subList((int) Math.floor(sorted.size() / 2.0), (int) Math.ceil(sorted.size() / 2.0)));
+            return List.copyOf(sorted
+                    .subList((int) Math.floor(sorted.size() / 2.0), (int) Math.ceil(sorted.size() / 2.0)));
         });
     }
 
     public static <T extends CharSequence> ConflictResolution<T, T> shortest() {
         return ((values, context) -> values.isEmpty() ? values :
-                values.stream().collect(Collectors.groupingBy(v -> v.getValue().length(), TreeMap::new, Collectors.toList()))
+                values.stream()
+                        .collect(Collectors.groupingBy(v -> v.getValue().length(), TreeMap::new, Collectors.toList()))
                         .firstEntry()
                         .getValue());
     }
 
     public static <T extends CharSequence> ConflictResolution<T, T> longest() {
         return ((values, context) -> values.isEmpty() ? values :
-                values.stream().collect(Collectors.groupingBy(v -> v.getValue().length(), TreeMap::new, Collectors.toList()))
+                values.stream()
+                        .collect(Collectors.groupingBy(v -> v.getValue().length(), TreeMap::new, Collectors.toList()))
                         .lastEntry()
                         .getValue());
     }
@@ -142,7 +147,8 @@ public class CommonConflictResolutions {
                 values.stream().collect(Collectors.groupingBy(AnnotatedValue::getValue))
                         .entrySet()
                         .stream()
-                        .collect(Collectors.groupingBy(entry -> entry.getValue().size(), TreeMap::new, Collectors.toList()))
+                        .collect(Collectors
+                                .groupingBy(entry -> entry.getValue().size(), TreeMap::new, Collectors.toList()))
                         .lastEntry()
                         .getValue()
                         .stream()
@@ -152,14 +158,16 @@ public class CommonConflictResolutions {
 
     public static <T> ConflictResolution<T, T> earliest() {
         return ((values, context) -> values.isEmpty() ? values :
-                values.stream().collect(Collectors.groupingBy(AnnotatedValue::getDateTime, TreeMap::new, Collectors.toList()))
+                values.stream()
+                        .collect(Collectors.groupingBy(AnnotatedValue::getDateTime, TreeMap::new, Collectors.toList()))
                         .firstEntry()
                         .getValue());
     }
 
     public static <T> ConflictResolution<T, T> latest() {
         return ((values, context) -> values.isEmpty() ? values :
-                values.stream().collect(Collectors.groupingBy(AnnotatedValue::getDateTime, TreeMap::new, Collectors.toList()))
+                values.stream()
+                        .collect(Collectors.groupingBy(AnnotatedValue::getDateTime, TreeMap::new, Collectors.toList()))
                         .lastEntry()
                         .getValue());
     }
@@ -201,7 +209,7 @@ public class CommonConflictResolutions {
     }
 
     public static <E, T extends Collection<E>, R extends Collection<E>> TerminalConflictResolution<T, R> unionAll(
-        final Supplier<? extends R> ctor) {
+            final Supplier<? extends R> ctor) {
         return (annotatedValues, context) -> {
             final R collection = ctor.get();
             for (final AnnotatedValue<T> annotatedValue : annotatedValues) {
@@ -223,7 +231,8 @@ public class CommonConflictResolutions {
 
     public static <T extends Comparable<T>> ConflictResolution<T, T> min() {
         return ((values, context) -> values.stream().min(comparator())
-                .map(min -> values.stream().filter(v -> v.getValue().equals(min.getValue())).collect(Collectors.toList()))
+                .map(min -> values.stream().filter(v -> v.getValue().equals(min.getValue()))
+                        .collect(Collectors.toList()))
                 .orElse(List.of()));
     }
 
@@ -233,7 +242,8 @@ public class CommonConflictResolutions {
         private final ResolutionTag<R> resolutionTag;
 
         @Override
-        public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> values, final FusionContext context) {
+        public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> values,
+                final FusionContext context) {
             final List<AnnotatedValue<R>> annotatedValues = this.resolution.resolvePartially(values, context);
             context.storeValues(this.resolutionTag, annotatedValues);
             return annotatedValues;

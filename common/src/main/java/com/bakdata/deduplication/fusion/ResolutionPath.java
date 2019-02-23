@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.fusion;
 
@@ -37,11 +36,12 @@ public class ResolutionPath<T, R> implements ConflictResolution<T, R> {
     ConflictResolution<R, R> resolution;
 
     @Override
-    public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> annotatedValues, final FusionContext context) {
+    public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> annotatedValues,
+            final FusionContext context) {
         final List<AnnotatedValue<R>> fieldValues = annotatedValues.stream()
-            .map(ar -> ar.withValue(this.extractor.apply(ar.getValue())))
-            .filter(ar -> isNonEmpty(ar.getValue()))
-            .collect(Collectors.toList());
+                .map(ar -> ar.withValue(this.extractor.apply(ar.getValue())))
+                .filter(ar -> isNonEmpty(ar.getValue()))
+                .collect(Collectors.toList());
         return this.resolution.resolvePartially(fieldValues, context);
     }
 }

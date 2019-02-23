@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.classifier;
 
@@ -36,16 +35,21 @@ import lombok.Singular;
 import lombok.Value;
 
 /**
- * Successively applies a list of rules to the record and returns the respective {@link Classification} with the following cases:
+ * Successively applies a list of rules to the record and returns the respective {@link Classification} with the
+ * following cases:
  * <ul>
- * <li>If any rule classifies the pair unambiguously as {@link Classification.ClassificationResult#DUPLICATE} or {@link Classification.ClassificationResult#NON_DUPLICATE}, the classification is immediately returned.</li>
- * <li>If some rule classifies the pair as {@link Classification.ClassificationResult#POSSIBLE_DUPLICATE}, the remaining rules with be evaluated to see if an unambiguous classification will be reached, in which case that classification is returned. If the results are only ambiguous, the last {@code POSSIBLE_DUPLICATE} classification will be returned.</li>
+ * <li>If any rule classifies the pair unambiguously as {@link Classification.ClassificationResult#DUPLICATE} or {@link
+ * Classification.ClassificationResult#NON_DUPLICATE}, the classification is immediately returned.</li>
+ * <li>If some rule classifies the pair as {@link Classification.ClassificationResult#POSSIBLE_DUPLICATE}, the
+ * remaining
+ * rules with be evaluated to see if an unambiguous classification will be reached, in which case that classification is
+ * returned. If the results are only ambiguous, the last {@code POSSIBLE_DUPLICATE} classification will be
+ * returned.</li>
  * <li>If no rule can be applied, the result is {@link #UNKNOWN}.</li>
  * </ul>
  * <br>
- * The {@code Classification} will contain a description naming the triggered rule and converts the rule score into a confidence score.
- *
- * @param <T>
+ * The {@code Classification} will contain a description naming the triggered rule and converts the rule score into a
+ * confidence score.
  */
 @Value
 @Builder
@@ -84,50 +88,56 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     }
 
     private Optional<Classification> evaluateRule(final Rule<? super T> rule, final Candidate<? extends T> candidate,
-        final SimilarityContext context) {
-        return context.safeExecute(() -> rule.evaluate(candidate.getNewRecord(), candidate.getOldRecord(), context)).map(score -> {
-            if (Float.isNaN(score)) {
-                return UNKNOWN;
-            }
-            if (score <= -0.0f) {
-                return Classification.builder()
-                        .result(Classification.ClassificationResult.NON_DUPLICATE)
-                        .confidence(-score)
-                        .explanation(rule.getName())
-                        .build();
-            } else {
-                return Classification.builder()
-                        .result(Classification.ClassificationResult.DUPLICATE)
-                        .confidence(score)
-                        .explanation(rule.getName())
-                        .build();
-            }
-        });
+            final SimilarityContext context) {
+        return context.safeExecute(() -> rule.evaluate(candidate.getNewRecord(), candidate.getOldRecord(), context))
+                .map(score -> {
+                    if (Float.isNaN(score)) {
+                        return UNKNOWN;
+                    }
+                    if (score <= -0.0f) {
+                        return Classification.builder()
+                                .result(Classification.ClassificationResult.NON_DUPLICATE)
+                                .confidence(-score)
+                                .explanation(rule.getName())
+                                .build();
+                    } else {
+                        return Classification.builder()
+                                .result(Classification.ClassificationResult.DUPLICATE)
+                                .confidence(score)
+                                .explanation(rule.getName())
+                                .build();
+                    }
+                });
     }
 
     @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
     public static class RuleBasedClassifierBuilder<T> {
 
-        public RuleBasedClassifierBuilder<T> positiveRule(final String name, final BiPredicate<T, T> applicablePredicate,
-                                                          final SimilarityMeasure<T> similarityMeasure) {
+        public RuleBasedClassifierBuilder<T> positiveRule(final String name,
+                final BiPredicate<T, T> applicablePredicate,
+                final SimilarityMeasure<T> similarityMeasure) {
             return this.positiveRule(name, (left, right, context) ->
-                    applicablePredicate.test(left, right) ? similarityMeasure.getSimilarity(left, right, context) : DOES_NOT_APPLY);
+                    applicablePredicate.test(left, right) ? similarityMeasure.getSimilarity(left, right, context)
+                            : DOES_NOT_APPLY);
         }
 
-        public RuleBasedClassifierBuilder<T> positiveRule(final String name, final SimilarityMeasure<T> similarityMeasure) {
+        public RuleBasedClassifierBuilder<T> positiveRule(final String name,
+                final SimilarityMeasure<T> similarityMeasure) {
             return this.rule(new Rule<>(name, similarityMeasure.unknownIf(s -> s <= 0)));
         }
 
-        public RuleBasedClassifierBuilder<T> negativeRule(final String name, final BiPredicate<T, T> applicablePredicate,
-                                                          final SimilarityMeasure<T> similarityMeasure) {
+        public RuleBasedClassifierBuilder<T> negativeRule(final String name,
+                final BiPredicate<T, T> applicablePredicate,
+                final SimilarityMeasure<T> similarityMeasure) {
             return this.negativeRule(name, (left, right, context) ->
-                    applicablePredicate.test(left, right) ? similarityMeasure.getSimilarity(left, right, context) : DOES_NOT_APPLY);
+                    applicablePredicate.test(left, right) ? similarityMeasure.getSimilarity(left, right, context)
+                            : DOES_NOT_APPLY);
         }
 
         public RuleBasedClassifierBuilder<T> negativeRule(final String name,
-            final SimilarityMeasure<? super T> similarityMeasure) {
+                final SimilarityMeasure<? super T> similarityMeasure) {
             final SimilarityMeasure<T> negativeSim =
-                (left, right, context) -> -similarityMeasure.getSimilarity(left, right, context);
+                    (left, right, context) -> -similarityMeasure.getSimilarity(left, right, context);
             return this.rule(new Rule<>(name, negativeSim.unknownIf(s -> s >= 0)));
         }
 

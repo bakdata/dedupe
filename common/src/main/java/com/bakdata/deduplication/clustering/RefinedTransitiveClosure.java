@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.clustering;
 
@@ -38,7 +37,8 @@ import lombok.Value;
 
 @Value
 @Builder
-public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>> implements Clustering<C, T> {
+public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>>
+        implements Clustering<C, T> {
     @NonNull
     RefineCluster<C, T> refineCluster;
 
@@ -53,12 +53,12 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
 
     @java.beans.ConstructorProperties({"refineCluster", "oldClusterIndex", "closure", "idExtractor"})
     RefinedTransitiveClosure(final @NonNull RefineCluster<C, T> refineCluster,
-        final Map<I, Cluster<C, T>> oldClusterIndex, final TransitiveClosure<C, T, I> closure,
-        final @NonNull Function<? super T, ? extends I> idExtractor) {
+            final Map<I, Cluster<C, T>> oldClusterIndex, final TransitiveClosure<C, T, I> closure,
+            final @NonNull Function<? super T, ? extends I> idExtractor) {
         this.refineCluster = refineCluster;
         this.oldClusterIndex = oldClusterIndex != null ? oldClusterIndex : new HashMap<>();
         this.closure = closure != null ? closure
-            : new TransitiveClosure<>(idExtractor, refineCluster.getClusterIdGenerator(), new HashMap<>());
+                : new TransitiveClosure<>(idExtractor, refineCluster.getClusterIdGenerator(), new HashMap<>());
         this.idExtractor = idExtractor;
     }
 

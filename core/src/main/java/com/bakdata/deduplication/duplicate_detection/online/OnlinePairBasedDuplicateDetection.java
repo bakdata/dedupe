@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.duplicate_detection.online;
 
@@ -58,8 +57,9 @@ public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> imple
                 .collect(Collectors.toList());
 
         final var handledPairs = classified.stream()
-                .flatMap(cc -> cc.getClassification().getResult() == Classification.ClassificationResult.POSSIBLE_DUPLICATE ?
-                    this.hardPairHandler.apply(cc).stream() :
+                .flatMap(cc -> cc.getClassification().getResult()
+                        == Classification.ClassificationResult.POSSIBLE_DUPLICATE ?
+                        this.hardPairHandler.apply(cc).stream() :
                         Stream.of(cc))
                 .collect(Collectors.toList());
 

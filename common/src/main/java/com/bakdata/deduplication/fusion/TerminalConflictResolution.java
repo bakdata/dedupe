@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.fusion;
 
@@ -29,7 +28,8 @@ import java.util.Optional;
 
 @FunctionalInterface
 public interface TerminalConflictResolution<T, R> extends ConflictResolution<T, R> {
-    default List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> values, final FusionContext context) {
+    default List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> values,
+            final FusionContext context) {
         return this.resolveFully(values, context).map(List::of).orElse(List.of());
     }
 

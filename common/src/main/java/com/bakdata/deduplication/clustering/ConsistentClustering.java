@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.clustering;
 
@@ -38,21 +37,23 @@ import lombok.NonNull;
 import lombok.Value;
 
 /**
- * Wraps another clustering and keeps clusters together, when the wrapped clustering would split it.<br>
- * Example: consider a stable marriage-based clustering where A1-B have been previously matched and subsequently clustered.
- * If a strong A2-B would replace that pair and thus split the cluster, this consistent clustering returns a cluster [A1, A2, B] instead.<br>
+ * Wraps another clustering and keeps clusters together, when the wrapped clustering would split it.<br> Example:
+ * consider a stable marriage-based clustering where A1-B have been previously matched and subsequently clustered. If a
+ * strong A2-B would replace that pair and thus split the cluster, this consistent clustering returns a cluster [A1, A2,
+ * B] instead.<br>
  * <p>
- * This clustering is similar to {@link TransitiveClosure} but allows the wrapped clustering to split temporary (=not-returned) clusters. Thus, in the example above, we have the following two situations:
- * - If A1-B and A2-B would be passed in the same invocation of {@link #cluster(List)}, only cluster [A2, B] would be returned.
- * - If A-B is passed in a first invocation, this invocation returns [A1, B]. The following invocation with A2-B would then return [A1, A2, B].
+ * This clustering is similar to {@link TransitiveClosure} but allows the wrapped clustering to split temporary
+ * (=not-returned) clusters. Thus, in the example above, we have the following two situations: - If A1-B and A2-B would
+ * be passed in the same invocation of {@link #cluster(List)}, only cluster [A2, B] would be returned. - If A-B is
+ * passed in a first invocation, this invocation returns [A1, B]. The following invocation with A2-B would then return
+ * [A1, A2, B].
  * </p>
  * It thus trades off clustering accuracy to increase reliability of subsequent data processing.
- *
- * @param <T>
  */
 @Value
 @Builder
-public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparable<? super I>> implements Clustering<C, T> {
+public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparable<? super I>>
+        implements Clustering<C, T> {
     @NonNull
     Clustering<C, T> clustering;
     Function<T, I> idExtractor;

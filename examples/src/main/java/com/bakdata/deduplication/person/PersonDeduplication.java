@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.person;
 
@@ -37,9 +36,9 @@ public class PersonDeduplication implements OnlineDeduplication<Person> {
     OnlineDeduplication<Person> deduplication;
 
     public PersonDeduplication(final HardPairHandler<Person> hardPairHandler,
-                               final HardFusionHandler<Person> hardFusionHandler) {
+            final HardFusionHandler<Person> hardFusionHandler) {
         this.deduplication = OnlinePairBasedDeduplication.<Person>builder()
-            .duplicateDetection(new PersonDuplicateDetection(hardPairHandler))
+                .duplicateDetection(new PersonDuplicateDetection(hardPairHandler))
                 .fusion(new PersonFusion())
                 .hardFusionHandler(hardFusionHandler)
                 .build();

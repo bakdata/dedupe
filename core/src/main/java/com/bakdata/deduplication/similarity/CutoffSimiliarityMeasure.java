@@ -21,41 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.bakdata.deduplication;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import lombok.Getter;
+package com.bakdata.deduplication.similarity;
+
 import lombok.Value;
-import lombok.extern.java.Log;
 
 @Value
-@Log
-public class ExceptionContext {
-    @Getter
-    private final List<Exception> exceptions = new ArrayList<>();
+public class CutoffSimiliarityMeasure<T> implements SimilarityMeasure<T> {
+    SimilarityMeasure<T> inner;
+    float threshold;
 
-    @SuppressWarnings("unused")
-    public <T> Optional<T> safeExecute(final Callable<? extends T> function) {
-        try {
-            return Optional.of(function.call());
-        } catch (final Exception e) {
-            log.log(Level.FINE, "Suppressing exception", e);
-            this.exceptions.add(e);
-            return Optional.empty();
-        }
+    protected static float cutoff(final float similarity, final float min) {
+        return similarity < min ? 0 : similarity;
     }
 
-    @SuppressWarnings("unused")
-    public void safeExecute(final Runnable runnable) {
-        try {
-            runnable.run();
-        } catch (final RuntimeException e) {
-            log.log(Level.FINE, "Suppressing exception", e);
-            this.exceptions.add(e);
+    @Override
+    public float getSimilarity(final T left, final T right, final SimilarityContext context) {
+        return cutoff(this.inner.getSimilarity(left, right, context), this.threshold);
+    }
+
+    @Override
+    public SimilarityMeasure<T> cutoff(final float threshold) {
+        if (threshold < this.threshold) {
+            return this;
         }
+        return new com.bakdata.deduplication.similarity.CutoffSimiliarityMeasure<>(this.inner, threshold);
     }
 }

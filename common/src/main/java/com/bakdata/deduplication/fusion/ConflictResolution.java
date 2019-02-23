@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.fusion;
 
@@ -40,7 +39,8 @@ public interface ConflictResolution<T, R> {
             case 1:
                 return Optional.of(resolvedValues.get(0).getValue());
             default:
-                final var uniqueValues = resolvedValues.stream().map(AnnotatedValue::getValue).distinct().collect(Collectors.toList());
+                final var uniqueValues =
+                        resolvedValues.stream().map(AnnotatedValue::getValue).distinct().collect(Collectors.toList());
                 if (uniqueValues.size() == 1) {
                     return Optional.of(uniqueValues.get(0));
                 }
@@ -50,6 +50,7 @@ public interface ConflictResolution<T, R> {
 
     default <R2> ConflictResolution<T, R2> andThen(final ConflictResolution<R, R2> successor) {
         final var predecessor = this;
-        return ((values, context) -> successor.resolvePartially(predecessor.resolvePartially(values, context), context));
+        return ((values, context) -> successor
+                .resolvePartially(predecessor.resolvePartially(values, context), context));
     }
 }
