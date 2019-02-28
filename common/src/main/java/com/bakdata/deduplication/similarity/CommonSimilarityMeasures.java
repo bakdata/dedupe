@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.similarity;
 
@@ -53,7 +52,6 @@ import org.apache.commons.codec.language.RefinedSoundex;
 import org.apache.commons.codec.language.Soundex;
 import org.apache.commons.codec.language.bm.BeiderMorseEncoder;
 import org.apache.commons.text.similarity.JaroWinklerDistance;
-import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.apache.commons.text.similarity.SimilarityScore;
 
 @UtilityClass
@@ -76,9 +74,9 @@ public class CommonSimilarityMeasures {
     public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> jaccard() {
         return (left, right, context) -> {
             @SuppressWarnings("unchecked") final Set<T> leftSet =
-                left instanceof Set ? (Set<T>) left : new HashSet<>(left);
+                    left instanceof Set ? (Set<T>) left : new HashSet<>(left);
             @SuppressWarnings("unchecked") final Set<T> rightSet =
-                left instanceof Set ? (Set<T>) right : new HashSet<>(right);
+                    left instanceof Set ? (Set<T>) right : new HashSet<>(right);
             final long intersectCount = leftSet.stream().filter(rightSet::contains).count();
             return (float) intersectCount / (rightSet.size() + leftSet.size() - intersectCount);
         };
@@ -92,7 +90,8 @@ public class CommonSimilarityMeasures {
         return new SimilarityScoreMeasure<>(new JaroWinklerDistance());
     }
 
-    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> mongeElkan(final SimilarityMeasure<T> pairMeasure) {
+    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> mongeElkan(
+            final SimilarityMeasure<T> pairMeasure) {
         return mongeElkan(pairMeasure, Integer.MAX_VALUE / 2);
     }
 
@@ -103,9 +102,9 @@ public class CommonSimilarityMeasures {
                 return unknown();
             }
             final Map<T, Long> leftHistogram =
-                left.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+                    left.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
             final Map<T, Long> rightHistogram =
-                right.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+                    right.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
             float dotProduct = 0;
             for (final Map.Entry<T, Long> leftEntry : leftHistogram.entrySet()) {
                 final Long rightCount = rightHistogram.get(leftEntry.getKey());
@@ -122,7 +121,8 @@ public class CommonSimilarityMeasures {
     }
 
 
-    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> mongeElkan(final SimilarityMeasure<T> pairMeasure, final int maxPositionDiff) {
+    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> mongeElkan(
+            final SimilarityMeasure<T> pairMeasure, final int maxPositionDiff) {
         return new MongeElkan<>(pairMeasure, maxPositionDiff, 0);
     }
 
@@ -130,12 +130,8 @@ public class CommonSimilarityMeasures {
         return (left, right, context) -> 1 - measure.getSimilarity(left, right, context);
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T, C extends Collection<? extends T>> List<T> ensureList(final C leftCollection) {
-        return leftCollection instanceof List ? (List<T>) leftCollection : List.copyOf(leftCollection);
-    }
-
-    public static <T, C extends List<? extends T>> SimilarityMeasure<C> positionWise(final SimilarityMeasure<T> pairMeasure) {
+    public static <T, C extends List<? extends T>> SimilarityMeasure<C> positionWise(
+            final SimilarityMeasure<T> pairMeasure) {
         return mongeElkan(pairMeasure, 0);
     }
 
@@ -222,34 +218,19 @@ public class CommonSimilarityMeasures {
         return ngram(3);
     }
 
-    public static <T> WeightedAggregation.WeightedAggregationBuilder<T> weightedAggregation(final BiFunction<List<Float>, List<Float>, Float> aggregator) {
+    public static <T> WeightedAggregation.WeightedAggregationBuilder<T> weightedAggregation(
+            final BiFunction<List<Float>, List<Float>, Float> aggregator) {
         return WeightedAggregation.<T>builder().aggregator(aggregator);
     }
 
     public static <T> WeightedAggregation.WeightedAggregationBuilder<T> weightedAverage() {
         return weightedAggregation((weightedSims, weights) ->
-                (float) (weightedSims.stream().mapToDouble(sim -> sim).sum() / weights.stream().mapToDouble(w -> w).sum()));
+                (float) (weightedSims.stream().mapToDouble(sim -> sim).sum() / weights.stream().mapToDouble(w -> w)
+                        .sum()));
     }
 
     static int getMaxLen(final CharSequence left, final CharSequence right) {
         return Math.max(left.length(), right.length());
-    }
-
-    /**
-     * Used to translate {@link SimilarityScore} that are actually distance functions to similarity scores
-     */
-    @RequiredArgsConstructor
-    public static class DistanceSimilarityMeasure<T extends CharSequence> implements SimilarityMeasure<T> {
-        private final SimilarityScore<? extends Number> score;
-
-        @Override
-        public float getSimilarity(final CharSequence left, final CharSequence right, final SimilarityContext context) {
-            final float distance = this.score.apply(left, right).floatValue();
-            if (distance == -1) {
-                return 0;
-            }
-            return 1.0f - distance / getMaxLen(left, right);
-        }
     }
 
     @RequiredArgsConstructor
@@ -262,30 +243,6 @@ public class CommonSimilarityMeasures {
         }
     }
 
-    public static class Levensthein<T extends CharSequence> implements SimilarityMeasure<T> {
-        private final float threshold;
-
-        public Levensthein(final float threshold) {
-            this.threshold = threshold;
-        }
-
-        @Override
-        public float getSimilarity(final CharSequence left, final CharSequence right, final SimilarityContext context) {
-            final var maxLen = getMaxLen(left, right);
-            final var maxDiff = (int) (maxLen * (1 - this.threshold));
-            final var measure = new DistanceSimilarityMeasure<T>(new LevenshteinDistance(maxDiff));
-            return measure.getSimilarity(left, right, context);
-        }
-
-        @Override
-        public SimilarityMeasure<T> cutoff(final float threshold) {
-            if (threshold < this.threshold) {
-                return this;
-            }
-            return new Levensthein<>(threshold);
-        }
-    }
-
     @Builder
     @Value
     public static class WeightedAggregation<R> implements SimilarityMeasure<R> {
@@ -293,7 +250,8 @@ public class CommonSimilarityMeasures {
         @Singular
         List<WeightedSimilarity<R>> weightedSimilarities;
         @Getter(lazy = true)
-        List<Float> weights = this.weightedSimilarities.stream().map(WeightedSimilarity::getWeight).collect(Collectors.toList());
+        List<Float> weights =
+                this.weightedSimilarities.stream().map(WeightedSimilarity::getWeight).collect(Collectors.toList());
 
         @Override
         public float getSimilarity(final R left, final R right, final SimilarityContext context) {
@@ -320,7 +278,8 @@ public class CommonSimilarityMeasures {
         }
 
         public static class WeightedAggregationBuilder<R> {
-            public <T> WeightedAggregationBuilder<R> add(final float weight, final Function<R, ? extends T> extractor, final SimilarityMeasure<? super T> measure) {
+            public <T> WeightedAggregationBuilder<R> add(final float weight, final Function<R, ? extends T> extractor,
+                    final SimilarityMeasure<? super T> measure) {
                 return this.add(weight, measure.of(extractor));
             }
 
@@ -330,38 +289,4 @@ public class CommonSimilarityMeasures {
         }
     }
 
-    @Value
-    private static class MongeElkan<C extends Collection<? extends T>, T> implements SimilarityMeasure<C> {
-        private final SimilarityMeasure<T> pairMeasure;
-        private final int maxPositionDiff;
-        private final float cutoff;
-
-        @Override
-        public float getSimilarity(final C leftCollection, final C rightCollection, final SimilarityContext context) {
-            if (leftCollection.isEmpty() || rightCollection.isEmpty()) {
-                return 0;
-            }
-            final List<T> leftList = ensureList(leftCollection);
-            final List<T> rightList = ensureList(rightCollection);
-            // when cutoff is .9 and |left| = 3, then on average each element has .1 buffer
-            // as soon as the current sum + buffer < index, the cutoff threshold cannot be passed (buffer used up)
-            final float cutoffBuffer = (1 - this.cutoff) * leftCollection.size();
-            float sum = 0;
-            for (int leftIndex = 0; leftIndex < leftCollection.size() && (cutoffBuffer + sum) >= leftIndex; leftIndex++) {
-                float max = 0;
-                for (int rightIndex = Math.max(0, leftIndex - this.maxPositionDiff),
-                     rightMax = Math.min(rightCollection.size(), leftIndex + this.maxPositionDiff); max < 1.0 && rightIndex < rightMax; rightIndex++) {
-                    max = Math.max(max, this.pairMeasure
-                        .getSimilarity(leftList.get(leftIndex), rightList.get(rightIndex), context));
-                }
-                sum += max;
-            }
-            return CutoffSimiliarityMeasure.cutoff(sum / leftCollection.size(), this.cutoff);
-        }
-
-        @Override
-        public SimilarityMeasure<C> cutoff(final float threshold) {
-            return new MongeElkan<>(this.pairMeasure, this.maxPositionDiff, threshold);
-        }
-    }
 }

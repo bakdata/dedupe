@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.clustering;
 
@@ -38,7 +37,7 @@ import lombok.Value;
 @Builder
 public class Cluster<C extends Comparable<C>, T> {
     @SuppressWarnings("squid:S4276")
-    private static final Function<Iterable<?>, Integer> INT_GENERATOR = new Function<>() {
+    private static final Function INT_GENERATOR = new Function<Iterable<?>, Integer>() {
         private final AtomicInteger nextId = new AtomicInteger();
 
         @Override
@@ -47,7 +46,7 @@ public class Cluster<C extends Comparable<C>, T> {
         }
     };
     @SuppressWarnings("squid:S4276")
-    private static final Function<Iterable<?>, Long> LONG_GENERATOR = new Function<>() {
+    private static final Function LONG_GENERATOR = new Function<Iterable<?>, Long>() {
         private final AtomicLong nextId = new AtomicLong();
 
         @Override
@@ -64,7 +63,7 @@ public class Cluster<C extends Comparable<C>, T> {
 
     @SuppressWarnings("unchecked")
     public static <T> Function<Iterable<T>, Integer> intGenerator() {
-        return (Function) INT_GENERATOR;
+        return INT_GENERATOR;
     }
 
     @SuppressWarnings("unchecked")
@@ -88,7 +87,8 @@ public class Cluster<C extends Comparable<C>, T> {
         return this.elements.contains(record);
     }
 
-    public Cluster<C, T> merge(final Function<Iterable<T>, ? extends C> idGenerator, final Cluster<C, ? extends T> other) {
+    public Cluster<C, T> merge(final Function<? super Iterable<T>, ? extends C> idGenerator,
+            final Cluster<C, ? extends T> other) {
         if (other == this) {
             return this;
         }

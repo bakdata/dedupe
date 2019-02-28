@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.clustering;
 
@@ -41,7 +40,8 @@ import lombok.Value;
 
 @Value
 @Builder
-public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>> implements Clustering<C, T> {
+public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>>
+        implements Clustering<C, T> {
     @NonNull
     Function<? super T, ? extends I> idExtractor;
     @NonNull
@@ -53,7 +53,8 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
     @Override
     public List<Cluster<C, T>> cluster(final List<ClassifiedCandidate<T>> classified) {
         final List<Candidate<T>> duplicates = classified.stream()
-                .filter(classifiedCandidate -> classifiedCandidate.getClassification().getResult() == Classification.ClassificationResult.DUPLICATE)
+                .filter(classifiedCandidate -> classifiedCandidate.getClassification().getResult()
+                        == Classification.ClassificationResult.DUPLICATE)
                 .map(ClassifiedCandidate::getCandidate)
                 .collect(Collectors.toList());
         return this.clusterDuplicates(duplicates);
@@ -104,7 +105,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
 
     public void removeCluster(final Cluster<C, ? extends T> cluster) {
         final List<I> recordIds = cluster.getElements().stream()
-            .map(this.idExtractor)
+                .map(this.idExtractor)
                 .collect(Collectors.toList());
         final Map<C, List<Cluster<C, T>>> referredCluster = recordIds.stream()
                 .map(this.clusterIndex::get)

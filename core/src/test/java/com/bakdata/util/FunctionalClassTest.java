@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,24 +20,22 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.util;
-
-import com.bakdata.util.FunctionalClass.Field;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import org.junit.jupiter.api.Test;
-
-import java.beans.IntrospectionException;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.bakdata.util.FunctionalClass.from;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import com.bakdata.util.FunctionalClass.Field;
+import java.beans.IntrospectionException;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import org.junit.jupiter.api.Test;
 
 class FunctionalClassTest {
 
@@ -126,7 +124,7 @@ class FunctionalClassTest {
         class PersonWithoutSetter {
 
             @Getter
-            private String id = null;
+            private final String id = null;
         }
 
         assertThatExceptionOfType(RuntimeException.class)

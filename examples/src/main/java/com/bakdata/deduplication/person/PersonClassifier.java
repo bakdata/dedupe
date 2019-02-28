@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,20 +20,23 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.person;
+
+import static com.bakdata.deduplication.similarity.CommonSimilarityMeasures.colognePhonetic;
+import static com.bakdata.deduplication.similarity.CommonSimilarityMeasures.equality;
+import static com.bakdata.deduplication.similarity.CommonSimilarityMeasures.jaroWinkler;
+import static com.bakdata.deduplication.similarity.CommonSimilarityMeasures.levenshtein;
+import static com.bakdata.deduplication.similarity.CommonSimilarityMeasures.max;
+import static com.bakdata.deduplication.similarity.CommonSimilarityMeasures.maxDiff;
 
 import com.bakdata.deduplication.classifier.Classifier;
 import com.bakdata.deduplication.classifier.RuleBasedClassifier;
 import com.bakdata.deduplication.similarity.CommonSimilarityMeasures;
-import lombok.Value;
-import lombok.experimental.Delegate;
-
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-
-import static com.bakdata.deduplication.similarity.CommonSimilarityMeasures.*;
+import lombok.Value;
+import lombok.experimental.Delegate;
 
 @Value
 public class PersonClassifier implements Classifier<Person> {
@@ -43,9 +46,11 @@ public class PersonClassifier implements Classifier<Person> {
     Classifier<Person> classifier = RuleBasedClassifier.<Person>builder()
             .positiveRule("Basic comparison", CommonSimilarityMeasures.<Person>weightedAverage()
                     .add(2, Person::getFirstName, max(levenshtein().cutoff(0.5f), jaroWinkler()))
-                    .add(2, Person::getLastName, max(equality().of(colognePhonetic()), levenshtein().cutoff(0.5f), jaroWinkler()))
+                    .add(2, Person::getLastName,
+                            max(equality().of(colognePhonetic()), levenshtein().cutoff(0.5f), jaroWinkler()))
                     .add(1, Person::getGender, equality())
-                    .add(2, Person::getBirthDate, max(levenshtein().of(ISO_FORMAT::format), maxDiff(2, ChronoUnit.DAYS)))
+                    .add(2, Person::getBirthDate,
+                            max(levenshtein().of(ISO_FORMAT::format), maxDiff(2, ChronoUnit.DAYS)))
                     .build()
                     .scaleWithThreshold(0.9f))
             .build();

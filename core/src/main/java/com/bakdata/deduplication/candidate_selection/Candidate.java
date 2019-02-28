@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.candidate_selection;
 
@@ -32,7 +31,7 @@ public class Candidate<T> {
     T oldRecord;
 
     public static <T extends Comparable<? super T>> Candidate<T> normalized(final T record1, final T record2) {
-        if(record1.compareTo(record2) <= 0) {
+        if (record1.compareTo(record2) <= 0) {
             return new Candidate<>(record1, record2);
         }
         return new Candidate<>(record2, record1);

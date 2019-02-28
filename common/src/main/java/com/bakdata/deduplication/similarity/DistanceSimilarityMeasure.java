@@ -21,41 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.bakdata.deduplication;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import lombok.Getter;
-import lombok.Value;
-import lombok.extern.java.Log;
+package com.bakdata.deduplication.similarity;
 
-@Value
-@Log
-public class ExceptionContext {
-    @Getter
-    private final List<Exception> exceptions = new ArrayList<>();
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.text.similarity.SimilarityScore;
 
-    @SuppressWarnings("unused")
-    public <T> Optional<T> safeExecute(final Callable<? extends T> function) {
-        try {
-            return Optional.of(function.call());
-        } catch (final Exception e) {
-            log.log(Level.FINE, "Suppressing exception", e);
-            this.exceptions.add(e);
-            return Optional.empty();
+/**
+ * Used to translate {@link SimilarityScore} that are actually distance functions to similarity scores
+ */
+@RequiredArgsConstructor
+public class DistanceSimilarityMeasure<T extends CharSequence> implements SimilarityMeasure<T> {
+    private final SimilarityScore<? extends Number> score;
+
+    @Override
+    public float getSimilarity(final CharSequence left, final CharSequence right, final SimilarityContext context) {
+        final float distance = this.score.apply(left, right).floatValue();
+        if (distance == -1) {
+            return 0;
         }
-    }
-
-    @SuppressWarnings("unused")
-    public void safeExecute(final Runnable runnable) {
-        try {
-            runnable.run();
-        } catch (final RuntimeException e) {
-            log.log(Level.FINE, "Suppressing exception", e);
-            this.exceptions.add(e);
-        }
+        return 1.0f - distance / CommonSimilarityMeasures.getMaxLen(left, right);
     }
 }

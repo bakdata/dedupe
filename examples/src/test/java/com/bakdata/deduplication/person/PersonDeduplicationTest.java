@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.person;
 
@@ -48,7 +47,8 @@ class PersonDeduplicationTest {
     private static List<Person> parseCsv(final String resourceName) throws IOException {
         final CSVFormat format = CSVFormat.newFormat('\t').withFirstRecordAsHeader().withQuote('"');
         try (final var parser = CSVParser
-            .parse(PersonDeduplicationTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8, format)) {
+                .parse(PersonDeduplicationTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8,
+                        format)) {
             return parser.getRecords()
                     .stream()
                     .map(record -> Person.builder()
@@ -68,12 +68,12 @@ class PersonDeduplicationTest {
         final PersonDeduplication deduplication = new PersonDeduplication(HardPairHandler.ignore(), Optional::of);
 
         // no fusion on the non-duplicated customers
-        for (final Person customer : PersonDeduplicationTest.parseCsv("/customer.csv")) {
+        for (final Person customer : parseCsv("/customer.csv")) {
             final Person fusedPerson = deduplication.deduplicate(customer);
             assertSame(customer, fusedPerson);
         }
 
-        for (final Person customer : PersonDeduplicationTest.parseCsv("/exact_duplicates.csv")) {
+        for (final Person customer : parseCsv("/exact_duplicates.csv")) {
             final Person fusedPerson = deduplication.deduplicate(customer);
             assertNotSame(customer, fusedPerson);
             // should be the same except for fusion id

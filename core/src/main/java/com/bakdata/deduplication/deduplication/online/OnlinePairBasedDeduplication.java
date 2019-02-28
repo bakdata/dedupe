@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.deduplication.online;
 
@@ -51,14 +50,14 @@ public class OnlinePairBasedDeduplication<T> implements OnlineDeduplication<T> {
         }
 
         final List<? extends Cluster<?, T>> mainClusters =
-            clusters.stream().filter(c -> c.contains(newRecord)).collect(Collectors.toList());
+                clusters.stream().filter(c -> c.contains(newRecord)).collect(Collectors.toList());
         if (mainClusters.size() != 1) {
             throw new IllegalStateException(
-                "Expected exactly one cluster with the new record, but received " + clusters);
+                    "Expected exactly one cluster with the new record, but received " + clusters);
         }
 
         return Optional.of(this.fusion.fuse(mainClusters.get(0)))
-            .flatMap(this.hardFusionHandler::handlePartiallyFusedValue)
+                .flatMap(this.hardFusionHandler::handlePartiallyFusedValue)
                 .map(FusedValue::getValue)
                 .orElse(newRecord);
     }

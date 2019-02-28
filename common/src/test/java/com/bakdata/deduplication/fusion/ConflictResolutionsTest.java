@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.fusion;
 
@@ -34,9 +33,9 @@ import static com.bakdata.deduplication.fusion.CommonConflictResolutions.vote;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.AdditionalFieldMergeBuilder;
-import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.FieldMergeBuilder;
-import com.bakdata.deduplication.fusion.ConflictResolutions.Merge.MergeBuilder;
+import com.bakdata.deduplication.fusion.Merge.AdditionalFieldMergeBuilder;
+import com.bakdata.deduplication.fusion.Merge.FieldMergeBuilder;
+import com.bakdata.deduplication.fusion.Merge.MergeBuilder;
 import com.bakdata.util.FunctionalClass;
 import com.google.common.collect.Sets;
 import java.beans.IntrospectionException;
@@ -295,7 +294,7 @@ class ConflictResolutionsTest {
     private static final class PersonWithoutSetter {
 
         @Getter
-        private String id = null;
+        private String id;
     }
 
 }

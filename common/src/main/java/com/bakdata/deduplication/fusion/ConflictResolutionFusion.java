@@ -1,7 +1,7 @@
 /*
- * The MIT License
+ * MIT License
  *
- * Copyright (c) 2018 bakdata GmbH
+ * Copyright (c) 2019 bakdata GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package com.bakdata.deduplication.fusion;
 
@@ -58,14 +57,17 @@ public class ConflictResolutionFusion<T> implements Fusion<T> {
                 .map(e -> new AnnotatedValue<>(e, this.getSource(e), this.lastModifiedExtractor.apply(e)))
                 .collect(Collectors.toList());
         final FusionContext context = new FusionContext();
-        final T resolvedValue = context.safeExecute(() -> this.rootResolution.resolve(conflictingValues, context)).flatMap(r -> r)
-                .orElseThrow(() -> this.createException(conflictingValues, context));
+        final T resolvedValue =
+                context.safeExecute(() -> this.rootResolution.resolve(conflictingValues, context)).flatMap(r -> r)
+                        .orElseThrow(() -> this.createException(conflictingValues, context));
         return new FusedValue<>(resolvedValue, cluster, context.getExceptions());
     }
 
-    private FusionException createException(final List<AnnotatedValue<T>> conflictingValues, final FusionContext context) {
-        final FusionException fusionException = new FusionException("Could not resolve conflict in " + conflictingValues,
-                context.getExceptions().get(0));
+    private FusionException createException(final List<AnnotatedValue<T>> conflictingValues,
+            final FusionContext context) {
+        final FusionException fusionException =
+                new FusionException("Could not resolve conflict in " + conflictingValues,
+                        context.getExceptions().get(0));
         context.getExceptions().stream().skip(1).forEach(fusionException::addSuppressed);
         return fusionException;
     }
