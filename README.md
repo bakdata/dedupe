@@ -1,6 +1,7 @@
-[![Build status](https://travis-ci.org/bakdata/dedupe.svg?branch=master)](https://travis-ci.org/bakdata/dedupe/) 
+[![Build Status](https://dev.azure.com/bakdata/public/_apis/build/status/bakdata.dedupe?branchName=master)](https://dev.azure.com/bakdata/public/_build/latest?definitionId=4&branchName=master)
 [![Sonarcloud status](https://sonarcloud.io/api/project_badges/measure?project=com.bakdata.dedupe%3Adedupe&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.bakdata.dedupe%3Adedupe)
 [![Code coverage](https://sonarcloud.io/api/project_badges/measure?project=com.bakdata.dedupe%3Adedupe&metric=coverage)](https://sonarcloud.io/dashboard?id=com.bakdata.dedupe%3Adedupe)
+[![Maven](https://img.shields.io/maven-central/v/com.bakdata.dedupe/core.svg)](https://search.maven.org/search?q=g:com.bakdata.dedupe&core=gav)
 
 Java DSL for (online) deduplication
 ===================================
@@ -17,21 +18,25 @@ In particular, this project provides the following:
 - A focus on online algorithms that continuously deduplicate a stream of input records.
 - Examples for different domains (to be expanded).
 
-# Structure #
+## Getting Started
 
-The project consists of three parts
-- **core**: Provides the basic interfaces and data structures of the various deduplication stages.
-- **common**: Implements common similarities and algorithms.
-- **examples**: Showcases different domains.
+You can add dedupe via Maven Central.
 
-# Building & executing tests #
-
-This project requires Java 11. To build and execute all tests, please run
-```bash
-./gradlew build
+#### Gradle
+```gradle
+compile group: 'com.bakdata.dedupe', name: 'common', version: '1.1.0'
 ```
 
-For IDEs, import the project (or the build.gradle file) as a gradle project. The project makes heavily use of [Lombok](http://projectlombok.org/), so make sure you have the appropriate IDE plugin. 
+#### Maven
+```xml
+<dependency>
+    <groupId>com.bakdata.dedupe</groupId>
+    <artifactId>common</artifactId>
+    <version>1.1.0</version>
+</dependency>
+```
+
+For other build tools or versions, refer to the [latest version in MvnRepository](https://mvnrepository.com/artifact/com.bakdata.dedupe/common/latest).
 
 # Using the framework #
 
@@ -156,3 +161,20 @@ The shown conflict resolution approach, reconciles each field in a recursive man
 
 The conflict resolution may also use source preferences, source confidence scores, and timestamps to find the best value.
 
+# Maintenance #
+
+## Structure ##
+
+The project consists of three parts
+- **core**: Provides the basic interfaces and data structures of the various deduplication stages.
+- **common**: Implements common similarities and algorithms.
+- **examples**: Showcases different domains.
+
+## Building & executing tests ##
+
+This project requires Java 11. To build and execute all tests, please run
+```bash
+./gradlew build
+```
+
+For IDEs, import the project (or the build.gradle.ktsgit a file) as a gradle project. The project makes heavily use of [Lombok](http://projectlombok.org/), so make sure you have the appropriate IDE plugin and enabled annotation preprocessing. 
