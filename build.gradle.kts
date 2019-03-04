@@ -1,8 +1,8 @@
 plugins {
     // release
     id("net.researchgate.release") version "2.6.0"
-    id("com.bakdata.sonar") version "1.1.2"
-    id("com.bakdata.sonatype") version "1.1.2"
+    id("com.bakdata.sonar") version "1.1.4"
+    id("com.bakdata.sonatype") version "1.1.4"
     id("org.hildan.github.changelog") version "0.8.0"
 }
 
@@ -38,7 +38,7 @@ configure<org.hildan.github.changelog.plugin.GitHubChangelogExtension> {
 
 subprojects {
     apply(plugin = "java-library")
-    // build fails for java 11, let"s wait for a newer lombok version
+
     configure<JavaPluginConvention> {
         sourceCompatibility = org.gradle.api.JavaVersion.VERSION_11
         targetCompatibility = org.gradle.api.JavaVersion.VERSION_11
