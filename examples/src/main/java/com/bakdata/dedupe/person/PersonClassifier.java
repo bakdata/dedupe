@@ -23,7 +23,7 @@
  */
 package com.bakdata.dedupe.person;
 
-import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.colognePhonetic;
+import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.beiderMorse;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.equality;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.jaroWinkler;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.levenshtein;
@@ -47,7 +47,7 @@ public class PersonClassifier implements Classifier<Person> {
             .positiveRule("Basic comparison", CommonSimilarityMeasures.<Person>weightedAverage()
                     .add(2, Person::getFirstName, max(levenshtein().cutoff(0.5f), jaroWinkler()))
                     .add(2, Person::getLastName,
-                            max(equality().of(colognePhonetic()), levenshtein().cutoff(0.5f), jaroWinkler()))
+                            max(equality().of(beiderMorse()), levenshtein().cutoff(0.5f), jaroWinkler()))
                     .add(1, Person::getGender, equality())
                     .add(2, Person::getBirthDate,
                             max(levenshtein().of(ISO_FORMAT::format), maxDiff(2, ChronoUnit.DAYS)))
@@ -55,3 +55,4 @@ public class PersonClassifier implements Classifier<Person> {
                     .scaleWithThreshold(0.9f))
             .build();
 }
+
