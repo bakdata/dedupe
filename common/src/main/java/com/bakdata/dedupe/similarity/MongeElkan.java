@@ -35,16 +35,11 @@ class MongeElkan<C extends Collection<? extends T>, T> implements CollectionSimi
     private final int maxPositionDiff;
     private final float cutoff;
 
-    @SuppressWarnings("unchecked")
-    private static <T, C extends Collection<? extends T>> List<T> ensureList(final C leftCollection) {
-        return leftCollection instanceof List ? (List<T>) leftCollection : List.copyOf(leftCollection);
-    }
-
     @Override
     public float calculateNonEmptyCollectionSimilarity(@NonNull final C leftCollection,
             @NonNull final C rightCollection, @NonNull final SimilarityContext context) {
-        final List<T> leftList = ensureList(leftCollection);
-        final List<T> rightList = ensureList(rightCollection);
+        final List<T> leftList = List.copyOf(leftCollection);
+        final List<T> rightList = List.copyOf(rightCollection);
         // when cutoff is .9 and |left| = 3, then on average each element has .1 buffer
         // as soon as the current sum + buffer < index, the cutoff threshold cannot be passed (buffer used up)
         final float cutoffBuffer = (1 - this.cutoff) * leftCollection.size();

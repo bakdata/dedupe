@@ -92,17 +92,28 @@ public class CommonSimilarityMeasures {
         return new SimilarityScoreMeasure<>(new JaroWinklerDistance());
     }
 
+    /**
+     * Will find the stable matches between the left and the right side with a given pair similarity measure and
+     * calculate the average similarity between the stable pairs.
+     * <p>A pair (A, B) is stable if neither A or B have another element C, such that A (or B) prefer C over their
+     * current partner and that C also prefers the element of his current partner.</p>
+     * <p>The average similarity is normalized over the maximum number of elements in left or right, such that
+     * superfluous partners degrade the overall similarity.</p>
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/Stable_marriage_problem">Stable marriage on Wikipedia</a>
+     */
+    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> stableMatching(
+            final SimilarityMeasure<T> pairMeasure) {
+        return new StableMatchingSimilarity<>(pairMeasure);
+    }
+
     public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> mongeElkan(
             final SimilarityMeasure<T> pairMeasure) {
         return mongeElkan(pairMeasure, Integer.MAX_VALUE / 2);
     }
 
-
     public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> cosine() {
         return (left, right, context) -> {
-            if (left == null || right == null) {
-                return unknown();
-            }
             final Map<T, Long> leftHistogram =
                     left.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
             final Map<T, Long> rightHistogram =
