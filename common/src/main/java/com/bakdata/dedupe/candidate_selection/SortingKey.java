@@ -27,10 +27,31 @@ import java.util.function.Function;
 import lombok.NonNull;
 import lombok.Value;
 
+/**
+ * A sorting key allows a dataset to be indexed by a specific (calculated) value of a record, such that duplicates have
+ * a higher probability of being in close proximity and thus a {@link CandidateSelection} may prune the search space
+ * drastically.
+ * <p>Note to increase the flexibility </p>
+ *
+ * @param <T> the type of the record.
+ */
 @Value
-public class SortingKey<T> {
+public class SortingKey<T, K extends Comparable<K>> {
+    /**
+     * The name of the sorting key. Mostly used for debugging.
+     */
     @NonNull
     String name;
+    /**
+     * A calculation or simple value access to extract the key.
+     * <p>Please try to avoid string concatenation and use {@link CompositeValue} unless you really want that
+     * semantics. String concatenation will change the sorting order if the strings in the beginning do not have the
+     * same length.</p>
+     * <p>Example: Consider the two records [Ed, Sheeran] and [Edgar, Poe]. Concatentation will change order {@code
+     * EdgarPoe < EdSheeran}.</p>
+     *
+     * @see CompositeValue
+     */
     @NonNull
-    Function<T, Comparable<?>> keyExtractor;
+    Function<T, K> keyExtractor;
 }

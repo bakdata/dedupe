@@ -72,7 +72,7 @@ public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> imple
      * A callback for {@link Classification#POSSIBLE_DUPLICATE}s.
      */
     @Builder.Default
-    PossibleDuplicateHandler<T> possibleDuplicateHandler = PossibleDuplicateHandler.ignore();
+    PossibleDuplicateHandler<T> possibleDuplicateHandler = PossibleDuplicateHandler.keep();
 
     @Override
     public @NonNull Collection<Cluster<C, T>> detectDuplicates(final @NonNull T newRecord) {

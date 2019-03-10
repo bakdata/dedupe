@@ -27,11 +27,17 @@ import com.bakdata.util.ExceptionContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Delegate;
 
+/**
+ * A fusion context captures exceptions in an {@link ExceptionContext} and provides additional configurations that
+ * represent cross-cutting concerns, such as null handling.
+ */
 @SuppressWarnings("WeakerAccess")
 @Value
+@Builder
 public class FusionContext {
     @Delegate
     ExceptionContext exceptionContext = new ExceptionContext();
@@ -39,6 +45,10 @@ public class FusionContext {
 
     public <T> void storeValues(final ResolutionTag<T> resolutionTag, final List<AnnotatedValue<T>> annotatedValues) {
         this.storedValues.put(resolutionTag, annotatedValues);
+    }
+
+    public boolean isNonEmpty(final Object value) {
+        return value != null && !"".equals(value);
     }
 
     @SuppressWarnings("unchecked")

@@ -25,6 +25,7 @@
 package com.bakdata.dedupe.fusion;
 
 import com.bakdata.util.FunctionalClass;
+import com.bakdata.util.FunctionalField;
 import com.bakdata.util.ObjectUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,11 +49,11 @@ public class Merge<R> implements ConflictResolution<R, R> {
 
     @SuppressWarnings("unchecked")
     static <R> MergeBuilder<R> builder(final Supplier<R> ctor) {
-        return new MergeBuilder<>(ctor, FunctionalClass.from((Class<R>) ctor.get().getClass()));
+        return new MergeBuilder<>(ctor, FunctionalClass.of((Class<R>) ctor.get().getClass()));
     }
 
     static <R> MergeBuilder<R> builder(final Class<R> clazz) {
-        final FunctionalClass<R> f = FunctionalClass.from(clazz);
+        final FunctionalClass<R> f = FunctionalClass.of(clazz);
         return new MergeBuilder<>(f.getConstructor(), f);
     }
 
@@ -77,7 +78,7 @@ public class Merge<R> implements ConflictResolution<R, R> {
                 final FusionContext context) {
             final List<AnnotatedValue<T>> fieldValues = annotatedValues.stream()
                     .map(ar -> ar.withValue(this.getter.apply(ar.getValue())))
-                    .filter(ar -> ObjectUtils.isNonEmpty(ar.getValue()))
+                    .filter(ar -> context.isNonEmpty(ar.getValue()))
                     .collect(Collectors.toList());
             context.safeExecute(() -> {
                 final Optional<T> resolvedValue = this.resolution.resolve(fieldValues, context);
@@ -96,14 +97,14 @@ public class Merge<R> implements ConflictResolution<R, R> {
             return new FieldMergeBuilder<>(this, getter, setter);
         }
 
-        public <F> FieldMergeBuilder<F, R> field(final FunctionalClass.Field<R, F> field) {
+        public <F> FieldMergeBuilder<F, R> field(final FunctionalField<R, F> field) {
             final Function<R, F> getter = field.getGetter();
             final BiConsumer<R, F> setter = field.getSetter();
             return this.field(getter, setter);
         }
 
         public <F> FieldMergeBuilder<F, R> field(final String name) {
-            final FunctionalClass.Field<R, F> field = this.clazz.field(name);
+            final FunctionalField<R, F> field = this.clazz.field(name);
             return this.field(field);
         }
 
@@ -200,7 +201,7 @@ public class Merge<R> implements ConflictResolution<R, R> {
             return new FieldMergeBuilder<>(this.inner.getMergeBuilder(), getter, setter);
         }
 
-        public <F2> FieldMergeBuilder<F2, R> field(final FunctionalClass.Field<R, F2> field) {
+        public <F2> FieldMergeBuilder<F2, R> field(final FunctionalField<R, F2> field) {
             final Function<R, F2> getter = field.getGetter();
             final BiConsumer<R, F2> setter = field.getSetter();
             return this.field(getter, setter);
@@ -208,7 +209,7 @@ public class Merge<R> implements ConflictResolution<R, R> {
 
         public <F2> FieldMergeBuilder<F2, R> field(final String name) {
             final FunctionalClass<R> clazz = this.inner.getMergeBuilder().getClazz();
-            final FunctionalClass.Field<R, F2> field = clazz.field(name);
+            final FunctionalField<R, F2> field = clazz.field(name);
             return this.field(field);
         }
 

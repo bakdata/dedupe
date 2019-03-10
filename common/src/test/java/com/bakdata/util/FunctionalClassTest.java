@@ -23,11 +23,10 @@
  */
 package com.bakdata.util;
 
-import static com.bakdata.util.FunctionalClass.from;
+import static com.bakdata.util.FunctionalClass.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import com.bakdata.util.FunctionalClass.Field;
 import java.beans.IntrospectionException;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -41,14 +40,14 @@ class FunctionalClassTest {
 
     @Test
     void testGetConstructor() {
-        final Supplier<Person> ctor = from(Person.class).getConstructor();
+        final Supplier<Person> ctor = of(Person.class).getConstructor();
         assertThat(ctor.get())
                 .isNotNull();
     }
 
     @Test
     void testGetConstructorWithException() {
-        final Supplier<PersonWithExceptionConstructor> ctor = from(PersonWithExceptionConstructor.class)
+        final Supplier<PersonWithExceptionConstructor> ctor = of(PersonWithExceptionConstructor.class)
                 .getConstructor();
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(ctor::get)
@@ -59,7 +58,7 @@ class FunctionalClassTest {
     void testGetGetter() {
         final Person person = new Person();
         person.setId("foo");
-        final Field<Person, Object> id = from(Person.class).field("id");
+        final FunctionalField<Person, Object> id = of(Person.class).field("id");
         final Function<Person, Object> getter = id.getGetter();
         assertThat(getter.apply(person))
                 .isEqualTo("foo");
@@ -68,7 +67,7 @@ class FunctionalClassTest {
     @Test
     void testGetGetterForMissingField() {
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> from(Person.class).field("i"))
+                .isThrownBy(() -> of(Person.class).field("i"))
                 .withCauseInstanceOf(IntrospectionException.class)
                 .withMessageContaining("Method not found: isI");
     }
@@ -87,7 +86,7 @@ class FunctionalClassTest {
 
         final PersonWithExceptionGetter person = new PersonWithExceptionGetter();
         person.setId("foo");
-        final Field<PersonWithExceptionGetter, Object> id = from(PersonWithExceptionGetter.class)
+        final FunctionalField<PersonWithExceptionGetter, Object> id = of(PersonWithExceptionGetter.class)
                 .field("id");
         final Function<PersonWithExceptionGetter, Object> getter = id.getGetter();
         assertThatExceptionOfType(UnsupportedOperationException.class)
@@ -98,7 +97,7 @@ class FunctionalClassTest {
     @Test
     void testGetMissingConstructor() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> from(PersonWithoutDefaultConstructor.class).getConstructor())
+                .isThrownBy(() -> of(PersonWithoutDefaultConstructor.class).getConstructor())
                 .withCauseInstanceOf(NoSuchMethodException.class)
                 .withMessageContaining(PersonWithoutDefaultConstructor.class.getName() + ".<init>()");
     }
@@ -113,7 +112,7 @@ class FunctionalClassTest {
         }
 
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> from(PersonWithoutGetter.class).field("id"))
+                .isThrownBy(() -> of(PersonWithoutGetter.class).field("id"))
                 .withCauseInstanceOf(IntrospectionException.class)
                 .withMessageContaining("Method not found: isId");
     }
@@ -128,7 +127,7 @@ class FunctionalClassTest {
         }
 
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> from(PersonWithoutSetter.class).field("id"))
+                .isThrownBy(() -> of(PersonWithoutSetter.class).field("id"))
                 .withCauseInstanceOf(IntrospectionException.class)
                 .withMessageContaining("Method not found: setId");
     }
@@ -136,7 +135,7 @@ class FunctionalClassTest {
     @Test
     void testGetSetter() {
         final Person person = new Person();
-        final Field<Person, Object> id = from(Person.class).field("id");
+        final FunctionalField<Person, Object> id = of(Person.class).field("id");
         final BiConsumer<Person, Object> setter = id.getSetter();
         setter.accept(person, "foo");
         assertThat(person.getId())
@@ -146,7 +145,7 @@ class FunctionalClassTest {
     @Test
     void testGetSetterForMissingField() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> from(Person.class).field("i"))
+                .isThrownBy(() -> of(Person.class).field("i"))
                 .withCauseInstanceOf(IntrospectionException.class)
                 //getter method is also looked up in constructor
                 .withMessageContaining("Method not found: isI");
@@ -165,7 +164,7 @@ class FunctionalClassTest {
         }
 
         final PersonWithExceptionSetter person = new PersonWithExceptionSetter();
-        final BiConsumer<PersonWithExceptionSetter, Object> setter = from(PersonWithExceptionSetter.class)
+        final BiConsumer<PersonWithExceptionSetter, Object> setter = of(PersonWithExceptionSetter.class)
                 .field("id").getSetter();
         assertThatExceptionOfType(UnsupportedOperationException.class)
                 .isThrownBy(() -> setter.accept(person, "foo"))

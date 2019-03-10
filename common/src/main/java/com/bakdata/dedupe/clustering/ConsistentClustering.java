@@ -75,7 +75,7 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
         if (clusters.isEmpty()) {
             return clusters;
         }
-        // the returned cluster is not affected from this clustering
+        // the returned cluster is not affected of this clustering
         if (clusters.size() == 1 && this.noRecordInIndex(clusters)) {
             return clusters;
         }
@@ -89,7 +89,7 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
             throw new IllegalStateException("Expected exactly one transitive cluster");
         }
         if (clusters.size() == 1 && clusters.get(0).equals(transitiveClusters.get(0))) {
-            // previously split cluster have been remerged, so we can remove it from our internal closure
+            // previously split cluster have been remerged, so we can remove it of our internal closure
             this.getInternalClosure().removeCluster(clusters.get(0));
         }
         return transitiveClusters;

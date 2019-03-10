@@ -29,10 +29,19 @@ import com.bakdata.dedupe.candidate_selection.online.OnlineCandidate;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 
+/**
+ * A classifier that knows the results perfectly as it receives the gold standard during creation.
+ * <p>This classifier is used for evaluation if you want to evaluate the effectiveness of {@link
+ * com.bakdata.dedupe.candidate_selection.CandidateSelection} or {@link com.bakdata.dedupe.clustering.Clustering}
+ * without worrying about your {@link Classifier}.</p>
+ *
+ * @param <T> the type of the record.
+ */
 @Value
 public class OracleClassifier<T> implements Classifier<T> {
     private static final ClassificationResult DUPLICATE =
@@ -40,21 +49,31 @@ public class OracleClassifier<T> implements Classifier<T> {
     private static final ClassificationResult NON_DUPLICATE =
             ClassificationResult.builder().classification(Classification.NON_DUPLICATE).confidence(1).build();
 
+    /**
+     * The set of real duplicates. Any pair not within this set is a non-duplicate by definition.
+     */
     @NonNull
     Set<Candidate<T>> goldDuplicates;
-    @Getter(lazy = true)
+    /**
+     * Adds swapped versions of each duplicate, such that we can perform a fast lookup without considering the element
+     * order.
+     */
+    @Getter(value = AccessLevel.PRIVATE, lazy = true)
     Set<Candidate<T>> symmetricDuplicates = this.calculateSymmetricDuplicates();
 
+    /**
+     * For each pair [A, B], also adds [B, A] for fast lookup.
+     */
     private Set<Candidate<T>> calculateSymmetricDuplicates() {
         return this.getGoldDuplicates().stream()
-                .flatMap(
-                        duplicate -> Stream.of(duplicate, new OnlineCandidate<>(duplicate.getRecord2(),
-                                duplicate.getRecord1())))
+                .flatMap(duplicate -> Stream.of(duplicate, new OnlineCandidate<>(duplicate.getRecord2(),
+                        duplicate.getRecord1())))
                 .collect(Collectors.toSet());
     }
 
     @Override
     public ClassificationResult classify(final Candidate<T> candidate) {
+        // simple lookup
         return this.getSymmetricDuplicates().contains(candidate) ? DUPLICATE : NON_DUPLICATE;
     }
 }

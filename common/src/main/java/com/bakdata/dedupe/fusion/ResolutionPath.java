@@ -23,8 +23,6 @@
  */
 package com.bakdata.dedupe.fusion;
 
-import static com.bakdata.util.ObjectUtils.isNonEmpty;
-
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -40,7 +38,7 @@ public class ResolutionPath<T, R> implements ConflictResolution<T, R> {
             final FusionContext context) {
         final List<AnnotatedValue<R>> fieldValues = annotatedValues.stream()
                 .map(ar -> ar.withValue(this.extractor.apply(ar.getValue())))
-                .filter(ar -> isNonEmpty(ar.getValue()))
+                .filter(ar -> context.isNonEmpty(ar.getValue()))
                 .collect(Collectors.toList());
         return this.resolution.resolvePartially(fieldValues, context);
     }

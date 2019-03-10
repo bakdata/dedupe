@@ -31,7 +31,6 @@ import lombok.Value;
 
 @Value
 public class FunctionalConstructor<T> {
-
     @NonNull
     Constructor<T> ctor;
 

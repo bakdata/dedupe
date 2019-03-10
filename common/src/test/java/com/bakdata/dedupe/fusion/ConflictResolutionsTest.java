@@ -145,7 +145,7 @@ class ConflictResolutionsTest {
     @Test
     void testFieldFromField() {
         final FieldMergeBuilder<String, Person> field = create()
-                .field(FunctionalClass.from(Person.class).field("id"));
+                .field(FunctionalClass.of(Person.class).field("id"));
         testField(field);
     }
 
@@ -182,7 +182,7 @@ class ConflictResolutionsTest {
     @Test
     void testFieldFromWrongField() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> create().field(FunctionalClass.from(Person.class).field("i")))
+                .isThrownBy(() -> create().field(FunctionalClass.of(Person.class).field("i")))
                 .withCauseInstanceOf(IntrospectionException.class)
                 .withMessageContaining("Method not found: isI");
     }
@@ -218,7 +218,7 @@ class ConflictResolutionsTest {
     @Test
     void testNestedFieldFromField() {
         final FieldMergeBuilder<String, Person> nestedField = createWithId()
-                .field(FunctionalClass.from(Person.class).field("firstName"));
+                .field(FunctionalClass.of(Person.class).field("firstName"));
         testNestedField(nestedField);
     }
 
@@ -239,7 +239,7 @@ class ConflictResolutionsTest {
     @Test
     void testNestedFieldFromWrongField() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> createWithId().field(FunctionalClass.from(Person.class).field("fistName")))
+                .isThrownBy(() -> createWithId().field(FunctionalClass.of(Person.class).field("fistName")))
                 .withCauseInstanceOf(IntrospectionException.class)
                 .withMessageContaining("Method not found: isFistName");
     }

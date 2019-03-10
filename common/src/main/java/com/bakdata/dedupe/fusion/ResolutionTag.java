@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+<<<<<<< HEAD:common/src/main/java/com/bakdata/dedupe/fusion/ResolutionTag.java
 package com.bakdata.dedupe.fusion;
 
 import lombok.Value;
@@ -29,4 +30,34 @@ import lombok.Value;
 @SuppressWarnings("squid:S2326")
 public class ResolutionTag<T> {
     String name;
+=======
+
+package com.bakdata.util;
+
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import lombok.AccessLevel;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
+
+@Value
+public final class FunctionalField<R, F> {
+
+    @NonNull
+    PropertyDescriptor descriptor;
+
+    public Function<R, F> getGetter() {
+        final Method getter = this.descriptor.getReadMethod();
+        return new FunctionalMethod<>(getter)::invoke;
+    }
+
+    public BiConsumer<R, F> getSetter() {
+        final Method setter = this.descriptor.getWriteMethod();
+        return new FunctionalMethod<>(setter)::invoke;
+    }
+
+>>>>>>> Adding javadoc to common:common/src/main/java/com/bakdata/util/FunctionalField.java
 }

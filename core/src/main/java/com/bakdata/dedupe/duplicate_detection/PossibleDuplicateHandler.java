@@ -42,7 +42,7 @@ public interface PossibleDuplicateHandler<T> {
      * @param <T> the type of the record
      * @return a handler that ignores possible duplicates.
      */
-    static <T> @NonNull PossibleDuplicateHandler<T> ignore() {
+    static <T> @NonNull PossibleDuplicateHandler<T> keep() {
         return classifiedCandidate -> classifiedCandidate;
     }
 
@@ -74,6 +74,21 @@ public interface PossibleDuplicateHandler<T> {
                 .explanation("Ignored possible duplicate")
                 .build();
         return classifiedCandidate -> classifiedCandidate.toBuilder().classificationResult(noDuplicate).build();
+    }
+
+    /**
+     * Treats possible duplicates as unknown classification.
+     *
+     * @param <T> the type of the record
+     * @return a handler that replaces possible duplicates by unknown values.
+     */
+    static <T> @NonNull PossibleDuplicateHandler<T> unknown() {
+        final ClassificationResult unknown = ClassificationResult.builder()
+                .classification(Classification.UNKNOWN)
+                .confidence(0)
+                .explanation("Ignored possible duplicate")
+                .build();
+        return classifiedCandidate -> classifiedCandidate.toBuilder().classificationResult(unknown).build();
     }
 
     /**

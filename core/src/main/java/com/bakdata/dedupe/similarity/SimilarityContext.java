@@ -30,7 +30,8 @@ import lombok.Value;
 import lombok.experimental.Delegate;
 
 /**
- * A similarity context captures exceptions in an {@link ExceptionContext} and provides additional configurations.
+ * A similarity context captures exceptions in an {@link ExceptionContext} and provides additional configurations
+ * that represent cross-cutting concerns, such as null handling.
  */
 @Value
 @Builder
