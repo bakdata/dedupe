@@ -41,9 +41,16 @@ public class SimilarityContext {
     @Delegate
     ExceptionContext exceptionContext = new ExceptionContext();
     /**
-     * The similarity measure to use when either value under comparison is null.
+     * The similarity measure to use when any of the two values under comparison is null.
      */
     @Builder.Default
     @NonNull
-    SimilarityMeasure<Object> similarityMeasureForNull = (left, right, context) -> Float.NaN;
+    SimilarityMeasure<Object> similarityMeasureForNull = (left, right, context) -> SimilarityMeasure.unknown();
+
+    /**
+     * Calculates the similarity when any of the two values under comparison is null.
+     */
+    public <T> float getSimilarityForNull(T left, T right, SimilarityContext context) {
+        return similarityMeasureForNull.getSimilarity(left, right, context);
+    }
 }

@@ -75,12 +75,13 @@ public interface SimilarityMeasure<T> {
      * @param context the context of the comparison.
      * @return the similarity [0; 1] or {@link #unknown()} if no comparison can be performed (for example if left or
      * right are null).
-     * @implNote the default implementation returns {@link SimilarityContext#getSimilarityMeasureForNull()} if left or
+     * @implNote the default implementation returns
+     * {@link SimilarityContext#getSimilarityForNull(Object, Object, SimilarityContext)} if left or
      * right is null and delegates to {@link #calculateSimilarity(Object, Object, SimilarityContext)} otherwise.
      */
     default float getSimilarity(T left, T right, @NonNull SimilarityContext context) {
         if (left == null || right == null) {
-            return context.getSimilarityMeasureForNull().getSimilarity(left, right, context);
+            return context.getSimilarityForNull(left, right, context);
         }
         return calculateSimilarity(left, right, context);
     }

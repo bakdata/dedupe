@@ -51,7 +51,7 @@ public class TransformingSimilarityMeasure<R, T> implements SimilarityMeasure<T>
             R leftElement = this.transformation.transform(left, context);
             R rightElement = this.transformation.transform(right, context);
             return this.measure.getSimilarity(leftElement, rightElement, context);
-        }).orElse(context.getSimilarityMeasureForNull().getSimilarity(left, right, context));
+        }).orElse(context.getSimilarityForNull(left, right, context));
     }
 
     @Override

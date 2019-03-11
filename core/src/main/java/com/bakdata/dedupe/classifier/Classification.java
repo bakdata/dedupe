@@ -40,10 +40,10 @@ public enum Classification {
      * Possible duplicate may come from a high uncertainty of the {@link Classifier}. For example, if the classifier
      * uses a {@link com.bakdata.dedupe.similarity.SimilarityMeasure} and a threshold, the classifier might have
      * two thresholds:
-     * <li>
-     * <ul>an upper threshold which defines when a pair is a {@link #DUPLICATE}, and</ul>
-     * <ul>a lower bound when defines all pairs as {@link #NON_DUPLICATE}.</ul>
-     * </li>
+     * <ul>
+     * <li>an upper threshold which defines when a pair is a {@link #DUPLICATE}, and</li>
+     * <li>a lower bound when defines all pairs as {@link #NON_DUPLICATE}.</li>
+     * </ul>
      * All similarities between the threshold would then be labeled POSSIBLE_DUPLICATE.
      */
     POSSIBLE_DUPLICATE(true),

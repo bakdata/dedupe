@@ -41,10 +41,11 @@ public interface OnlineDeduplication<T> extends com.bakdata.dedupe.deduplication
     /**
      * Deduplicates the record with all previously seen records.
      * <p>There are two cases:</p>
-     * <ul>No duplicate has been detected: The record itself is returned.</ul>
-     * <ul>At least one duplicate has been detected: The record is added to the duplicate {@link
-     * com.bakdata.dedupe.clustering.Cluster} and a suitable representation for that cluster is returned.</ul>
-     *
+     * <ul>
+     * <li>No duplicate has been detected: The record itself is returned.</li>
+     * <li>At least one duplicate has been detected: The record is added to the duplicate {@link
+     * com.bakdata.dedupe.clustering.Cluster} and a suitable representation for that cluster is returned.</li>
+     * </ul>
      * @param newRecord the record that should be processed with all previously seen records
      * @return the record or a representation of the duplicate {@link com.bakdata.dedupe.clustering.Cluster} of
      * the record.
