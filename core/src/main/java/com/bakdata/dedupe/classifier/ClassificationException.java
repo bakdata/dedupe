@@ -21,29 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package com.bakdata.dedupe.classifier;
 
-package com.bakdata.dedupe.similarity;
-
-import java.util.Collection;
-import lombok.NonNull;
-import lombok.Value;
-
-@Value
-public class StableMatchingSimilarity<C extends Collection<? extends T>, T>
-        implements CollectionSimilarityMeasure<C, T> {
-//    private final Assigner<T> stableAssignment;
-
-    public StableMatchingSimilarity(final SimilarityMeasure<T> pairMeasure) {
-//        this.stableAssignment = new StableMarriage<>(pairMeasure);
+/**
+ * An exception thrown by a {@link Classifier} whenever an exception during classification occurred.
+ * <p>If a classifier experiences multiple exceptions, only the first one is chained and the remained is added with
+ * {@link #addSuppressed(Throwable)}.</p>
+ */
+public class ClassificationException extends RuntimeException {
+    public ClassificationException() {
     }
 
-    @Override
-    public float calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
-            @NonNull SimilarityContext context) {
-//        final Collection<Match<T>> matches =
-//                stableAssignment.getMatches(List.copyOf(leftCollection), List.copyOf(rightCollection), context);
-//        return matches.stream().map(Match::getSimilarity).reduce(0f, Float::sum) /
-//                Math.max(leftCollection.size(), rightCollection.size());
-        return 0;
+    public ClassificationException(final String message) {
+        super(message);
+    }
+
+    public ClassificationException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
+
+    public ClassificationException(final Throwable cause) {
+        super(cause);
+    }
+
+    public ClassificationException(final String message, final Throwable cause, final boolean enableSuppression,
+            final boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

@@ -22,28 +22,12 @@
  * SOFTWARE.
  */
 
-package com.bakdata.dedupe.similarity;
+package com.bakdata.dedupe.matching;
 
-import java.util.Collection;
-import lombok.NonNull;
 import lombok.Value;
 
 @Value
-public class StableMatchingSimilarity<C extends Collection<? extends T>, T>
-        implements CollectionSimilarityMeasure<C, T> {
-//    private final Assigner<T> stableAssignment;
-
-    public StableMatchingSimilarity(final SimilarityMeasure<T> pairMeasure) {
-//        this.stableAssignment = new StableMarriage<>(pairMeasure);
-    }
-
-    @Override
-    public float calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
-            @NonNull SimilarityContext context) {
-//        final Collection<Match<T>> matches =
-//                stableAssignment.getMatches(List.copyOf(leftCollection), List.copyOf(rightCollection), context);
-//        return matches.stream().map(Match::getSimilarity).reduce(0f, Float::sum) /
-//                Math.max(leftCollection.size(), rightCollection.size());
-        return 0;
-    }
+public class Match<T> {
+    T left;
+    T right;
 }

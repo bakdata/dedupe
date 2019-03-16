@@ -56,14 +56,14 @@ import org.apache.commons.codec.language.bm.BeiderMorseEncoder;
 import org.apache.commons.text.similarity.JaroWinklerDistance;
 import org.apache.commons.text.similarity.SimilarityScore;
 
+/**
+ * A utility class that offers factory methods for common similarity measures. Usually, these methods are included
+ * through static imports.
+ * <p>For new similarity measure, please open an issue or PR on <a href="https://github.com/bakdata/dedupe/">Github</a>
+ * }.</p>
+ */
 @UtilityClass
 public class CommonSimilarityMeasures {
-
-    private static final Splitter WHITE_SPACE_SPLITTER = Splitter.on(Pattern.compile("\\s+"));
-
-    public static <T extends CharSequence> ValueTransformation<T, List<CharSequence>> bigram() {
-        return ngram(2);
-    }
 
     public static <T> SimilarityMeasure<T> equality() {
         return ((left, right, context) -> left.equals(right) ? 1 : 0);
@@ -148,10 +148,6 @@ public class CommonSimilarityMeasures {
         return mongeElkan(pairMeasure, 0);
     }
 
-    public static ValueTransformation<String, String> colognePhonetic() {
-        return codec(new ColognePhonetic());
-    }
-
     @SafeVarargs
     public static <T> SimilarityMeasure<T> max(final SimilarityMeasure<? super T>... measures) {
         if (measures.length == 0) {
@@ -195,46 +191,6 @@ public class CommonSimilarityMeasures {
             }
             return min == 2 ? Float.NaN : min;
         };
-    }
-
-    public static <T extends CharSequence> ValueTransformation<T, List<CharSequence>> ngram(final int n) {
-        return (t, context) -> IntStream.range(0, t.length() - n + 1)
-                .mapToObj(i -> t.subSequence(i, i + n))
-                .collect(Collectors.toList());
-    }
-
-    public static ValueTransformation<String, String> soundex() {
-        return codec(new Soundex());
-    }
-
-    public static ValueTransformation<String, String> refinedSoundex(final char[] mapping) {
-        return codec(new RefinedSoundex(mapping));
-    }
-
-    public static ValueTransformation<String, String> beiderMorse() {
-        return codec(new BeiderMorseEncoder());
-    }
-
-    public static ValueTransformation<String, String> codec(final StringEncoder encoder) {
-        return new ValueTransformation<>() {
-            @Override
-            @SneakyThrows
-            public String transform(@NonNull String s, @NonNull SimilarityContext context) {
-                return encoder.encode(s);
-            }
-        };
-    }
-
-    public static <T extends CharSequence> ValueTransformation<T, List<String>> words() {
-        return (t, context) -> Lists.newArrayList(WHITE_SPACE_SPLITTER.split(t));
-    }
-
-    public static <T, R> ValueTransformation<T, R> transform(final Function<T, ? extends R> function) {
-        return (t, context) -> function.apply(t);
-    }
-
-    public static <T extends CharSequence> ValueTransformation<T, List<CharSequence>> trigram() {
-        return ngram(3);
     }
 
     public static <T> WeightedAggregation.WeightedAggregationBuilder<T> weightedAggregation(

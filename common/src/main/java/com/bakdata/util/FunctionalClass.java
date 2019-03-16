@@ -47,16 +47,16 @@ public class FunctionalClass<T> {
     Class<T> clazz;
 
     /**
-     * Returns the functional field with the given name. The field can be used to invoke a getter or setter.
+     * Returns the functional field with the given name. The field can be used to newInstance a getter or setter.
      *
      * @param name the name of the field.
      * @param <F> the type of the field.
      * @return the field.
      * @throws IllegalArgumentException if a field with the given name does not exist.
      */
-    public <F> @NonNull FunctionalField<T, F> field(final @NonNull String name) {
+    public <F> @NonNull FunctionalProperty<T, F> field(final @NonNull String name) {
         final PropertyDescriptor descriptor = this.getPropertyDescriptor(name);
-        return new FunctionalField<>(descriptor);
+        return new FunctionalProperty<>(descriptor);
     }
 
     /**
@@ -68,7 +68,7 @@ public class FunctionalClass<T> {
     public Supplier<T> getConstructor() {
         try {
             final Constructor<T> ctor = this.clazz.getDeclaredConstructor();
-            return new FunctionalConstructor<>(ctor)::invoke;
+            return new FunctionalConstructor<>(ctor)::newInstance;
         } catch (final NoSuchMethodException e) {
             throw new IllegalStateException(e);
         }

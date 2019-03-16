@@ -25,8 +25,7 @@
 package com.bakdata.dedupe.fusion;
 
 import com.bakdata.util.FunctionalClass;
-import com.bakdata.util.FunctionalField;
-import com.bakdata.util.ObjectUtils;
+import com.bakdata.util.FunctionalProperty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -97,14 +96,14 @@ public class Merge<R> implements ConflictResolution<R, R> {
             return new FieldMergeBuilder<>(this, getter, setter);
         }
 
-        public <F> FieldMergeBuilder<F, R> field(final FunctionalField<R, F> field) {
+        public <F> FieldMergeBuilder<F, R> field(final FunctionalProperty<R, F> field) {
             final Function<R, F> getter = field.getGetter();
             final BiConsumer<R, F> setter = field.getSetter();
             return this.field(getter, setter);
         }
 
         public <F> FieldMergeBuilder<F, R> field(final String name) {
-            final FunctionalField<R, F> field = this.clazz.field(name);
+            final FunctionalProperty<R, F> field = this.clazz.field(name);
             return this.field(field);
         }
 
@@ -201,7 +200,7 @@ public class Merge<R> implements ConflictResolution<R, R> {
             return new FieldMergeBuilder<>(this.inner.getMergeBuilder(), getter, setter);
         }
 
-        public <F2> FieldMergeBuilder<F2, R> field(final FunctionalField<R, F2> field) {
+        public <F2> FieldMergeBuilder<F2, R> field(final FunctionalProperty<R, F2> field) {
             final Function<R, F2> getter = field.getGetter();
             final BiConsumer<R, F2> setter = field.getSetter();
             return this.field(getter, setter);
@@ -209,7 +208,7 @@ public class Merge<R> implements ConflictResolution<R, R> {
 
         public <F2> FieldMergeBuilder<F2, R> field(final String name) {
             final FunctionalClass<R> clazz = this.inner.getMergeBuilder().getClazz();
-            final FunctionalField<R, F2> field = clazz.field(name);
+            final FunctionalProperty<R, F2> field = clazz.field(name);
             return this.field(field);
         }
 

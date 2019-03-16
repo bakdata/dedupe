@@ -65,6 +65,15 @@ public interface SimilarityMeasure<T> {
     }
 
     /**
+     * Returns true if {@code sim(a, b) = sim(b, a)}.
+     *
+     * @return true if {@code sim(a, b) = sim(b, a)}
+     */
+    default boolean isSymmetric() {
+        return false;
+    }
+
+    /**
      * Calculates the similarity of the left and right value.
      * <p>Note that some similarities are non-commutative, so that the order of the parameters matters.</p>
      * <p>In contrast to {@link #calculateSimilarity(Object, Object, SimilarityContext)}, this method allows null
@@ -149,8 +158,10 @@ public interface SimilarityMeasure<T> {
      * @return a similarity measure rescaling {@code (minExclusive, 1]} to {@code (0, 1]}.
      */
     default @NonNull SimilarityMeasure<T> scaleWithThreshold(final float minExclusive) {
+        // uses #cutoff first to allow optimizations for SimilarityMeasure
+        @NonNull final SimilarityMeasure<T> similarityMeasure = cutoff(minExclusive);
         return (left, right, context) -> {
-            final float similarity = this.getSimilarity(left, right, context);
+            final float similarity = similarityMeasure.getSimilarity(left, right, context);
             return similarity > minExclusive ? (similarity - minExclusive) / (1 - minExclusive) : 0;
         };
     }

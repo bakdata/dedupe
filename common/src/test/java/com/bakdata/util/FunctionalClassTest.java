@@ -58,7 +58,7 @@ class FunctionalClassTest {
     void testGetGetter() {
         final Person person = new Person();
         person.setId("foo");
-        final FunctionalField<Person, Object> id = of(Person.class).field("id");
+        final FunctionalProperty<Person, Object> id = of(Person.class).field("id");
         final Function<Person, Object> getter = id.getGetter();
         assertThat(getter.apply(person))
                 .isEqualTo("foo");
@@ -86,7 +86,7 @@ class FunctionalClassTest {
 
         final PersonWithExceptionGetter person = new PersonWithExceptionGetter();
         person.setId("foo");
-        final FunctionalField<PersonWithExceptionGetter, Object> id = of(PersonWithExceptionGetter.class)
+        final FunctionalProperty<PersonWithExceptionGetter, Object> id = of(PersonWithExceptionGetter.class)
                 .field("id");
         final Function<PersonWithExceptionGetter, Object> getter = id.getGetter();
         assertThatExceptionOfType(UnsupportedOperationException.class)
@@ -135,7 +135,7 @@ class FunctionalClassTest {
     @Test
     void testGetSetter() {
         final Person person = new Person();
-        final FunctionalField<Person, Object> id = of(Person.class).field("id");
+        final FunctionalProperty<Person, Object> id = of(Person.class).field("id");
         final BiConsumer<Person, Object> setter = id.getSetter();
         setter.accept(person, "foo");
         assertThat(person.getId())

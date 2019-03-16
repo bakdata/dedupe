@@ -21,26 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.bakdata.dedupe.similarity;
 
-public class SimilarityException extends RuntimeException {
-    public SimilarityException() {
-    }
+package com.bakdata.dedupe.matching;
 
-    public SimilarityException(final String message) {
-        super(message);
-    }
+import com.google.common.collect.Table;
+import java.util.List;
+import lombok.NonNull;
 
-    public SimilarityException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
-
-    public SimilarityException(final Throwable cause) {
-        super(cause);
-    }
-
-    public SimilarityException(final String message, final Throwable cause, final boolean enableSuppression,
-            final boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+public interface MatchMaker<T> {
+    Iterable<? extends Match<T>> match(@NonNull Table<T, T, Float> leftScoreOfRight,
+            @NonNull Table<T, T, Float> rightScoreOfLeft);
 }

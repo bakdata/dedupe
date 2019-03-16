@@ -27,10 +27,18 @@ package com.bakdata.dedupe.similarity;
 import lombok.Value;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
+/**
+ * Provides the Levensthein similarity calculation, which calculates the number of insertions, deletions, and
+ * replacements needed to transform one string into another.
+ * <p>The similarity is calculated by normalizing the number of edits over the maximum input length.</p>
+ * <p>Note that Levenshtein distance is really slow, but can be tremulously </p>
+ *
+ * @param <T> the type of the input.
+ */
 @Value
 public class Levensthein<T extends CharSequence> implements SimilarityMeasure<T> {
-    float threshold;
     static DistanceSimilarityMeasure<CharSequence> NoThresholdMeasure = new DistanceSimilarityMeasure<>(new LevenshteinDistance());
+    float threshold;
 
     public Levensthein(final float threshold) {
         this.threshold = threshold;

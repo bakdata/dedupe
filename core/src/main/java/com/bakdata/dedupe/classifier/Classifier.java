@@ -41,6 +41,7 @@ public interface Classifier<T> {
      *
      * @param candidate the candidate to classify.
      * @return the {@link ClassificationResult} duplicateClass.
+     * @throws ClassificationException if one or more exceptions occur during classification.
      */
     @NonNull ClassificationResult classify(@NonNull Candidate<T> candidate);
 

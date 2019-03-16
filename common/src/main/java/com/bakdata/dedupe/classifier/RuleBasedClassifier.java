@@ -25,7 +25,6 @@ package com.bakdata.dedupe.classifier;
 
 import com.bakdata.dedupe.candidate_selection.Candidate;
 import com.bakdata.dedupe.similarity.SimilarityContext;
-import com.bakdata.dedupe.similarity.SimilarityException;
 import com.bakdata.dedupe.similarity.SimilarityMeasure;
 import java.util.List;
 import java.util.Optional;
@@ -48,12 +47,17 @@ import lombok.Value;
  * There are three types of rules:
  * <ul>
  * <li>Negatives rule are used to exclude false positives. For example, when two person records have completely
- * different social security numbers, we want to declare them non-duplicate, even if they share the same name.</li>
+ * different social security numbers, we want to declare them non-duplicate, even if they share the same name.
+ * Negative rules are usually combined with explicit or implicit preconditions (e.g., different SSN).</li>
  * <li>A positive rule is used to explicitly include true positives. Positive rules can be used as exceptions of
  * negative rules or for very specific edge cases that are hard to model in a stable overall similarity measure. For
  * example, a person has changed the last name after marriage, so we exclude the last name of comparison and make
- * everything else stricter.</li>
- * <li>Threshold rules</li>
+ * everything else stricter. Positive rules are usually combined with explicit or implicit preconditions (e.g.,
+ * different last name).</li>
+ * <li>Threshold rules classify a pair as a duplicate if above over a given threshold or as non-duplicate otherwise.
+ * These rules are usually at the end of the rule list and are evaluated if no special case has been handled with
+ * positive or negative rules. By convention, the last rule is dubbed the default rule that should also not have any
+ * preconditions.</li>
  * </ul>
  *
  * The {@code Classification} will contain a description naming the triggered rule and converts the rule score into a
@@ -94,13 +98,6 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     @Builder.Default
     Supplier<SimilarityContext> contextSupplier = () -> SimilarityContext.builder().build();
 
-    private static float scaleAtThreshold(float similarity, float threshold) {
-        if (similarity >= threshold) {
-            return (similarity - threshold) / (1 - threshold);
-        }
-        return -(threshold - similarity) / (threshold);
-    }
-
     @Override
     public ClassificationResult classify(final Candidate<T> candidate) {
         final SimilarityContext context = contextSupplier.get();
@@ -125,8 +122,9 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     /**
      * Creates an exception with the first caught exception as root and all other exceptions as suppressed.
      */
-    private SimilarityException createException(final Candidate<T> candidate, final SimilarityContext context) {
-        final SimilarityException fusionException = new SimilarityException("Could not classify candidate " + candidate,
+    private ClassificationException createException(final Candidate<T> candidate, final SimilarityContext context) {
+        final ClassificationException
+                fusionException = new ClassificationException("Could not classify candidate " + candidate,
                 context.getExceptions().get(0));
         context.getExceptions().stream().skip(1).forEach(fusionException::addSuppressed);
         return fusionException;
@@ -181,6 +179,13 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
      */
     @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
     public static class RuleBasedClassifierBuilder<T> {
+        private static float scaleAtThreshold(float similarity, float threshold) {
+            if (similarity >= threshold) {
+                return (similarity - threshold) / (1 - threshold);
+            }
+            return -(threshold - similarity) / (threshold);
+        }
+
         /**
          * Creates a positive rule that is applied only when the precondition holds. Following rules are only evaluated
          * if the similarity is either {@link SimilarityMeasure#unknown()} or 0. If the precondition fails, {@link
@@ -188,15 +193,14 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * <p>Positive rules result in {@link Classification#DUPLICATE}s.</p>
          *
          * @param name the name of the rule for lineage/debugging.
-         * @param applicablePredicate a predicate for left and right input.
+         * @param condition a predicate for left and right input.
          * @param similarityMeasure the similarity measure of this rule.
          * @return this
          */
-        public RuleBasedClassifierBuilder<T> positiveRule(final String name,
-                final BiPredicate<T, T> applicablePredicate, final SimilarityMeasure<T> similarityMeasure) {
-            return this.positiveRule(name, (left, right, context) ->
-                    applicablePredicate.test(left, right) ? similarityMeasure.getSimilarity(left, right, context)
-                            : DOES_NOT_APPLY);
+        public RuleBasedClassifierBuilder<T> positiveRule(final @NonNull String name,
+                final @NonNull BiPredicate<T, T> condition,
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure) {
+            return this.positiveRule(name, conditional(similarityMeasure, condition));
         }
 
         /**
@@ -208,8 +212,8 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * @param similarityMeasure the similarity measure of this rule.
          * @return this
          */
-        public RuleBasedClassifierBuilder<T> positiveRule(final String name,
-                final SimilarityMeasure<T> similarityMeasure) {
+        public RuleBasedClassifierBuilder<T> positiveRule(final @NonNull String name,
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure) {
             return this.rule(new Rule<>(name, similarityMeasure.unknownIf(s -> s <= 0)));
         }
 
@@ -220,16 +224,14 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * <p>Negative rules result in {@link Classification#NON_DUPLICATE}s.</p>
          *
          * @param name the name of the rule for lineage/debugging.
-         * @param applicablePredicate a predicate for left and right input.
+         * @param condition a predicate for left and right input.
          * @param similarityMeasure the similarity measure of this rule.
          * @return this
          */
-        public RuleBasedClassifierBuilder<T> negativeRule(final String name,
-                final BiPredicate<T, T> applicablePredicate,
-                final SimilarityMeasure<T> similarityMeasure) {
-            return this.negativeRule(name, (left, right, context) ->
-                    applicablePredicate.test(left, right) ? similarityMeasure.getSimilarity(left, right, context)
-                            : DOES_NOT_APPLY);
+        public RuleBasedClassifierBuilder<T> negativeRule(final @NonNull String name,
+                final @NonNull BiPredicate<T, T> condition,
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure) {
+            return this.negativeRule(name, conditional(similarityMeasure, condition));
         }
 
         /**
@@ -241,48 +243,76 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * @param similarityMeasure the similarity measure of this rule.
          * @return this
          */
-        public RuleBasedClassifierBuilder<T> negativeRule(final String name,
-                final SimilarityMeasure<? super T> similarityMeasure) {
+        public RuleBasedClassifierBuilder<T> negativeRule(final @NonNull String name,
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure) {
             final SimilarityMeasure<T> negativeSim =
                     (left, right, context) -> -similarityMeasure.getSimilarity(left, right, context);
             return this.rule(new Rule<>(name, negativeSim.unknownIf(s -> s >= 0)));
         }
 
         /**
-         * Creates a positive rule that is applied only when the precondition holds. Following rules are only evaluated
-         * if the similarity is either {@link SimilarityMeasure#unknown()} or 0. If the precondition fails, {@link
+         * Creates a threshold rule that is applied only when the precondition holds. Following rules are only evaluated
+         * if the similarity is {@link SimilarityMeasure#unknown()}. If the precondition fails, {@link
          * Rule#doesNotApply()} is returned and the following rules are evaluated.
-         * <p>Positive rules result in {@link Classification#DUPLICATE}s.</p>
+         * <p>Threshold rules result in {@link Classification#DUPLICATE}s if {@code sim >= threshold} and in
+         * {@link Classification#NON_DUPLICATE} if {@code sim < threshold}.</p>
          *
          * @param name the name of the rule for lineage/debugging.
-         * @param applicablePredicate a predicate for left and right input.
+         * @param condition a predicate for left and right input.
          * @param similarityMeasure the similarity measure of this rule.
+         * @param threshold the threshold that discriminates duplicates and non-duplicates
          * @return this
          */
-        public RuleBasedClassifierBuilder<T> positiveRule(final String name,
-                final BiPredicate<T, T> applicablePredicate, final SimilarityMeasure<T> similarityMeasure) {
-            return this.positiveRule(name, (left, right, context) ->
-                    applicablePredicate.test(left, right) ? similarityMeasure.getSimilarity(left, right, context)
-                            : DOES_NOT_APPLY);
+        public RuleBasedClassifierBuilder<T> thresholdRule(final @NonNull String name,
+                final @NonNull BiPredicate<T, T> condition,
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure, float threshold) {
+            return this.thresholdRule(name, conditional(similarityMeasure, condition),
+                    threshold);
         }
 
         /**
-         * Creates a positive rule that is always applied. Following rules are only evaluated if the similarity is
-         * either {@link SimilarityMeasure#unknown()} or 0.
-         * <p>Positive rules result in {@link Classification#DUPLICATE}s.</p>
+         * Wraps a similarity measure, such that it is only applied when precondition hold.
+         */
+        private SimilarityMeasure<T> conditional(@NonNull SimilarityMeasure<? super T> similarityMeasure,
+                @NonNull BiPredicate<T, T> condition) {
+            return (left, right, context) -> condition.test(left, right) ?
+                    similarityMeasure.getSimilarity(left, right, context) :
+                    DOES_NOT_APPLY;
+        }
+
+        /**
+         * Creates a threshold rule that is always applied. Following rules are only evaluated
+         * if the similarity is {@link SimilarityMeasure#unknown()}.
+         * <p>Threshold rules result in {@link Classification#DUPLICATE}s if {@code sim >= threshold} and in
+         * {@link Classification#NON_DUPLICATE} if {@code sim < threshold}.</p>
          *
          * @param name the name of the rule for lineage/debugging.
          * @param similarityMeasure the similarity measure of this rule.
+         * @param threshold the threshold that discriminates duplicates and non-duplicates
          * @return this
          */
-        public RuleBasedClassifierBuilder<T> positiveRule(final String name,
-                final SimilarityMeasure<T> similarityMeasure) {
+        public RuleBasedClassifierBuilder<T> thresholdRule(final @NonNull String name,
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure, float threshold) {
             return this.rule(new Rule<>(name, similarityMeasure.unknownIf(s -> s <= 0)));
         }
 
-        public RuleBasedClassifierBuilder<T> defaultRule(final SimilarityMeasure<T> similarityMeasure) {
-            return this.rule(new Rule<>("default", similarityMeasure));
+        /**
+         * Creates a threshold rule named "default" that is always applied. By convention, this should be the last rule
+         * that is evaluated if no other rules applied.
+         * <p>Threshold rules result in {@link Classification#DUPLICATE}s if {@code sim >= threshold} and in
+         * {@link Classification#NON_DUPLICATE} if {@code sim < threshold}.</p>
+         * <p>If the similarity measure returns {@link SimilarityMeasure#unknown()}, the {@link
+         * #defaultClassificationResult} is returned.</p>
+         *
+         * @param similarityMeasure the similarity measure of this rule.
+         * @param threshold the threshold that discriminates duplicates and non-duplicates
+         * @return this
+         */
+        public RuleBasedClassifierBuilder<T> defaultRule(
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure, float threshold) {
+            return this.thresholdRule("default", similarityMeasure, threshold);
         }
+
     }
 
     /**
@@ -299,13 +329,15 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
         /**
          * The name of the rule for lineage/debugging.
          */
+        @NonNull
         String name;
         /**
          * The similarity measure of this rule.
          * <p>Note that through various factory methods, the {@link SimilarityMeasure} can be wrapped such that it
          * returns negative values.</p>
          */
-        SimilarityMeasure<T> measure;
+        @NonNull
+        SimilarityMeasure<? super T> measure;
 
         /**
          * Indicates that this similarity measure can not be applied (e.g., precondition not satisfied).
