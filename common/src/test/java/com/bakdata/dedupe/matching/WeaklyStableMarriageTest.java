@@ -108,7 +108,7 @@ class WeaklyStableMarriageTest {
         void shouldFindStableMatchesWithTies() {
             List<Queue<List<Integer>>> mensFavoriteWomen = asList(
                     createRanking(3, 0, 1, 2),
-                    createRanking(1, 2, 0, 3),
+                    createRanking(3, 1, 2, 0),
                     createRanking(1, 3, 2, 0),
                     createRanking(2, 0, 3, 1)
             );
@@ -121,9 +121,8 @@ class WeaklyStableMarriageTest {
             final Stream<Match<Integer>> matches =
                     new WeaklyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
-            // new Match(1, 2), new Match(2, 1) is only weakly stable
             assertThat(matches.collect(Collectors.toList()))
-                    .containsExactlyInAnyOrder(new Match(0, 3), new Match(3, 0));
+                    .containsExactlyInAnyOrder(new Match(0, 3), new Match(1, 2), new Match(2, 1), new Match(3, 0));
         }
 
         private Queue<List<Integer>> createRanking(int... favorites) {

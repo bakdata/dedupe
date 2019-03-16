@@ -29,7 +29,6 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -42,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
-import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.NonNull;
@@ -106,7 +104,7 @@ public abstract class AbstractStableMarriage<T> implements MatchMaker<T> {
         protected final List<? extends Queue<List<Integer>>> womensFavoriteMen;
 
         // engagements row = man, col = woman
-        protected final Table<Integer, Integer, Boolean> engagements = HashBasedTable.create();
+        protected final Table<Integer, Integer, Boolean> engagements;
 
         protected final BitSet freeMen = new BitSet();
 
@@ -114,20 +112,44 @@ public abstract class AbstractStableMarriage<T> implements MatchMaker<T> {
                 final List<? extends Queue<List<Integer>>> womensFavoriteMen) {
             this.mensFavoriteWomen = mensFavoriteWomen;
             this.womensFavoriteMen = womensFavoriteMen;
+            engagements = HashBasedTable.create();
+//            engagements = ArrayTable.create(IntStream.range(0, mensFavoriteWomen.size()).boxed().collect(toList()),
+//                    IntStream.range(0, womensFavoriteMen.size()).boxed().collect(toList()));
         }
 
-        protected static Set<Integer> getSuccessors(Queue<List<Integer>> favoriteMen, Integer m) {
+        protected static List<Integer> getStrictSuccessors(Queue<List<Integer>> favoriteMen, Integer m) {
             return getTailStream(favoriteMen, m).skip(1).flatMap(equallyGoodMen -> equallyGoodMen.stream())
-                    .collect(toSet());
+                    .collect(toList());
         }
 
-        protected static Set<Integer> getTail(Queue<List<Integer>> favoriteMen, Integer m) {
-            return getTailStream(favoriteMen, m).flatMap(equallyGoodMen -> equallyGoodMen.stream()).collect(toSet());
+        protected static List<Integer> getSuccessors(Queue<List<Integer>> favoriteMen, Integer m) {
+            return getTailStream(favoriteMen, m).flatMap(equallyGoodMen -> equallyGoodMen.stream())
+                    .dropWhile(m_ -> !m.equals(m_))
+                    .skip(1)
+                    .collect(toList());
+        }
+
+        protected static List<Integer> getTail(Queue<List<Integer>> favoriteMen, Integer m) {
+            return getTailStream(favoriteMen, m).flatMap(equallyGoodMen -> equallyGoodMen.stream()).collect(toList());
         }
 
         private static Stream<List<Integer>> getTailStream(Queue<List<Integer>> favoriteMen, Integer m) {
             return favoriteMen.stream().dropWhile(equallyGoodMen -> !equallyGoodMen.contains(m));
         }
+
+        protected void propose(Integer m, Integer w) {
+            engagements.put(m, w, true);
+        }
+
+        @Override
+        public Stream<Match<Integer>> getStableMatches() {
+            match();
+            return engagements.cellSet().stream()
+                    .filter(cell -> cell.getValue() != null)
+                    .map(cell -> new Match(cell.getRowKey(), cell.getColumnKey()));
+        }
+
+        protected abstract void match();
 
         protected void breakEngangement(Integer m, Integer w) {
             if (engagements.remove(m, w) != null) {
@@ -137,7 +159,7 @@ public abstract class AbstractStableMarriage<T> implements MatchMaker<T> {
 
         protected void delete(Integer m, Integer w) {
             deleteInFav(mensFavoriteWomen.get(m), w);
-            deleteInFav(mensFavoriteWomen.get(w), m);
+            deleteInFav(womensFavoriteMen.get(w), m);
         }
 
         private void deleteInFav(Collection<List<Integer>> favs, Integer elem) {

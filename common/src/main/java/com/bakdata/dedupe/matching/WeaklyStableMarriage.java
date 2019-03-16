@@ -28,7 +28,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import java.util.List;
 import java.util.Queue;
-import java.util.stream.Stream;
 import lombok.Value;
 
 /**
@@ -61,7 +60,8 @@ public class WeaklyStableMarriage<T> extends AbstractStableMarriage<T> {
             super(mensFavoriteWomen, womensFavoriteMen);
         }
 
-        public Stream<Match<Integer>> getStableMatches() {
+        @Override
+        protected void match() {
             // Assign each person to be free;
             freeMen.set(0, mensFavoriteWomen.size());
             // while (some man m is free) do
@@ -74,21 +74,20 @@ public class WeaklyStableMarriage<T> extends AbstractStableMarriage<T> {
                 } else {
                     // w := first woman on m’s list;
                     Integer w = highestRankedWomen.get(0);
-                    freeMen.clear(m);
                     // if (some man m' is engaged to w) then
                     Integer m_ = Iterables.getFirst(engagements.column(w).keySet(), null);
                     if (m_ != null) {
+                        breakEngangement(m_, w);
                         freeMen.set(m_);
                     }
-                    //for each (strict successor m" of m on w’s list) do
+                    freeMen.clear(m);
+                    propose(m, w);
+                    //for each (successor m" of m on w’s list) do
                     getSuccessors(womensFavoriteMen.get(w), m).forEach(m__ -> {
-                        breakEngangement(m__, w);
                         delete(m__, w);
                     });
                 }
             }
-            // output the engaged pairs, which form a stable matching
-            return engagements.cellSet().stream().map(cell -> new Match(cell.getRowKey(), cell.getColumnKey()));
         }
     }
 }

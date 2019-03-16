@@ -33,7 +33,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import java.util.stream.Stream;
 import lombok.Value;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.interfaces.MatchingAlgorithm.Matching;
@@ -107,13 +106,15 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
 
         private void createGraph() {
             for (Cell<Integer, Integer, Boolean> engagement : engagements.cellSet()) {
-                final Integer m = engagement.getRowKey();
-                final Integer w = engagement.getColumnKey();
-                manVertexes.add(m);
-                graph.addVertex(m);
-                womanVertexes.add(-w - 1);
-                graph.addVertex(-w - 1);
-                graph.addEdge(m, -w - 1, new Match<>(m, -w - 1));
+                if (engagement.getValue() != null) {
+                    final Integer m = engagement.getRowKey();
+                    final Integer w = engagement.getColumnKey();
+                    manVertexes.add(m);
+                    graph.addVertex(m);
+                    womanVertexes.add(-w - 1);
+                    graph.addVertex(-w - 1);
+                    graph.addEdge(m, -w - 1, new Match<>(m, -w - 1));
+                }
             }
         }
     }
@@ -125,7 +126,8 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
             super(mensFavoriteWomen, womensFavoriteMen);
         }
 
-        public Stream<Match<Integer>> getStableMatches() {
+        @Override
+        protected void match() {
             // Assign each person to be free;
             freeMen.set(0, mensFavoriteWomen.size());
             // while (some man m is free) do
@@ -139,11 +141,11 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
                     //for each (woman w at the head of m's list) do
                     for (Integer w : highestRankedWomen) {
                         //m proposes, and becomes engaged, to w;
-                        engagements.put(m, w, true);
+                        propose(m, w);
                         freeMen.clear(m);
 
                         //for each (strict successor m' of m on w’s list) do
-                        getSuccessors(womensFavoriteMen.get(w), m).forEach(m_ -> {
+                        getStrictSuccessors(womensFavoriteMen.get(w), m).forEach(m_ -> {
                             breakEngangement(m_, w);
                             delete(m_, w);
                         });
@@ -165,12 +167,9 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
                                 });
                             }
                         }
-
-
                     }
                 }
             }
-            return engagements.cellSet().stream().map(cell -> new Match(cell.getRowKey(), cell.getColumnKey()));
         }
     }
 }
