@@ -69,7 +69,9 @@ class FunctionalClassTest {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> of(Person.class).field("i"))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: isI");
+                .withMessageContaining("Unknown property: i")
+                .satisfies(
+                        exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: isI"));
     }
 
     @Test
@@ -114,7 +116,9 @@ class FunctionalClassTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> of(PersonWithoutGetter.class).field("id"))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: isId");
+                .withMessageContaining("Unknown property: id")
+                .satisfies(
+                        exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: isId"));
     }
 
     @Test
@@ -129,7 +133,9 @@ class FunctionalClassTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> of(PersonWithoutSetter.class).field("id"))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: setId");
+                .withMessageContaining("Unknown property: id")
+                .satisfies(
+                        exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: isId"));
     }
 
     @Test
@@ -147,8 +153,9 @@ class FunctionalClassTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> of(Person.class).field("i"))
                 .withCauseInstanceOf(IntrospectionException.class)
-                //getter method is also looked up in constructor
-                .withMessageContaining("Method not found: isI");
+                .withMessageContaining("Unknown property: i")
+                .satisfies(
+                        exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: isI"));
     }
 
     @Test

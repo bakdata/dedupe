@@ -183,7 +183,7 @@ class StronglyStableMarriageTest {
 
             // new Match(1, 2), new Match(2, 1) is only weakly stable
             assertThat(matches.collect(Collectors.toList()))
-                    .containsExactlyInAnyOrder(new Match(0, 3), new Match(3, 0));
+                    .containsExactlyInAnyOrder(new Match(0, 3), new Match(1, 2), new Match(3, 0));
         }
 
         private Queue<List<Integer>> createRanking(int... favorites) {

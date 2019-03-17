@@ -25,21 +25,22 @@
 package com.bakdata.dedupe.similarity;
 
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.levenshtein;
-import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.stableMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
 
+import com.bakdata.dedupe.matching.WeaklyStableMarriage;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class StableMatchingSimilarityTest {
+class MatchingSimilarityTest {
     @Test
     void shouldCalculateSimilarityStableMatches() {
         List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc");
         List<String> women = Arrays.asList("abcd", "cc", "ab", "bb");
 
-        final SimilarityMeasure<List<String>> stableMatching = stableMatching(levenshtein());
+        final SimilarityMeasure<List<String>> stableMatching =
+                new MatchingSimilarity<>(new WeaklyStableMarriage<>(), levenshtein());
 
         final float sim =
                 stableMatching.getSimilarity(men, women, SimilarityContext.builder().build());
@@ -57,7 +58,8 @@ class StableMatchingSimilarityTest {
         List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc", "x");
         List<String> women = Arrays.asList("abcd", "cc", "ab", "bb");
 
-        final SimilarityMeasure<List<String>> stableMatching = stableMatching(levenshtein());
+        final SimilarityMeasure<List<String>> stableMatching =
+                new MatchingSimilarity<>(new WeaklyStableMarriage<>(), levenshtein());
 
         final float sim =
                 stableMatching.getSimilarity(men, women, SimilarityContext.builder().build());
@@ -75,7 +77,8 @@ class StableMatchingSimilarityTest {
         List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc");
         List<String> women = Arrays.asList("abcd", "cc", "ab", "bb", "x");
 
-        final SimilarityMeasure<List<String>> stableMatching = stableMatching(levenshtein());
+        final SimilarityMeasure<List<String>> stableMatching =
+                new MatchingSimilarity<>(new WeaklyStableMarriage<>(), levenshtein());
 
         final float sim =
                 stableMatching.getSimilarity(men, women, SimilarityContext.builder().build());

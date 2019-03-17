@@ -25,8 +25,7 @@ package com.bakdata.dedupe.similarity;
 
 import static com.bakdata.dedupe.similarity.SimilarityMeasure.unknown;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
+import com.bakdata.dedupe.matching.WeaklyStableMarriage;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
@@ -37,22 +36,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Singular;
-import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.experimental.UtilityClass;
-import org.apache.commons.codec.StringEncoder;
-import org.apache.commons.codec.language.ColognePhonetic;
-import org.apache.commons.codec.language.RefinedSoundex;
-import org.apache.commons.codec.language.Soundex;
-import org.apache.commons.codec.language.bm.BeiderMorseEncoder;
 import org.apache.commons.text.similarity.JaroWinklerDistance;
 import org.apache.commons.text.similarity.SimilarityScore;
 
@@ -104,7 +94,7 @@ public class CommonSimilarityMeasures {
      */
     public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> stableMatching(
             final SimilarityMeasure<T> pairMeasure) {
-        return new StableMatchingSimilarity<>(pairMeasure);
+        return new MatchingSimilarity<>(new WeaklyStableMarriage<>(), pairMeasure);
     }
 
     public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> mongeElkan(

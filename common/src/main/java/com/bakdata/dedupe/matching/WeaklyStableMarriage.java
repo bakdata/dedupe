@@ -63,24 +63,18 @@ public class WeaklyStableMarriage<T> extends AbstractStableMarriage<T> {
         @Override
         protected void match() {
             // Assign each person to be free;
-            freeMen.set(0, mensFavoriteWomen.size());
             // while (some man m is free) do
-            while (!freeMen.isEmpty()) {
-                final int m = freeMen.nextSetBit(0);
+            Integer m;
+            while ((m = getNextFreeMen()) != null) {
                 final List<Integer> highestRankedWomen = mensFavoriteWomen.get(m).peek();
-                if (highestRankedWomen == null) {
-                    // no more women to propose to (poor guy)
-                    freeMen.clear(m);
-                } else {
+                if (highestRankedWomen != null) {
                     // w := first woman on m’s list;
                     Integer w = highestRankedWomen.get(0);
                     // if (some man m' is engaged to w) then
                     Integer m_ = Iterables.getFirst(engagements.column(w).keySet(), null);
                     if (m_ != null) {
                         breakEngangement(m_, w);
-                        freeMen.set(m_);
                     }
-                    freeMen.clear(m);
                     propose(m, w);
                     //for each (successor m" of m on w’s list) do
                     getSuccessors(womensFavoriteMen.get(w), m).forEach(m__ -> {

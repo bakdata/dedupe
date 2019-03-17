@@ -168,7 +168,9 @@ class ConflictResolutionsTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> ConflictResolutions.merge(PersonWithoutGetter::new).field("id"))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: isId");
+                .withMessageContaining("Unknown property: id")
+                .satisfies(
+                        exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: isId"));
     }
 
     @Test
@@ -176,7 +178,9 @@ class ConflictResolutionsTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> ConflictResolutions.merge(PersonWithoutSetter::new).field("id"))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: setId");
+                .withMessageContaining("Unknown property: id")
+                .satisfies(
+                        exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: setId"));
     }
 
     @Test
@@ -184,7 +188,8 @@ class ConflictResolutionsTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> create().field(FunctionalClass.of(Person.class).field("i")))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: isI");
+                .withMessageContaining("Unknown property: i")
+                .satisfies(exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: isI"));
     }
 
     @Test
@@ -192,7 +197,8 @@ class ConflictResolutionsTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> create().field("i"))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: isI");
+                .withMessageContaining("Unknown property: i")
+                .satisfies(exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: isI"));
     }
 
     @Test
@@ -241,7 +247,9 @@ class ConflictResolutionsTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> createWithId().field(FunctionalClass.of(Person.class).field("fistName")))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: isFistName");
+                .withMessageContaining("Unknown property: fistName")
+                .satisfies(exception -> assertThat(exception.getCause())
+                        .hasMessageContaining("Method not found: isFistName"));
     }
 
     @Test
@@ -249,7 +257,9 @@ class ConflictResolutionsTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> createWithId().field("fistName"))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: isFistName");
+                .withMessageContaining("Unknown property: fistName")
+                .satisfies(exception -> assertThat(exception.getCause())
+                        .hasMessageContaining("Method not found: isFistName"));
     }
 
     private enum Gender {

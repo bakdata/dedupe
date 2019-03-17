@@ -128,44 +128,36 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
 
         @Override
         protected void match() {
-            // Assign each person to be free;
-            freeMen.set(0, mensFavoriteWomen.size());
             // while (some man m is free) do
-            while (!freeMen.isEmpty()) {
-                final Integer m = freeMen.nextSetBit(0);
+            Integer m;
+            while ((m = getNextFreeMen()) != null) {
                 final List<Integer> highestRankedWomen = mensFavoriteWomen.get(m).peek();
-                if (highestRankedWomen == null) {
-                    // no more women to propose to (poor guy)
-                    freeMen.clear(m);
-                } else {
-                    //for each (woman w at the head of m's list) do
-                    for (Integer w : highestRankedWomen) {
-                        //m proposes, and becomes engaged, to w;
-                        propose(m, w);
-                        freeMen.clear(m);
+                //for each (woman w at the head of m's list) do
+                for (Integer w : highestRankedWomen) {
+                    //m proposes, and becomes engaged, to w;
+                    propose(m, w);
 
-                        //for each (strict successor m' of m on w’s list) do
-                        getStrictSuccessors(womensFavoriteMen.get(w), m).forEach(m_ -> {
-                            breakEngangement(m_, w);
-                            delete(m_, w);
-                        });
-                    }
-                    //find the critical set Z of men;
-                    Set<Integer> z = new CriticalSetFinder(engagements).findMenInCriticalSubset();
-                    // perfect matching if no critical set
-                    if (!z.isEmpty()) {
-                        //for each (woman w who is engaged to a man in Z) do
-                        for (Integer criticalMan : z) {
-                            for (Integer w : engagements.row(criticalMan).keySet()) {
-                                //break all engagements involving w;
-                                engagements.column(w).clear();
+                    //for each (strict successor m' of m on w’s list) do
+                    getStrictSuccessors(womensFavoriteMen.get(w), m).forEach(m_ -> {
+                        breakEngangement(m_, w);
+                        delete(m_, w);
+                    });
+                }
+                //find the critical set Z of men;
+                Set<Integer> z = new CriticalSetFinder(engagements).findMenInCriticalSubset();
+                // perfect matching if no critical set
+                if (!z.isEmpty()) {
+                    //for each (woman w who is engaged to a man in Z) do
+                    for (Integer criticalMan : z) {
+                        for (Integer w : engagements.row(criticalMan).keySet()) {
+                            //break all engagements involving w;
+                            engagements.column(w).clear();
 
-                                //for each (tail m' of m on w’s list) do
-                                getTail(womensFavoriteMen.get(w), m).forEach(m_ -> {
-                                    breakEngangement(m_, w);
-                                    delete(m_, w);
-                                });
-                            }
+                            //for each (tail m' of m on w’s list) do
+                            getTail(womensFavoriteMen.get(w), m).forEach(m_ -> {
+                                breakEngangement(m_, w);
+                                delete(m_, w);
+                            });
                         }
                     }
                 }

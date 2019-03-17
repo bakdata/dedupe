@@ -81,7 +81,7 @@ public class FunctionalClass<T> {
         try {
             return new PropertyDescriptor(name, this.clazz);
         } catch (final IntrospectionException e) {
-            throw new IllegalArgumentException("Unknown property " + name, e);
+            throw new IllegalArgumentException("Unknown property: " + name, e);
         }
     }
 

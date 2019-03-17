@@ -33,7 +33,6 @@ import static java.util.stream.Collectors.toList;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -50,11 +49,11 @@ public abstract class AbstractStableMarriage<T> implements MatchMaker<T> {
     @Override
     public Iterable<? extends Match<T>> match(@NonNull final Table<T, T, Float> mensRankingOfWoman,
             @NonNull final Table<T, T, Float> womensRankingOfMen) {
-        final List<T> men = new ArrayList<>(mensRankingOfWoman.columnKeySet());
-        final List<T> women = new ArrayList<>(womensRankingOfMen.columnKeySet());
+        final List<T> men = new ArrayList<>(mensRankingOfWoman.rowKeySet());
+        final List<T> women = new ArrayList<>(womensRankingOfMen.rowKeySet());
 
         final List<Queue<List<Integer>>> mensFavoriteWomen = getRanking(mensRankingOfWoman, men, women);
-        final List<Queue<List<Integer>>> womensFavoriteMen = getRanking(womensRankingOfMen, men, women);
+        final List<Queue<List<Integer>>> womensFavoriteMen = getRanking(womensRankingOfMen, women, men);
 
         return createMatcher(mensFavoriteWomen, womensFavoriteMen).getStableMatches()
                 .map(match -> new Match<>(men.get(match.getLeft()), women.get(match.getRight())))
@@ -80,7 +79,7 @@ public abstract class AbstractStableMarriage<T> implements MatchMaker<T> {
                             .map(targetIndex -> Pair.of(targetIndex,
                                     rankingTable.get(source.get(sourceIndex), target.get(targetIndex))))
                             // filter unranked targets
-                            .filter(targetScore -> targetScore.getRight() == null)
+                            .filter(targetScore -> targetScore.getRight() != null)
                             // group by score
                             .collect(groupingBy(Pair::getRight, mapping(Pair::getLeft, toList())));
                     // sort groups by highest score
@@ -105,8 +104,6 @@ public abstract class AbstractStableMarriage<T> implements MatchMaker<T> {
 
         // engagements row = man, col = woman
         protected final Table<Integer, Integer, Boolean> engagements;
-
-        protected final BitSet freeMen = new BitSet();
 
         protected AbstractMatcher(final List<? extends Queue<List<Integer>>> mensFavoriteWomen,
                 final List<? extends Queue<List<Integer>>> womensFavoriteMen) {
@@ -137,6 +134,15 @@ public abstract class AbstractStableMarriage<T> implements MatchMaker<T> {
             return favoriteMen.stream().dropWhile(equallyGoodMen -> !equallyGoodMen.contains(m));
         }
 
+        protected Integer getNextFreeMen() {
+            for (int m = 0; m < mensFavoriteWomen.size(); m++) {
+                if (engagements.row(m).isEmpty() && !mensFavoriteWomen.get(m).isEmpty()) {
+                    return m;
+                }
+            }
+            return null;
+        }
+
         protected void propose(Integer m, Integer w) {
             engagements.put(m, w, true);
         }
@@ -152,9 +158,7 @@ public abstract class AbstractStableMarriage<T> implements MatchMaker<T> {
         protected abstract void match();
 
         protected void breakEngangement(Integer m, Integer w) {
-            if (engagements.remove(m, w) != null) {
-                freeMen.set(m);
-            }
+            engagements.remove(m, w);
         }
 
         protected void delete(Integer m, Integer w) {
