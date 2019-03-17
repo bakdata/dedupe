@@ -32,7 +32,6 @@ import static java.util.stream.Collectors.toList;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -45,18 +44,18 @@ import java.util.stream.Stream;
 import lombok.NonNull;
 import org.apache.commons.lang3.tuple.Pair;
 
-public abstract class AbstractStableMarriage<T> implements MatchMaker<T> {
+public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
     @Override
-    public Iterable<? extends Match<T>> match(@NonNull final Table<T, T, Float> mensRankingOfWoman,
-            @NonNull final Table<T, T, Float> womensRankingOfMen) {
-        final List<T> men = new ArrayList<>(mensRankingOfWoman.rowKeySet());
-        final List<T> women = new ArrayList<>(womensRankingOfMen.rowKeySet());
+    public Iterable<? extends Match<T>> match(@NonNull final Collection<WeightedEdge<T>> leftToRightWeights,
+            @NonNull final Collection<WeightedEdge<T>> rightToLeftWeights) {
+        final List<T> men = leftToRightWeights.stream().map(WeightedEdge::getFirst).distinct().collect(toList());
+        final List<T> women = rightToLeftWeights.stream().map(WeightedEdge::getFirst).distinct().collect(toList());
 
-        final List<Queue<List<Integer>>> mensFavoriteWomen = getRanking(mensRankingOfWoman, men, women);
-        final List<Queue<List<Integer>>> womensFavoriteMen = getRanking(womensRankingOfMen, women, men);
+        final List<Queue<List<Integer>>> mensFavoriteWomen = getRanking(leftToRightWeights, men, women);
+        final List<Queue<List<Integer>>> womensFavoriteMen = getRanking(rightToLeftWeights, women, men);
 
         return createMatcher(mensFavoriteWomen, womensFavoriteMen).getStableMatches()
-                .map(match -> new Match<>(men.get(match.getLeft()), women.get(match.getRight())))
+                .map(match -> new Match<>(men.get(match.getFirst()), women.get(match.getSecond())))
                 .collect(toList());
     }
 
@@ -71,13 +70,18 @@ public abstract class AbstractStableMarriage<T> implements MatchMaker<T> {
      * <li>Inner list groups all equally ranked targets.</li>
      * </ul>
      */
-    private List<Queue<List<Integer>>> getRanking(@NonNull final Table<T, T, Float> rankingTable, List<T> source,
+    private List<Queue<List<Integer>>> getRanking(final Collection<WeightedEdge<T>> weightedEdges, List<T> source,
             List<T> target) {
+        Table<T, T, Float> scores = HashBasedTable.create();
+        for (WeightedEdge<T> weightedEdge : weightedEdges) {
+            scores.put(weightedEdge.getFirst(), weightedEdge.getSecond(), weightedEdge.getWeight());
+        }
+
         return IntStream.range(0, source.size()).mapToObj(sourceIndex -> {
                     final Map<Float, List<Integer>> scoreGroup = IntStream.range(0, target.size()).boxed()
                             // get the score for a given target
                             .map(targetIndex -> Pair.of(targetIndex,
-                                    rankingTable.get(source.get(sourceIndex), target.get(targetIndex))))
+                                    scores.get(source.get(sourceIndex), target.get(targetIndex))))
                             // filter unranked targets
                             .filter(targetScore -> targetScore.getRight() != null)
                             // group by score
@@ -110,8 +114,6 @@ public abstract class AbstractStableMarriage<T> implements MatchMaker<T> {
             this.mensFavoriteWomen = mensFavoriteWomen;
             this.womensFavoriteMen = womensFavoriteMen;
             engagements = HashBasedTable.create();
-//            engagements = ArrayTable.create(IntStream.range(0, mensFavoriteWomen.size()).boxed().collect(toList()),
-//                    IntStream.range(0, womensFavoriteMen.size()).boxed().collect(toList()));
         }
 
         protected static List<Integer> getStrictSuccessors(Queue<List<Integer>> favoriteMen, Integer m) {

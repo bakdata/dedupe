@@ -27,43 +27,55 @@ package com.bakdata.dedupe.similarity;
 import static com.bakdata.dedupe.similarity.SimilarityMeasure.isUnknown;
 
 import com.bakdata.dedupe.matching.Match;
-import com.bakdata.dedupe.matching.MatchMaker;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.Tables;
+import com.bakdata.dedupe.matching.BipartiteMatcher;
+import com.bakdata.dedupe.matching.WeightedEdge;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.NonNull;
 import lombok.Value;
 
 @Value
 public class MatchingSimilarity<C extends Collection<? extends T>, T> implements CollectionSimilarityMeasure<C, T> {
-    @NonNull MatchMaker<T> matchMaker;
+    @NonNull BipartiteMatcher<T> bipartiteMatcher;
     @NonNull SimilarityMeasure<T> pairMeasure;
 
     @Override
     public float calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
             @NonNull SimilarityContext context) {
-        final Table<T, T, Float> leftScoreOfRight = getScores(leftCollection, rightCollection, context);
-        final Table<T, T, Float> rightScoreOfLeft = pairMeasure.isSymmetric()
-                ? Tables.transpose(leftScoreOfRight)
+        final Collection<WeightedEdge<T>> leftScoreOfRight = getScores(leftCollection, rightCollection, context);
+        final Collection<WeightedEdge<T>> rightScoreOfLeft = pairMeasure.isSymmetric()
+                ? reversed(leftScoreOfRight)
                 : getScores(rightCollection, leftCollection, context);
 
-        final Iterable<? extends Match<T>> matches = matchMaker.match(leftScoreOfRight, rightScoreOfLeft);
+        final Iterable<? extends Match<T>> matches = bipartiteMatcher.match(leftScoreOfRight, rightScoreOfLeft);
         return StreamSupport.stream(matches.spliterator(), false)
-                       .map(match -> leftScoreOfRight.get(match.getLeft(), match.getRight()))
+                       .map(match -> getWeight(leftScoreOfRight, match))
                        .reduce(0f, Float::sum) /
                Math.max(leftCollection.size(), rightCollection.size());
     }
 
-    private Table<T, T, Float> getScores(@NonNull C leftCollection, @NonNull C rightCollection,
+    private float getWeight(Collection<WeightedEdge<T>> leftScoreOfRight, Match<T> match) {
+        return leftScoreOfRight.stream()
+                .filter(edge -> edge.getFirst().equals(match.getFirst()) &&
+                                edge.getSecond().equals(match.getSecond()))
+                .findFirst()
+                .orElseThrow().getWeight();
+    }
+
+    private Collection<WeightedEdge<T>> reversed(Collection<WeightedEdge<T>> scores) {
+        return scores.stream().map(score -> score.reversed()).collect(Collectors.toList());
+    }
+
+    private Collection<WeightedEdge<T>> getScores(@NonNull C leftCollection, @NonNull C rightCollection,
             @NonNull SimilarityContext context) {
-        final Table<T, T, Float> leftScoreOfRight = HashBasedTable.create();
+        final Collection<WeightedEdge<T>> leftScoreOfRight = new ArrayList<>();
         for (T left : leftCollection) {
             for (T right : rightCollection) {
                 final float leftScore = pairMeasure.getSimilarity(left, right, context);
                 if (!isUnknown(leftScore)) {
-                    leftScoreOfRight.put(left, right, leftScore);
+                    leftScoreOfRight.add(new WeightedEdge<>(left, right, leftScore));
                 }
             }
         }

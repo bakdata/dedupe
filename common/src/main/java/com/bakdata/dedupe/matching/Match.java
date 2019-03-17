@@ -24,10 +24,25 @@
 
 package com.bakdata.dedupe.matching;
 
+import lombok.NonNull;
 import lombok.Value;
 
+/**
+ * A match in a bipartite graph. The result set of matches for a given {@link Assigner} or {@link BipartiteMatcher} is a
+ * matching.
+ *
+ * @param <T> the type of the record.
+ */
 @Value
 public class Match<T> {
-    T left;
-    T right;
+    /**
+     * The first vertex.
+     */
+    @NonNull
+    T first;
+    /**
+     * The second vertex.
+     */
+    @NonNull
+    T second;
 }

@@ -24,11 +24,41 @@
 
 package com.bakdata.dedupe.matching;
 
-import com.google.common.collect.Table;
-import java.util.List;
 import lombok.NonNull;
+import lombok.Value;
 
-public interface MatchMaker<T> {
-    Iterable<? extends Match<T>> match(@NonNull Table<T, T, Float> leftScoreOfRight,
-            @NonNull Table<T, T, Float> rightScoreOfLeft);
+/**
+ * A weighted (directed) edge between two records.
+ * <p>The consumer may decide to treat the edge directed or undirected, please refer to the respective API
+ * documentation.</p>
+ *
+ * @param <T> the type of the records.
+ */
+@Value
+public class WeightedEdge<T> {
+    /**
+     * The first vertex.
+     */
+    @NonNull
+    T first;
+    /**
+     * The second vertex.
+     */
+    @NonNull
+    T second;
+    /**
+     * The weight. May be negative depending of the application.
+     */
+    float weight;
+
+    /**
+     * Reverses the direction of the edge by swapping the vertexes.
+     * <p>On applications with undirected edges, this operation is effectively no-op, although the instances will be
+     * unequal.</p>
+     *
+     * @return the edge with reversed direction.
+     */
+    public WeightedEdge<T> reversed() {
+        return new WeightedEdge<>(second, first, weight);
+    }
 }
