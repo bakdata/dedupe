@@ -29,10 +29,10 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.SimilarityScore;
 
 /**
- * Used to translate {@link SimilarityScore} that are actually distance functions to similarity scores
+ * Used to translate {@link SimilarityScore} of apache common that are actually distance functions to similarity scores.
  */
 @RequiredArgsConstructor
-public class DistanceSimilarityMeasure<T extends CharSequence> implements SimilarityMeasure<T> {
+public class DistanceAdapter<T extends CharSequence> implements SimilarityMeasure<T> {
     private final SimilarityScore<? extends Number> score;
 
     @Override
@@ -42,12 +42,12 @@ public class DistanceSimilarityMeasure<T extends CharSequence> implements Simila
     }
 
     @Override
-    public float calculateSimilarity(final @NonNull CharSequence left, final @NonNull CharSequence right,
+    public float getNonNullSimilarity(final @NonNull CharSequence left, final @NonNull CharSequence right,
             final @NonNull SimilarityContext context) {
         final float distance = this.score.apply(left, right).floatValue();
         if (distance == -1) {
             return 0;
         }
-        return 1.0f - distance / CommonSimilarityMeasures.getMaxLen(left, right);
+        return 1.0f - distance / Math.max(left.length(), right.length());
     }
 }

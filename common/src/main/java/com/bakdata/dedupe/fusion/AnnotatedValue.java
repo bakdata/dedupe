@@ -24,13 +24,14 @@
 package com.bakdata.dedupe.fusion;
 
 import java.time.LocalDateTime;
+import lombok.NonNull;
 import lombok.Value;
 
 @Value
 public class AnnotatedValue<T> {
-    T value;
-    Source source;
-    LocalDateTime dateTime;
+    @NonNull T value;
+    @NonNull Source source;
+    @NonNull LocalDateTime dateTime;
 
     public static <T> AnnotatedValue<T> calculated(final T value) {
         return new AnnotatedValue<>(value, Source.getCalculated(), LocalDateTime.now());

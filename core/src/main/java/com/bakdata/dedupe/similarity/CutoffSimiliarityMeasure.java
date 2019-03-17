@@ -60,7 +60,7 @@ public class CutoffSimiliarityMeasure<T> implements SimilarityMeasure<T> {
     }
 
     @Override
-    public float calculateSimilarity(@NonNull final T left, @NonNull final T right,
+    public float getNonNullSimilarity(@NonNull final T left, @NonNull final T right,
             @NonNull final SimilarityContext context) {
         return cutoff(this.inner.getSimilarity(left, right, context), this.threshold);
     }

@@ -69,7 +69,7 @@ public class CachingSimilarity<T, I> implements SimilarityMeasure<T> {
     }
 
     @Override
-    public float calculateSimilarity(@NonNull T left, @NonNull T right, @NonNull SimilarityContext context) {
+    public float getNonNullSimilarity(@NonNull T left, @NonNull T right, @NonNull SimilarityContext context) {
         I leftId = idExtractor.apply(left);
         I rightId = idExtractor.apply(right);
         if (measure.isSymmetric() && (leftId instanceof Comparable && ((Comparable) leftId).compareTo(rightId) > 0)) {
@@ -81,7 +81,7 @@ public class CachingSimilarity<T, I> implements SimilarityMeasure<T> {
         if (cachedSim != null) {
             return cachedSim;
         }
-        float sim = measure.calculateSimilarity(left, right, context);
+        float sim = measure.getNonNullSimilarity(left, right, context);
         cache.put(leftId, rightId, sim);
         if (measure.isSymmetric() && !(leftId instanceof Comparable)) {
             cache.put(rightId, leftId, sim);

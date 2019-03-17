@@ -24,6 +24,7 @@
 
 package com.bakdata.dedupe.matching;
 
+import static com.bakdata.dedupe.matching.AbstractStableMarriage.AbstractMatcher.DUMMY_WEIGHT;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,63 +43,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class StronglyStableMarriageTest {
-//
-//
-//    @Test
-//    void shouldFindStableMatches() {
-//        List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc");
-//        List<String> women = Arrays.asList("abcd", "cc", "ab", "bb");
-//
-//        @NonNull Table<CharSequence, CharSequence, Float> menPrefences = HashBasedTable.create();
-//        @NonNull Table<CharSequence, CharSequence, Float> womenPreferences = HashBasedTable.create();
-//
-//
-//        final StronglyStableMarriage<CharSequence> stableMatching = new StronglyStableMarriage<>();
-//
-//        final List<Match<CharSequence>> matches =
-//                stableMatching.match(menPrefences, womenPreferences);
-//        assertThat(matches).usingFieldByFieldElementComparator().containsExactlyInAnyOrder(
-//                new Match("ccc", "cc", 2 / 3f),
-//                new Match("bbb", "bb", 2 / 3f),
-//                new Match("aaa", "ab", 1 / 3f),
-//                new Match("ddd", "abcd", 1 / 4f)
-//        );
-//    }
-//
-//    @Test
-//    void shouldFindStableMatchesWithAdditionalMen() {
-//        List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc", "x");
-//        List<String> women = Arrays.asList("abcd", "cc", "ab", "bb");
-//
-//        final StableMarriage<CharSequence> stableMatching = new StableMarriage<>(levenshtein());
-//
-//        final List<Match<CharSequence>> matches =
-//                stableMatching.getMatches(men, women, SimilarityContext.builder().build());
-//        assertThat(matches).usingFieldByFieldElementComparator().containsExactlyInAnyOrder(
-//                new Match("ccc", "cc", 2 / 3f),
-//                new Match("bbb", "bb", 2 / 3f),
-//                new Match("aaa", "ab", 1 / 3f),
-//                new Match("ddd", "abcd", 1 / 4f)
-//        );
-//    }
-//
-//    @Test
-//    void shouldFindStableMatchesWithAdditionalWomen() {
-//        List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc");
-//        List<String> women = Arrays.asList("abcd", "cc", "ab", "bb", "x");
-//
-//        final StableMarriage<CharSequence> stableMatching = new StableMarriage<>(levenshtein());
-//
-//        final List<Match<CharSequence>> matches =
-//                stableMatching.getMatches(men, women, SimilarityContext.builder().build());
-//        assertThat(matches).usingFieldByFieldElementComparator().containsExactlyInAnyOrder(
-//                new Match("ccc", "cc", 2 / 3f),
-//                new Match("bbb", "bb", 2 / 3f),
-//                new Match("aaa", "ab", 1 / 3f),
-//                new Match("ddd", "abcd", 1 / 4f)
-//        );
-//    }
-
     @Nested
     class MatchingWithRanking {
         @Test
@@ -115,11 +59,14 @@ class StronglyStableMarriageTest {
                     createRanking(3, 1, 2, 0),
                     createRanking(2, 1, 0, 3));
 
-            final Stream<Match<Integer>> matches =
+            final Stream<WeightedEdge<Integer>> matches =
                     new StronglyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
             assertThat(matches.collect(Collectors.toList()))
-                    .containsExactlyInAnyOrder(new Match(0, 0), new Match(1, 3), new Match(2, 2), new Match(3, 1));
+                    .containsExactlyInAnyOrder(new WeightedEdge(0, 0, DUMMY_WEIGHT),
+                            new WeightedEdge(1, 3, DUMMY_WEIGHT),
+                            new WeightedEdge(2, 2, DUMMY_WEIGHT),
+                            new WeightedEdge(3, 1, DUMMY_WEIGHT));
         }
 
         @Test
@@ -136,11 +83,14 @@ class StronglyStableMarriageTest {
                     createRanking(0, 1, 2, 3),
                     createRanking(3, 0, 2, 1));
 
-            final Stream<Match<Integer>> matches =
+            final Stream<WeightedEdge<Integer>> matches =
                     new StronglyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
             assertThat(matches.collect(Collectors.toList()))
-                    .containsExactlyInAnyOrder(new Match(0, 3), new Match(1, 2), new Match(2, 1), new Match(3, 0));
+                    .containsExactlyInAnyOrder(new WeightedEdge(0, 3, DUMMY_WEIGHT),
+                            new WeightedEdge(1, 2, DUMMY_WEIGHT),
+                            new WeightedEdge(2, 1, DUMMY_WEIGHT),
+                            new WeightedEdge(3, 0, DUMMY_WEIGHT));
         }
 
         @Test
@@ -157,11 +107,13 @@ class StronglyStableMarriageTest {
                     createRanking(0, 2),
                     createRanking(0, 3, 2, 1));
 
-            final Stream<Match<Integer>> matches =
+            final Stream<WeightedEdge<Integer>> matches =
                     new StronglyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
             assertThat(matches.collect(Collectors.toList()))
-                    .containsExactlyInAnyOrder(new Match(0, 3), new Match(2, 1), new Match(3, 0));
+                    .containsExactlyInAnyOrder(new WeightedEdge(0, 3, DUMMY_WEIGHT),
+                            new WeightedEdge(2, 1, DUMMY_WEIGHT),
+                            new WeightedEdge(3, 0, DUMMY_WEIGHT));
         }
 
         @Test
@@ -178,12 +130,14 @@ class StronglyStableMarriageTest {
                     createRanking(0, 1, 2, 3),
                     createRanking(3, 0, 2, 1));
 
-            final Stream<Match<Integer>> matches =
+            final Stream<WeightedEdge<Integer>> matches =
                     new StronglyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
             // new Match(1, 2), new Match(2, 1) is only weakly stable
             assertThat(matches.collect(Collectors.toList()))
-                    .containsExactlyInAnyOrder(new Match(0, 3), nMatch(1, 2), new Match(3, 0));
+                    .containsExactlyInAnyOrder(new WeightedEdge(0, 3, DUMMY_WEIGHT),
+                            new WeightedEdge(1, 2, DUMMY_WEIGHT),
+                            new WeightedEdge(3, 0, DUMMY_WEIGHT));
         }
 
         private Queue<List<Integer>> createRanking(int... favorites) {

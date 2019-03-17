@@ -25,18 +25,17 @@ package com.bakdata.dedupe.similarity;
 
 import static com.bakdata.dedupe.similarity.SimilarityMeasure.unknown;
 
+import com.bakdata.dedupe.matching.BipartiteMatcher;
 import com.bakdata.dedupe.matching.WeaklyStableMarriage;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -51,111 +50,198 @@ import org.apache.commons.text.similarity.SimilarityScore;
  * through static imports.
  * <p>For new similarity measure, please open an issue or PR on <a href="https://github.com/bakdata/dedupe/">Github</a>
  * }.</p>
+ *
+ * @see CommonTransformations
  */
 @UtilityClass
 public class CommonSimilarityMeasures {
-
+    /**
+     * A similarity measure that is 1 if {@code left.equals(right)} or {@code 0} otherwise.
+     *
+     * @param <T> the type of the record.
+     * @return A similarity measure that is 1 if {@code left.equals(right)} or {@code 0} otherwise.
+     */
     public static <T> SimilarityMeasure<T> equality() {
         return ((left, right, context) -> left.equals(right) ? 1 : 0);
     }
 
+    /**
+     * A similarity measure that is 0 if {@code left.equals(right)} or {@code 1} otherwise.
+     *
+     * @param <T> the type of the record.
+     * @return A similarity measure that is 0 if {@code left.equals(right)} or {@code 1} otherwise.
+     */
     public static <T> SimilarityMeasure<T> inequality() {
-        return ((left, right, context) -> left.equals(right) ? 0 : 1);
+        return negate(equality());
     }
 
-    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> jaccard() {
+    /**
+     * Treats the input collections as sets (removing duplicate elements) and calculates the size of the intersection
+     * over the size of the union.
+     *
+     * @param <E> the element type.
+     * @param <C> the collection type.
+     * @return the Jaccard set similarity.
+     */
+    public static <E, C extends Collection<? extends E>> SetSimilarityMeasure<C, E> jaccard() {
         return (left, right, context) -> {
-            @SuppressWarnings("unchecked") final Set<T> leftSet =
-                    left instanceof Set ? (Set<T>) left : new HashSet<>(left);
-            @SuppressWarnings("unchecked") final Set<T> rightSet =
-                    left instanceof Set ? (Set<T>) right : new HashSet<>(right);
-            final long intersectCount = leftSet.stream().filter(rightSet::contains).count();
-            return (float) intersectCount / (rightSet.size() + leftSet.size() - intersectCount);
+            final long intersectCount = left.stream().filter(right::contains).count();
+            return (float) intersectCount / (right.size() + left.size() - intersectCount);
         };
     }
 
+    /**
+     * Returns the Levenshtein similarity measure. It is often referred to as edit-distance, but it is actually the most
+     * known instance of edit distance.
+     * <p>The similarity is calculated by normalizing the number of edits over the maximum input length.</p>
+     * <p>Note that Levenshtein distance is really slow, but can be tremulously sped up by using a threshold (e.g.,
+     * {@link SimilarityMeasure#cutoff(float)} or {@link SimilarityMeasure#scaleWithThreshold(float)}).</p>
+     *
+     * @param <T> the type of the record.
+     * @return the Levenshtein distance.
+     */
     public static <T extends CharSequence> SimilarityMeasure<T> levenshtein() {
         return new Levensthein<>(0);
     }
 
+    /**
+     * Jaro-Winkler similarity counts the number of matched and transposed characters with a boost for initial
+     * characters.
+     *
+     * @param <T> the type of the record.
+     * @return the Jaro-Winkler similarity.
+     */
     public static <T extends CharSequence> SimilarityMeasure<T> jaroWinkler() {
         return new SimilarityScoreMeasure<>(new JaroWinklerDistance());
     }
 
     /**
-     * Will find the stable matches between the left and the right side with a given pair similarity measure and
-     * calculate the average similarity between the stable pairs.
-     * <p>A pair (A, B) is stable if neither A or B have another element C, such that A (or B) prefer C over their
-     * current partner and that C also prefers the element of his current partner.</p>
+     * Will find the (weakly) stable matches between the left and the right side with a given pair similarity measure
+     * and calculate the average similarity between the stable pairs.
+     * <p>A pair (A, B) is (weakly) stable if neither A or B have another element C, such that A (or B) prefer C over
+     * their current partner and that C also prefers the element of his current partner.</p>
      * <p>The average similarity is normalized over the maximum number of elements in left or right, such that
      * superfluous partners degrade the overall similarity.</p>
+     * <p>Stable matching prefers the left side over the right side.</p>
      *
+     * @param pairMeasure the similarity measure to use to calculate the preferences and the overall similarity.
+     * @param <E> the element type.
+     * @param <C> the collection type.
      * @see <a href="https://en.wikipedia.org/wiki/Stable_marriage_problem">Stable marriage on Wikipedia</a>
+     * @return a stable matching similarity.
      */
-    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> stableMatching(
-            final SimilarityMeasure<T> pairMeasure) {
+    public static <E, C extends Collection<? extends E>> SimilarityMeasure<C> stableMatching(
+            final SimilarityMeasure<E> pairMeasure) {
         return new MatchingSimilarity<>(new WeaklyStableMarriage<>(), pairMeasure);
     }
 
-    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> mongeElkan(
-            final SimilarityMeasure<T> pairMeasure) {
+    /**
+     * Monge-Elkan is a simple list-based similarity measure, where elements from the left are matched with elements
+     * from the right with the highest similarity within a certain index range.
+     * <p>It is simple in the regard that the same element on the right side can be matched multiple times to left
+     * elements.</p>
+     * <p>For non-repeating matching, consider {@link #matching(BipartiteMatcher, SimilarityMeasure)}.</p>
+     * <p>However, it is comparably fast, as only the similarities within the neighborhood are calculated. For a larger
+     * neighborhood, the matching approach is usually preferable.</p>
+     * <p>Monge-Elkan prefers the left side over the right side.</p>
+     * <p>Note that Monge-Elkan distance can be well sped up by using a threshold (e.g.,
+     * {@link SimilarityMeasure#cutoff(float)} or {@link SimilarityMeasure#scaleWithThreshold(float)}).</p>
+     *
+     * @param pairMeasure the similarity measure to use to calculate the preferences and the overall similarity.
+     * @param <E> the element type.
+     * @param <C> the collection type.
+     * @return the Monge-Elkan list-based similarity.
+     */
+    public static <E, C extends Collection<? extends E>> SimilarityMeasure<C> mongeElkan(
+            final SimilarityMeasure<E> pairMeasure) {
         return mongeElkan(pairMeasure, Integer.MAX_VALUE / 2);
     }
 
-    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> cosine() {
-        return (left, right, context) -> {
-            final Map<T, Long> leftHistogram =
-                    left.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
-            final Map<T, Long> rightHistogram =
-                    right.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
-            float dotProduct = 0;
-            for (final Map.Entry<T, Long> leftEntry : leftHistogram.entrySet()) {
-                final Long rightCount = rightHistogram.get(leftEntry.getKey());
-                if (rightCount != null) {
-                    dotProduct += leftEntry.getValue() * rightCount;
-                }
-            }
-            return dotProduct / getLength(leftHistogram) / getLength(rightHistogram);
-        };
+    /**
+     * Uses the given pair {@link SimilarityMeasure} to calculate a preference matrix and uses the {@link
+     * BipartiteMatcher} to find the best matching entries. The best matches and their similarity are used to calculate
+     * the overall similarity.
+     *
+     * <p>The average similarity is normalized over the maximum number of elements in left or right, such that
+     * superfluous partners degrade the overall similarity.</p>
+     *
+     * @param pairMeasure the similarity measure to use to calculate the preferences and the overall similarity.
+     * @param <E> the element type.
+     * @param <C> the collection type.
+     * @return a matching similarity measure.
+     */
+    public static <E, C extends Collection<? extends E>> SimilarityMeasure<C> matching(BipartiteMatcher<E> matcher,
+            final SimilarityMeasure<E> pairMeasure) {
+        return new MatchingSimilarity<>(new WeaklyStableMarriage<>(), pairMeasure);
     }
 
-    private static <T> float getLength(final Map<T, Long> histogram) {
-        return (float) Math.sqrt(histogram.values().stream().mapToDouble(count -> count * count).sum());
+    /**
+     * Calculates the cosine similarity measure over two bags of elements.
+     * <p>It first calculates the histograms of the two bags, interprets them as count vectors, and computes the cosine
+     * similarity.</p>
+     * <p>This measure is suited for medium to long texts.</p>
+     *
+     * @param <E> the element type.
+     * @param <C> the collection type.
+     * @return the cosine similarity.
+     */
+    public static <E, C extends Collection<? extends E>> CollectionSimilarityMeasure<C, E> cosine() {
+        return new CosineSimilarityMeasure<>();
     }
 
-
-    public static <T, C extends Collection<? extends T>> SimilarityMeasure<C> mongeElkan(
-            final SimilarityMeasure<T> pairMeasure, final int maxPositionDiff) {
+    /**
+     * Monge-Elkan is a simple list-based similarity measure, where elements from the left are matched with elements
+     * from the right with the highest similarity within a certain index range.
+     * <p>It is simple in the regard that the same element on the right side can be matched multiple times to left
+     * elements.</p>
+     * <p>For non-repeating matching, consider {@link #matching(BipartiteMatcher, SimilarityMeasure)}.</p>
+     * <p>However, it is comparably fast, as only the similarities within the neighborhood are calculated. For a larger
+     * neighborhood, the matching approach is usually preferable.</p>
+     * <p>Monge-Elkan prefers the left side over the right side.</p>
+     * <p>Note that Monge-Elkan distance can be well sped up by using a threshold (e.g.,
+     * {@link SimilarityMeasure#cutoff(float)} or {@link SimilarityMeasure#scaleWithThreshold(float)}).</p>
+     *
+     * @param pairMeasure the similarity measure to use to calculate the preferences and the overall similarity.
+     * @param maxPositionDiff the maximum index difference of the left list item and the right list item.
+     * @param <E> the element type.
+     * @param <C> the collection type.
+     * @return the Monge-Elkan list-based similarity.
+     */
+    public static <E, C extends Collection<? extends E>> SimilarityMeasure<C> mongeElkan(
+            final SimilarityMeasure<E> pairMeasure, final int maxPositionDiff) {
         return new MongeElkan<>(pairMeasure, maxPositionDiff, 0);
     }
 
-    public static <T> SimilarityMeasure<T> negate(final SimilarityMeasure<? super T> measure) {
-        return (left, right, context) -> 1 - measure.getSimilarity(left, right, context);
+    /**
+     * Swaps the lower and upper bound, such that equal pairs have a similarity of 0 and unequal pairs of 1.
+     * <p>In particular, the returned similarity is {@code 1 - this.sim}.</p>
+     *
+     * @return a negated similarity measure.
+     */
+    public static <T> SimilarityMeasure<T> negate(final SimilarityMeasure<T> measure) {
+        return measure.negate();
     }
 
-    public static <T, C extends List<? extends T>> SimilarityMeasure<C> positionWise(
-            final SimilarityMeasure<T> pairMeasure) {
+    /**
+     * Performs a simple one to one comparison of elements in two lists based on their index.
+     *
+     * @param pairMeasure the similarity measure to use to calculate the overall similarity.
+     * @param <E> the element type.
+     * @param <C> the collection type.
+     * @return a position-wise comparing, list-based similarity measure.
+     */
+    public static <E, C extends List<? extends E>> SimilarityMeasure<C> positionWise(
+            final SimilarityMeasure<E> pairMeasure) {
         return mongeElkan(pairMeasure, 0);
     }
 
     @SafeVarargs
     public static <T> SimilarityMeasure<T> max(final SimilarityMeasure<? super T>... measures) {
-        if (measures.length == 0) {
-            throw new IllegalArgumentException();
-        }
-        return (left, right, context) -> {
-            if (left == null || right == null) {
-                return unknown();
-            }
-            float max = -1;
-            for (int i = 0; max < 1 && i < measures.length; i++) {
-                final float similarity = measures[i].getSimilarity(left, right, context);
-                if (!Float.isNaN(similarity)) {
-                    max = Math.max(similarity, max);
-                }
-            }
-            return max == -1 ? Float.NaN : max;
-        };
+        return new AggregatingSimilarityMeasure<T>((Stream<Float> similarities) -> similarities
+                .filter(sim -> !SimilarityMeasure.isUnknown(sim))
+                .takeWhile(sim -> sim < 1f)
+                .max(Float::compareTo)
+                .orElse(unknown()), measures);
     }
 
     public static <T extends Temporal> SimilarityMeasure<T> maxDiff(final int diff, final TemporalUnit unit) {
@@ -165,23 +251,20 @@ public class CommonSimilarityMeasures {
 
     @SafeVarargs
     public static <T> SimilarityMeasure<T> min(final SimilarityMeasure<? super T>... measures) {
-        if (measures.length == 0) {
-            throw new IllegalArgumentException();
-        }
-        return (left, right, context) -> {
-            if (left == null || right == null) {
-                return unknown();
-            }
-            float min = 2;
-            for (int i = 0; min > 0 && i < measures.length; i++) {
-                final float similarity = measures[i].getSimilarity(left, right, context);
-                if (!Float.isNaN(similarity)) {
-                    min = Math.min(similarity, min);
-                }
-            }
-            return min == 2 ? Float.NaN : min;
-        };
+        return new AggregatingSimilarityMeasure<T>((Stream<Float> similarities) -> similarities
+                .filter(sim -> !SimilarityMeasure.isUnknown(sim))
+                .takeWhile(sim -> sim > 0f)
+                .min(Float::compareTo)
+                .orElse(unknown()), measures);
     }
+
+//    @SafeVarargs
+//    public static <T> SimilarityMeasure<T> average(final SimilarityMeasure<? super T>... measures) {
+//        return new AggregatingSimilarityMeasure<T>((Stream<Float> similarities) -> similarities
+//                .filter(sim -> !SimilarityMeasure.isUnknown(sim))
+//                .reduce(Float::sum)
+//                .orElse(unknown()), measures);
+//    }
 
     public static <T> WeightedAggregation.WeightedAggregationBuilder<T> weightedAggregation(
             final BiFunction<List<Float>, List<Float>, Float> aggregator) {
@@ -194,16 +277,12 @@ public class CommonSimilarityMeasures {
                         .sum()));
     }
 
-    static int getMaxLen(final CharSequence left, final CharSequence right) {
-        return Math.max(left.length(), right.length());
-    }
-
     @RequiredArgsConstructor
     public static class SimilarityScoreMeasure<T extends CharSequence> implements SimilarityMeasure<T> {
         private final SimilarityScore<? extends Number> score;
 
         @Override
-        public float calculateSimilarity(final CharSequence left, final CharSequence right,
+        public float getNonNullSimilarity(final CharSequence left, final CharSequence right,
                 final SimilarityContext context) {
             return this.score.apply(left, right).floatValue();
         }
@@ -220,7 +299,7 @@ public class CommonSimilarityMeasures {
                 this.weightedSimilarities.stream().map(WeightedSimilarity::getWeight).collect(Collectors.toList());
 
         @Override
-        public float calculateSimilarity(final R left, final R right, final SimilarityContext context) {
+        public float getNonNullSimilarity(final R left, final R right, final SimilarityContext context) {
             final var weightedSims = this.weightedSimilarities.stream()
                     .map(ws -> ws.getMeasure().getSimilarity(left, right, context) * ws.getWeight())
                     .collect(Collectors.toList());

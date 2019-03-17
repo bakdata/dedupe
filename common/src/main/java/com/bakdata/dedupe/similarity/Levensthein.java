@@ -31,29 +31,30 @@ import org.apache.commons.text.similarity.LevenshteinDistance;
  * Provides the Levensthein similarity calculation, which calculates the number of insertions, deletions, and
  * replacements needed to transform one string into another.
  * <p>The similarity is calculated by normalizing the number of edits over the maximum input length.</p>
- * <p>Note that Levenshtein distance is really slow, but can be tremulously </p>
+ * <p>Note that Levenshtein distance is really slow, but can be tremulously sped up by using {@link #cutoff(float)}
+ * or {@link #scaleWithThreshold(float)}.</p>
  *
  * @param <T> the type of the input.
  */
 @Value
 public class Levensthein<T extends CharSequence> implements SimilarityMeasure<T> {
-    static DistanceSimilarityMeasure<CharSequence> NoThresholdMeasure = new DistanceSimilarityMeasure<>(new LevenshteinDistance());
+    private static final DistanceAdapter<CharSequence> NoThresholdMeasure =
+            new DistanceAdapter<>(new LevenshteinDistance());
+    /**
+     * The threshold [0; 1], below which the calculation should be aborted. A high threshold saves tremendous time.
+     */
     float threshold;
 
-    public Levensthein(final float threshold) {
-        this.threshold = threshold;
-    }
-
     @Override
-    public float calculateSimilarity(final CharSequence left, final CharSequence right,
+    public float getNonNullSimilarity(final CharSequence left, final CharSequence right,
             final SimilarityContext context) {
         if(threshold == 0) {
-            return NoThresholdMeasure.calculateSimilarity(left, right, context);
+            return NoThresholdMeasure.getNonNullSimilarity(left, right, context);
         }
-        final var maxLen = CommonSimilarityMeasures.getMaxLen(left, right);
+        final var maxLen = Math.max(left.length(), right.length());
         final var maxDiff = (int) (maxLen * (1 - this.threshold));
-        final var measure = new DistanceSimilarityMeasure<T>(new LevenshteinDistance(maxDiff));
-        return measure.calculateSimilarity(left, right, context);
+        final var measure = new DistanceAdapter<T>(new LevenshteinDistance(maxDiff));
+        return measure.getNonNullSimilarity(left, right, context);
     }
 
     @Override

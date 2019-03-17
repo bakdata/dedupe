@@ -45,6 +45,8 @@ import org.apache.commons.codec.language.bm.BeiderMorseEncoder;
  * included through static imports.
  * <p>For new transformations, please open an issue or PR on <a href="https://github.com/bakdata/dedupe/">Github</a>
  * }.</p>
+ *
+ * @see CommonSimilarityMeasures
  */
 @UtilityClass
 public class CommonTransformations {

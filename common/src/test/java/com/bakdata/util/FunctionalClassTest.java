@@ -135,7 +135,7 @@ class FunctionalClassTest {
                 .withCauseInstanceOf(IntrospectionException.class)
                 .withMessageContaining("Unknown property: id")
                 .satisfies(
-                        exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: isId"));
+                        exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: setId"));
     }
 
     @Test

@@ -58,7 +58,7 @@ public class WeightedEdge<T> {
      *
      * @return the edge with reversed direction.
      */
-    public WeightedEdge<T> reversed() {
+    public @NonNull WeightedEdge<T> reversed() {
         return new WeightedEdge<>(second, first, weight);
     }
 }

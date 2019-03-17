@@ -25,26 +25,26 @@
 package com.bakdata.dedupe.similarity;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.NonNull;
 
 /**
- * A {@link SimilarityMeasure} that is defined over {@link Collection}s.
+ * A {@link SimilarityMeasure} that is defined over {@link Collection}s that are treated as sets.
+ * <p>Thus, all multiple occurrences of equivalent elements are ignored.</p>
  *
  * @param <E> the element type.
  * @param <C> the collection type.
  */
 @FunctionalInterface
-public interface CollectionSimilarityMeasure<C extends Collection<? extends E>, E> extends SimilarityMeasure<C> {
+public interface SetSimilarityMeasure<C extends Collection<? extends E>, E> extends CollectionSimilarityMeasure<C, E> {
     @Override
-    default float getNonNullSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
+    default float calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
             @NonNull SimilarityContext context) {
-        if (leftCollection.isEmpty() && rightCollection.isEmpty()) {
-            return 1;
-        }
-        if (leftCollection.isEmpty() || rightCollection.isEmpty()) {
-            return 0;
-        }
-        return calculateNonEmptyCollectionSimilarity(leftCollection, rightCollection, context);
+        final Set<E> leftSet = leftCollection instanceof Set ? (Set<E>) leftCollection : new HashSet<>(leftCollection);
+        final Set<E> rightSet =
+                rightCollection instanceof Set ? (Set<E>) rightCollection : new HashSet<>(rightCollection);
+        return calculateNonEmptySetSimilarity(leftSet, rightSet, context);
     }
 
     /**
@@ -56,6 +56,6 @@ public interface CollectionSimilarityMeasure<C extends Collection<? extends E>, 
      * @return the similarity [0; 1] or {@link #unknown()} if no comparison can be performed (for example if
      * leftCollection or rightCollection are null).
      */
-    float calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
+    float calculateNonEmptySetSimilarity(@NonNull Set<E> leftCollection, @NonNull Set<E> rightCollection,
             @NonNull SimilarityContext context);
 }

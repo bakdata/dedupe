@@ -53,6 +53,10 @@ public class WeaklyStableMarriage<T> extends AbstractStableMarriage<T> {
         return new Matcher(mensFavoriteWomen, womensFavoriteMen);
     }
 
+    /**
+     * Implements the weakly stable matching algorithm of [1], which is basically the default stable marriage with
+     * pruning.
+     */
     @VisibleForTesting
     static class Matcher extends AbstractStableMarriage.AbstractMatcher {
         Matcher(final List<? extends Queue<List<Integer>>> mensFavoriteWomen,

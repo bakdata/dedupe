@@ -46,7 +46,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
     @Override
-    public Iterable<? extends Match<T>> match(@NonNull final Collection<WeightedEdge<T>> leftToRightWeights,
+    public Iterable<? extends WeightedEdge<T>> match(@NonNull final Collection<WeightedEdge<T>> leftToRightWeights,
             @NonNull final Collection<WeightedEdge<T>> rightToLeftWeights) {
         final List<T> men = leftToRightWeights.stream().map(WeightedEdge::getFirst).distinct().collect(toList());
         final List<T> women = rightToLeftWeights.stream().map(WeightedEdge::getFirst).distinct().collect(toList());
@@ -55,8 +55,20 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
         final List<Queue<List<Integer>>> womensFavoriteMen = getRanking(rightToLeftWeights, women, men);
 
         return createMatcher(mensFavoriteWomen, womensFavoriteMen).getStableMatches()
-                .map(match -> new Match<>(men.get(match.getFirst()), women.get(match.getSecond())))
+                .map(match -> {
+                    final T m = men.get(match.getFirst());
+                    final T w = women.get(match.getSecond());
+                    return new WeightedEdge<>(m, w, getWeight(leftToRightWeights, m, w));
+                })
                 .collect(toList());
+    }
+
+    private float getWeight(Collection<WeightedEdge<T>> leftScoreOfRight, T m, T w) {
+        return leftScoreOfRight.stream()
+                .filter(edge -> edge.getFirst().equals(m) &&
+                                edge.getSecond().equals(w))
+                .findFirst()
+                .orElseThrow().getWeight();
     }
 
     protected abstract Matcher createMatcher(List<? extends Queue<List<Integer>>> mensFavoriteWomen,
@@ -99,10 +111,11 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
 
     @FunctionalInterface
     protected interface Matcher {
-        Stream<Match<Integer>> getStableMatches();
+        Stream<WeightedEdge<Integer>> getStableMatches();
     }
 
     protected static abstract class AbstractMatcher implements Matcher {
+        static final int DUMMY_WEIGHT = 1;
         protected final List<? extends Queue<List<Integer>>> mensFavoriteWomen;
         protected final List<? extends Queue<List<Integer>>> womensFavoriteMen;
 
@@ -150,11 +163,15 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
         }
 
         @Override
-        public Stream<Match<Integer>> getStableMatches() {
+        public Stream<WeightedEdge<Integer>> getStableMatches() {
             match();
             return engagements.cellSet().stream()
                     .filter(cell -> cell.getValue() != null)
-                    .map(cell -> new Match(cell.getRowKey(), cell.getColumnKey()));
+                    .map(cell -> {
+                        Integer first = cell.getRowKey();
+                        Integer second = cell.getColumnKey();
+                        return new WeightedEdge<>(first, second, DUMMY_WEIGHT);
+                    });
         }
 
         protected abstract void match();

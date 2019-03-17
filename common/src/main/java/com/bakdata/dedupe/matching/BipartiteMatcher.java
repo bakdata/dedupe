@@ -59,7 +59,8 @@ public interface BipartiteMatcher<T> extends Assigner<T> {
      * @apiNote The interface may use Iterables as the parameters in the future to facilitate an online applications.
      * Use {@link #matchMaterialized(Collection, Collection)} if you need an explicit {@link Set}.
      */
-    @NonNull Iterable<@NonNull ? extends Match<T>> match(@NonNull Collection<WeightedEdge<T>> leftToRightWeightedEdges,
+    @NonNull Iterable<@NonNull ? extends WeightedEdge<T>> match(
+            @NonNull Collection<WeightedEdge<T>> leftToRightWeightedEdges,
             @NonNull Collection<WeightedEdge<T>> rightToLeftWeightedEdges);
 
     /**
@@ -73,14 +74,19 @@ public interface BipartiteMatcher<T> extends Assigner<T> {
      * their respective weights.
      * @return the set of edges as a subset of leftToRightWeightedEdges.
      */
-    default @NonNull Set<@NonNull ? extends Match<T>> matchMaterialized(
+    default @NonNull Set<@NonNull ? extends WeightedEdge<T>> matchMaterialized(
             @NonNull Collection<WeightedEdge<T>> leftToRightWeightedEdges,
             @NonNull Collection<WeightedEdge<T>> rightToLeftWeightedEdges) {
         return Sets.newHashSet(match(leftToRightWeightedEdges, rightToLeftWeightedEdges));
     }
 
+    /**
+     * @implNote Invokes {@link #match(Collection, Collection)} by replicating the given weighted edges for both
+     * directions.
+     */
     @Override
-    default @NonNull Iterable<? extends Match<T>> assign(@NonNull Collection<@NonNull WeightedEdge<T>> weightedEdges) {
+    default @NonNull Iterable<? extends WeightedEdge<T>> assign(
+            @NonNull Collection<@NonNull WeightedEdge<T>> weightedEdges) {
         return match(weightedEdges, weightedEdges.stream().map(WeightedEdge::reversed).collect(Collectors.toList()));
     }
 }

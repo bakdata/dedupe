@@ -26,12 +26,15 @@ package com.bakdata.dedupe.fusion;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.NonNull;
 
 @FunctionalInterface
 public interface ConflictResolution<T, R> {
-    List<AnnotatedValue<R>> resolvePartially(List<AnnotatedValue<T>> values, FusionContext context);
+    @NonNull List<@NonNull AnnotatedValue<R>> resolvePartially(@NonNull List<@NonNull AnnotatedValue<T>> values,
+            @NonNull FusionContext context);
 
-    default Optional<R> resolve(final List<AnnotatedValue<T>> values, final FusionContext context) {
+    default @NonNull Optional<R> resolve(final @NonNull List<@NonNull AnnotatedValue<T>> values,
+            final @NonNull FusionContext context) {
         final List<AnnotatedValue<R>> resolvedValues = this.resolvePartially(values, context);
         switch (resolvedValues.size()) {
             case 0:
@@ -48,7 +51,7 @@ public interface ConflictResolution<T, R> {
         }
     }
 
-    default <R2> ConflictResolution<T, R2> andThen(final ConflictResolution<R, R2> successor) {
+    default <R2> @NonNull ConflictResolution<T, R2> andThen(final @NonNull ConflictResolution<R, R2> successor) {
         final var predecessor = this;
         return ((values, context) -> successor
                 .resolvePartially(predecessor.resolvePartially(values, context), context));

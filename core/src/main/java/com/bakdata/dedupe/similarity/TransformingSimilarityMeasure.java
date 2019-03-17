@@ -45,7 +45,7 @@ public class TransformingSimilarityMeasure<R, T> implements SimilarityMeasure<T>
     private final @NonNull SimilarityMeasure<R> measure;
 
     @Override
-    public float calculateSimilarity(@NonNull final T left, @NonNull final T right,
+    public float getNonNullSimilarity(@NonNull final T left, @NonNull final T right,
             @NonNull final SimilarityContext context) {
         return context.safeExecute(() -> {
             R leftElement = this.transformation.transform(left, context);

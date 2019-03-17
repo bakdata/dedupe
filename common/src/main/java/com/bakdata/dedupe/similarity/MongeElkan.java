@@ -30,17 +30,17 @@ import lombok.NonNull;
 import lombok.Value;
 
 @Value
-class MongeElkan<C extends Collection<? extends T>, T> implements CollectionSimilarityMeasure<C, T> {
-    private final SimilarityMeasure<T> pairMeasure;
+class MongeElkan<C extends Collection<? extends E>, E> implements CollectionSimilarityMeasure<C, E> {
+    private final SimilarityMeasure<E> pairMeasure;
     private final int maxPositionDiff;
     private final float cutoff;
 
     @Override
     public float calculateNonEmptyCollectionSimilarity(@NonNull final C leftCollection,
             @NonNull final C rightCollection, @NonNull final SimilarityContext context) {
-        final List<T> leftList = List.copyOf(leftCollection);
-        final List<T> rightList = List.copyOf(rightCollection);
-        // when cutoff is .9 and |left| = 3, then on average each element has .1 buffer
+        final List<E> leftList = List.copyOf(leftCollection);
+        final List<E> rightList = List.copyOf(rightCollection);
+        // consider a cutoff of .9 and |left| = 3, then on average each element has .1 buffer
         // as soon as the current sum + buffer < index, the cutoff threshold cannot be passed (buffer used up)
         final float cutoffBuffer = (1 - this.cutoff) * leftCollection.size();
         float sum = 0;
