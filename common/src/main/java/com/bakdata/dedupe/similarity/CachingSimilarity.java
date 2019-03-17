@@ -43,7 +43,7 @@ public class CachingSimilarity<T, I> implements SimilarityMeasure<T> {
     @NonNull SimilarityMeasure<T> measure;
     @NonNull Function<@NonNull T, @NonNull I> idExtractor;
     @Getter(AccessLevel.PRIVATE)
-    Table<I, I, Float> cache = HashBasedTable.create();
+    Table<I, I, Double> cache = HashBasedTable.create();
 
     /**
      * Creates a cache based on the object identity; that is, the cache only triggers if the exact same instances are
@@ -69,7 +69,7 @@ public class CachingSimilarity<T, I> implements SimilarityMeasure<T> {
     }
 
     @Override
-    public float getNonNullSimilarity(@NonNull T left, @NonNull T right, @NonNull SimilarityContext context) {
+    public double getNonNullSimilarity(@NonNull T left, @NonNull T right, @NonNull SimilarityContext context) {
         I leftId = idExtractor.apply(left);
         I rightId = idExtractor.apply(right);
         if (measure.isSymmetric() && (leftId instanceof Comparable && ((Comparable) leftId).compareTo(rightId) > 0)) {
@@ -77,11 +77,11 @@ public class CachingSimilarity<T, I> implements SimilarityMeasure<T> {
             leftId = rightId;
             rightId = temp;
         }
-        final Float cachedSim = cache.get(leftId, rightId);
+        final Double cachedSim = cache.get(leftId, rightId);
         if (cachedSim != null) {
             return cachedSim;
         }
-        float sim = measure.getNonNullSimilarity(left, right, context);
+        double sim = measure.getNonNullSimilarity(left, right, context);
         cache.put(leftId, rightId, sim);
         if (measure.isSymmetric() && !(leftId instanceof Comparable)) {
             cache.put(rightId, leftId, sim);

@@ -38,17 +38,17 @@ import lombok.Value;
 @Value
 public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
     @NonNull List<SimilarityMeasure<? super T>> similarityMeasures;
-    @NonNull Function<? super Stream<Float>, Float> aggregator;
+    @NonNull Function<? super Stream<Double>, Double> aggregator;
 
     public AggregatingSimilarityMeasure(
-            final @NonNull Function<? super Stream<Float>, Float> aggregator,
+            final @NonNull Function<? super Stream<Double>, Double> aggregator,
             @NonNull final SimilarityMeasure<? super T>... similarityMeasures) {
         this(aggregator, List.of(similarityMeasures));
     }
 
 
     public AggregatingSimilarityMeasure(
-            final @NonNull Function<? super Stream<Float>, Float> aggregator,
+            final @NonNull Function<? super Stream<Double>, Double> aggregator,
             @NonNull final Iterable<? extends SimilarityMeasure<? super T>> similarityMeasures) {
         this.similarityMeasures = Lists.newArrayList(similarityMeasures);
         this.aggregator = aggregator;
@@ -58,7 +58,7 @@ public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
     }
 
     @Override
-    public float getNonNullSimilarity(@NonNull final T left, @NonNull final T right,
+    public double getNonNullSimilarity(@NonNull final T left, @NonNull final T right,
             @NonNull final SimilarityContext context) {
         return aggregator.apply(similarityMeasures.stream().map(m -> m.getNonNullSimilarity(left, right, context)));
     }

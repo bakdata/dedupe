@@ -63,7 +63,7 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
                 .collect(toList());
     }
 
-    private float getWeight(Collection<WeightedEdge<T>> leftScoreOfRight, T m, T w) {
+    private double getWeight(Collection<WeightedEdge<T>> leftScoreOfRight, T m, T w) {
         return leftScoreOfRight.stream()
                 .filter(edge -> edge.getFirst().equals(m) &&
                                 edge.getSecond().equals(w))
@@ -84,13 +84,13 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
      */
     private List<Queue<List<Integer>>> getRanking(final Collection<WeightedEdge<T>> weightedEdges, List<T> source,
             List<T> target) {
-        Table<T, T, Float> scores = HashBasedTable.create();
+        Table<T, T, Double> scores = HashBasedTable.create();
         for (WeightedEdge<T> weightedEdge : weightedEdges) {
             scores.put(weightedEdge.getFirst(), weightedEdge.getSecond(), weightedEdge.getWeight());
         }
 
         return IntStream.range(0, source.size()).mapToObj(sourceIndex -> {
-                    final Map<Float, List<Integer>> scoreGroup = IntStream.range(0, target.size()).boxed()
+                    final Map<Double, List<Integer>> scoreGroup = IntStream.range(0, target.size()).boxed()
                             // get the score for a given target
                             .map(targetIndex -> Pair.of(targetIndex,
                                     scores.get(source.get(sourceIndex), target.get(targetIndex))))

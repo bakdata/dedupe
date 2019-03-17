@@ -71,7 +71,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     /**
      * A value to signal that the rule cannot be applied (precondition failed).
      */
-    private static final float DOES_NOT_APPLY = SimilarityMeasure.unknown();
+    private static final double DOES_NOT_APPLY = SimilarityMeasure.unknown();
     /**
      * The result when no rules could be applied.
      */
@@ -145,11 +145,11 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
      * <p>A negative rule returns a negative score [-1; -0] and results in a NON_DUPLICATE.</p>
      * <p>A positive rule returns a positive score [0; 1] and results in a DUPLICATE.</p>
      */
-    private ClassificationResult mapScoreToResult(Rule<? super T> rule, float score) {
+    private ClassificationResult mapScoreToResult(Rule<? super T> rule, double score) {
         if (didNotApply(score)) {
             return UNKNOWN;
         }
-        if (score <= -0.0f) {
+        if (score <= -0.0d) {
             // negative rule gave [-1; -0], confidence is just negated
             return ClassificationResult.builder()
                     .classification(Classification.NON_DUPLICATE)
@@ -168,7 +168,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     /**
      * Checks if score is equivalent to {@link #DOES_NOT_APPLY}.
      */
-    private boolean didNotApply(float score) {
+    private boolean didNotApply(double score) {
         return SimilarityMeasure.isUnknown(score);
     }
 
@@ -179,7 +179,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
      */
     @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
     public static class RuleBasedClassifierBuilder<T> {
-        private static float scaleAtThreshold(float similarity, float threshold) {
+        private static double scaleAtThreshold(double similarity, double threshold) {
             if (similarity >= threshold) {
                 return (similarity - threshold) / (1 - threshold);
             }
@@ -265,7 +265,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          */
         public RuleBasedClassifierBuilder<T> thresholdRule(final @NonNull String name,
                 final @NonNull BiPredicate<T, T> condition,
-                final @NonNull SimilarityMeasure<? super T> similarityMeasure, float threshold) {
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure, double threshold) {
             return this.thresholdRule(name, conditional(similarityMeasure, condition),
                     threshold);
         }
@@ -292,7 +292,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * @return this
          */
         public RuleBasedClassifierBuilder<T> thresholdRule(final @NonNull String name,
-                final @NonNull SimilarityMeasure<? super T> similarityMeasure, float threshold) {
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure, double threshold) {
             return this.rule(new Rule<>(name, similarityMeasure.unknownIf(s -> s <= 0)));
         }
 
@@ -309,7 +309,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * @return this
          */
         public RuleBasedClassifierBuilder<T> defaultRule(
-                final @NonNull SimilarityMeasure<? super T> similarityMeasure, float threshold) {
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure, double threshold) {
             return this.thresholdRule("default", similarityMeasure, threshold);
         }
 
@@ -343,7 +343,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * Indicates that this similarity measure can not be applied (e.g., precondition not satisfied).
          */
         @SuppressWarnings("SameReturnValue")
-        protected static float doesNotApply() {
+        protected static double doesNotApply() {
             return DOES_NOT_APPLY;
         }
 
@@ -358,7 +358,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * @param context the context of the comparison.
          * @return the similarity or {@link #doesNotApply()}.
          */
-        float evaluate(final T left, final T right, final SimilarityContext context) {
+        double evaluate(final T left, final T right, final SimilarityContext context) {
             return this.measure.getSimilarity(left, right, context);
         }
     }

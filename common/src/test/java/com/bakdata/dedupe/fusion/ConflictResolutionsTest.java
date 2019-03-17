@@ -105,7 +105,7 @@ class ConflictResolutionsTest {
                 .birthDate(LocalDate.of(2017, Month.DECEMBER, 31))
                 .lastModified(LocalDateTime.MAX)
                 .build();
-        final Source source1 = new Source("source1", 1.0f);
+        final Source source1 = new Source("source1", 1.0d);
         final LocalDateTime dateTime = LocalDateTime.MIN;
         final Person person2 = Person.builder()
                 .id("id2")
@@ -115,7 +115,7 @@ class ConflictResolutionsTest {
                 .birthDate(LocalDate.of(2018, Month.JANUARY, 1))
                 .lastModified(LocalDateTime.MIN)
                 .build();
-        final Source source2 = new Source("source2", 2.0f);
+        final Source source2 = new Source("source2", 2.0d);
         final List<AnnotatedValue<Person>> values = List.of(
                 new AnnotatedValue<>(person1, source1, dateTime),
                 new AnnotatedValue<>(person2, source2, dateTime));

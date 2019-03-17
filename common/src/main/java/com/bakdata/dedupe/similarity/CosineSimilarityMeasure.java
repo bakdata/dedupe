@@ -40,8 +40,8 @@ import lombok.NonNull;
  */
 public class CosineSimilarityMeasure<C extends Collection<? extends E>, E>
         implements CollectionSimilarityMeasure<C, E> {
-    private static <T> float getLength(final Map<T, Long> histogram) {
-        return (float) Math.sqrt(histogram.values().stream().mapToDouble(count -> count * count).sum());
+    private static <T> double getLength(final Map<T, Long> histogram) {
+        return (double) Math.sqrt(histogram.values().stream().mapToDouble(count -> count * count).sum());
     }
 
     private static <C extends Collection<? extends E>, E> Map<E, Long> getHistogram(@NonNull C left) {
@@ -49,11 +49,11 @@ public class CosineSimilarityMeasure<C extends Collection<? extends E>, E>
     }
 
     @Override
-    public float calculateNonEmptyCollectionSimilarity(@NonNull C left, @NonNull C right,
+    public double calculateNonEmptyCollectionSimilarity(@NonNull C left, @NonNull C right,
             @NonNull SimilarityContext context) {
         final Map<E, Long> leftHistogram = getHistogram(left);
         final Map<E, Long> rightHistogram = getHistogram(right);
-        float dotProduct = 0;
+        double dotProduct = 0;
         for (final Map.Entry<E, Long> leftEntry : leftHistogram.entrySet()) {
             final Long rightCount = rightHistogram.get(leftEntry.getKey());
             if (rightCount != null) {

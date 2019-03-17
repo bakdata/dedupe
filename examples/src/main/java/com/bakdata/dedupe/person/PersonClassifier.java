@@ -45,14 +45,14 @@ public class PersonClassifier implements Classifier<Person> {
     @Delegate
     Classifier<Person> classifier = RuleBasedClassifier.<Person>builder()
             .positiveRule("Basic comparison", CommonSimilarityMeasures.<Person>weightedAverage()
-                    .add(2, Person::getFirstName, max(levenshtein().cutoff(0.5f), jaroWinkler()))
+                    .add(2, Person::getFirstName, max(levenshtein().cutoff(0.5d), jaroWinkler()))
                     .add(2, Person::getLastName,
-                            max(equality().of(beiderMorse()), levenshtein().cutoff(0.5f), jaroWinkler()))
+                            max(equality().of(beiderMorse()), levenshtein().cutoff(0.5d), jaroWinkler()))
                     .add(1, Person::getGender, equality())
                     .add(2, Person::getBirthDate,
                             max(levenshtein().of(ISO_FORMAT::format), maxDiff(2, ChronoUnit.DAYS)))
                     .build()
-                    .scaleWithThreshold(0.9f))
+                    .scaleWithThreshold(0.9d))
             .build();
 }
 

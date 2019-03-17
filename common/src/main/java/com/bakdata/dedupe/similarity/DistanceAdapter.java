@@ -36,18 +36,18 @@ public class DistanceAdapter<T extends CharSequence> implements SimilarityMeasur
     private final SimilarityScore<? extends Number> score;
 
     @Override
-    public float getSimilarity(final CharSequence left, final CharSequence right,
+    public double getSimilarity(final CharSequence left, final CharSequence right,
             @NonNull final SimilarityContext context) {
         return 0;
     }
 
     @Override
-    public float getNonNullSimilarity(final @NonNull CharSequence left, final @NonNull CharSequence right,
+    public double getNonNullSimilarity(final @NonNull CharSequence left, final @NonNull CharSequence right,
             final @NonNull SimilarityContext context) {
-        final float distance = this.score.apply(left, right).floatValue();
+        final double distance = this.score.apply(left, right).floatValue();
         if (distance == -1) {
             return 0;
         }
-        return 1.0f - distance / Math.max(left.length(), right.length());
+        return 1.0d - distance / Math.max(left.length(), right.length());
     }
 }

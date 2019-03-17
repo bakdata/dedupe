@@ -36,7 +36,7 @@ import lombok.NonNull;
 @FunctionalInterface
 public interface CollectionSimilarityMeasure<C extends Collection<? extends E>, E> extends SimilarityMeasure<C> {
     @Override
-    default float getNonNullSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
+    default double getNonNullSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
             @NonNull SimilarityContext context) {
         if (leftCollection.isEmpty() && rightCollection.isEmpty()) {
             return 1;
@@ -56,6 +56,6 @@ public interface CollectionSimilarityMeasure<C extends Collection<? extends E>, 
      * @return the similarity [0; 1] or {@link #unknown()} if no comparison can be performed (for example if
      * leftCollection or rightCollection are null).
      */
-    float calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
+    double calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
             @NonNull SimilarityContext context);
 }

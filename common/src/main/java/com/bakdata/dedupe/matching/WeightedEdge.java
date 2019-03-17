@@ -49,7 +49,7 @@ public class WeightedEdge<T> {
     /**
      * The weight. May be negative depending of the application.
      */
-    float weight;
+    double weight;
 
     /**
      * Reverses the direction of the edge by swapping the vertexes.

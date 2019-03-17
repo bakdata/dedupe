@@ -45,7 +45,7 @@ public class TransformingSimilarityMeasure<R, T> implements SimilarityMeasure<T>
     private final @NonNull SimilarityMeasure<R> measure;
 
     @Override
-    public float getNonNullSimilarity(@NonNull final T left, @NonNull final T right,
+    public double getNonNullSimilarity(@NonNull final T left, @NonNull final T right,
             @NonNull final SimilarityContext context) {
         return context.safeExecute(() -> {
             R leftElement = this.transformation.transform(left, context);
@@ -55,7 +55,7 @@ public class TransformingSimilarityMeasure<R, T> implements SimilarityMeasure<T>
     }
 
     @Override
-    public @NonNull SimilarityMeasure<T> cutoff(final float threshold) {
+    public @NonNull SimilarityMeasure<T> cutoff(final double threshold) {
         return new TransformingSimilarityMeasure<>(this.transformation, this.measure.cutoff(threshold));
     }
 }

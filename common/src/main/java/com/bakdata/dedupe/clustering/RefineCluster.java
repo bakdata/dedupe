@@ -67,14 +67,14 @@ public class RefineCluster<C extends Comparable<C>, T> {
     @NonNull
     Function<? super Iterable<? extends T>, C> clusterIdGenerator;
 
-    private static float getWeight(final ClassificationResult classificationResult) {
+    private static double getWeight(final ClassificationResult classificationResult) {
         switch (classificationResult.getClassification()) {
             case DUPLICATE:
                 return classificationResult.getConfidence();
             case NON_DUPLICATE:
                 return -classificationResult.getConfidence();
             case UNKNOWN:
-                return -0.0f;
+                return -0.0d;
             default:
                 throw new IllegalStateException();
         }
@@ -84,14 +84,14 @@ public class RefineCluster<C extends Comparable<C>, T> {
         return n * (n - 1) / 2;
     }
 
-    private static float scoreClustering(final byte[] partitions, final float[][] weightMatrix) {
+    private static double scoreClustering(final byte[] partitions, final double[][] weightMatrix) {
         final int n = partitions.length;
         final int[] partitionSizes = new int[n];
         for (final byte clustering : partitions) {
             partitionSizes[clustering]++;
         }
 
-        float score = 0;
+        double score = 0;
         for (int rowIndex = 0; rowIndex < n; rowIndex++) {
             for (int colIndex = rowIndex + 1; colIndex < n; colIndex++) {
                 if (partitions[rowIndex] == partitions[colIndex]) {
@@ -114,7 +114,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
                     // reverse of Gaussian
                     int leftIndex = (int) (Math.sqrt(i + 0.25) - 0.5);
                     int rightIndex = i - getNumEdges(leftIndex) + leftIndex;
-                    return WeightedEdge.of(leftIndex, rightIndex, Float.NaN);
+                    return WeightedEdge.of(leftIndex, rightIndex, Double.NaN);
                 })
                 .collect(Collectors.toList());
         return weightedEdges;
@@ -168,12 +168,12 @@ public class RefineCluster<C extends Comparable<C>, T> {
      */
     private byte[] refineSmallCluster(final Cluster<C, T> cluster,
             final List<ClassifiedCandidate<T>> knownClassifications) {
-        final float[][] weightMatrix = this.getKnownWeightMatrix(cluster, knownClassifications);
+        final double[][] weightMatrix = this.getKnownWeightMatrix(cluster, knownClassifications);
 
         final int n = cluster.size();
         for (int rowIndex = 0; rowIndex < n; rowIndex++) {
             for (int colIndex = rowIndex + 1; colIndex < n; colIndex++) {
-                if (Float.isNaN(weightMatrix[rowIndex][colIndex])) {
+                if (Double.isNaN(weightMatrix[rowIndex][colIndex])) {
                     weightMatrix[rowIndex][colIndex] =
                             getWeight(this.classifier
                                     .classify(new OnlineCandidate<>(cluster.get(rowIndex), cluster.get(colIndex))));
@@ -220,12 +220,12 @@ public class RefineCluster<C extends Comparable<C>, T> {
         return this.getSubClusters(bestClustering, cluster);
     }
 
-    private float[][] getKnownWeightMatrix(final Cluster<C, T> cluster,
+    private double[][] getKnownWeightMatrix(final Cluster<C, T> cluster,
             final Iterable<ClassifiedCandidate<T>> knownClassifications) {
         final var n = cluster.size();
-        final var weightMatrix = new float[n][n];
+        final var weightMatrix = new double[n][n];
         for (final var row : weightMatrix) {
-            Arrays.fill(row, Float.NaN);
+            Arrays.fill(row, Double.NaN);
         }
 
         final var clusterIndex =
@@ -253,14 +253,14 @@ public class RefineCluster<C extends Comparable<C>, T> {
         final Collection<WeightedEdge> queue = new PriorityQueue<>(Comparator.comparing(WeightedEdge::getWeight));
         queue.addAll(edges);
 
-        final float[][] weightMatrix = new float[cluster.size()][cluster.size()];
+        final double[][] weightMatrix = new double[cluster.size()][cluster.size()];
         for (final WeightedEdge edge : edges) {
             weightMatrix[edge.left][edge.right] = edge.getWeight();
         }
 
         // start with each publication in its own cluster
         byte[] clustering = Bytes.toArray(IntStream.range(0, cluster.size()).boxed().collect(Collectors.toList()));
-        float score = 0;
+        double score = 0;
         for (final WeightedEdge edge : queue) {
             final byte[] newClustering = clustering.clone();
             final byte newClusterId = newClustering[edge.left];
@@ -270,7 +270,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
                     newClustering[i] = newClusterId;
                 }
             }
-            final float newScore = scoreClustering(newClustering, weightMatrix);
+            final double newScore = scoreClustering(newClustering, weightMatrix);
             if (newScore > score) {
                 score = newScore;
                 clustering = newClustering;
@@ -312,8 +312,8 @@ public class RefineCluster<C extends Comparable<C>, T> {
         }
 
         return weightedEdges.stream().map(weightedEdge -> {
-            float weight = weightedEdge.getWeight();
-            if (Float.isNaN(weight)) {
+            double weight = weightedEdge.getWeight();
+            if (Double.isNaN(weight)) {
                 // calculate weight for dummy entry
                 T left = cluster.get(weightedEdge.getLeft());
                 T right = cluster.get(weightedEdge.getRight());
@@ -374,19 +374,19 @@ public class RefineCluster<C extends Comparable<C>, T> {
         private int right;
         @Wither
         private
-        float weight;
+        double weight;
 
-        static WeightedEdge of(final int leftIndex, final int rightIndex, final float weight) {
+        static WeightedEdge of(final int leftIndex, final int rightIndex, final double weight) {
             return new WeightedEdge(Math.min(leftIndex, rightIndex), Math.max(leftIndex, rightIndex), weight);
         }
 
         WeightedEdge getTriangleEdge(final WeightedEdge e) {
             if (this.left < e.left) {
-                return new WeightedEdge(this.left, e.left + e.right - this.right, Float.NaN);
+                return new WeightedEdge(this.left, e.left + e.right - this.right, Double.NaN);
             } else if (this.left == e.left) {
-                return new WeightedEdge(Math.min(this.right, e.right), Math.max(this.right, e.right), Float.NaN);
+                return new WeightedEdge(Math.min(this.right, e.right), Math.max(this.right, e.right), Double.NaN);
             }
-            return new WeightedEdge(e.left, this.left + this.right - e.right, Float.NaN);
+            return new WeightedEdge(e.left, this.left + this.right - e.right, Double.NaN);
         }
 
         boolean overlaps(final WeightedEdge e) {

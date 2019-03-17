@@ -71,8 +71,8 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
      * custom similarity measure.</p>
      */
     SimilarityMeasure<Person> namesCorrectlySplitSimilarity = CommonSimilarityMeasures.<Person>weightedAverage()
-            .add(1, Person::getFirstName, max(levenshtein().cutoff(0.9f), jaroWinkler()))
-            .add(1, Person::getLastName, max(equality().of(beiderMorse()), levenshtein().cutoff(0.8f), jaroWinkler()))
+            .add(1, Person::getFirstName, max(levenshtein().cutoff(0.9d), jaroWinkler()))
+            .add(1, Person::getLastName, max(equality().of(beiderMorse()), levenshtein().cutoff(0.8d), jaroWinkler()))
             .build();
 
     /**
@@ -81,7 +81,7 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
      * <p>Note that we need to be stricter (=higher threshold) than {@link #namesCorrectlySplitSimilarity} to avoid too
      * many false positives.</p>
      */
-    SimilarityMeasure<Person> namesIncorrectlySplitSimilarity = levenshtein().cutoff(.9f).of(concatNames());
+    SimilarityMeasure<Person> namesIncorrectlySplitSimilarity = levenshtein().cutoff(.9d).of(concatNames());
 
     /**
      * Case 4: Swapped first and last name.
@@ -93,7 +93,7 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
      * <p>Example: John Johnson and John Smith will match 1) John -> John = 1.0; 2) Johnson -> John = 0.91</p>
      */
     SimilarityMeasure<String> nameSimilarity =
-            max(levenshtein().cutoff(0.9f), jaroWinkler(), equality().of(beiderMorse()));
+            max(levenshtein().cutoff(0.9d), jaroWinkler(), equality().of(beiderMorse()));
     SimilarityMeasure<Person> namesSwappedSimilarity = stableMatching(nameSimilarity)
             .of(person -> List.of(person.getFirstName(), person.getLastName()));
 
@@ -122,7 +122,7 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
                     .add(2, Person::getBirthDate,
                             max(levenshtein().of(ISO_FORMAT::format), maxDiff(2, ChronoUnit.DAYS)))
                     .build()
-                    .scaleWithThreshold(0.9f))
+                    .scaleWithThreshold(0.9d))
             .build();
 
     private ValueTransformation<Person, CharSequence> concatNames() {

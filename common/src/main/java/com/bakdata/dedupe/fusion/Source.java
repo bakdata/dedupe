@@ -30,7 +30,7 @@ import lombok.Value;
 @Value
 public class Source {
     @Getter
-    private static final Source Calculated = new Source("calculated", Float.NaN);
+    private static final Source Calculated = new Source("calculated", Double.NaN);
     String name;
-    float weight;
+    double weight;
 }

@@ -33,20 +33,20 @@ import lombok.Value;
 class MongeElkan<C extends Collection<? extends E>, E> implements CollectionSimilarityMeasure<C, E> {
     private final SimilarityMeasure<E> pairMeasure;
     private final int maxPositionDiff;
-    private final float cutoff;
+    private final double cutoff;
 
     @Override
-    public float calculateNonEmptyCollectionSimilarity(@NonNull final C leftCollection,
+    public double calculateNonEmptyCollectionSimilarity(@NonNull final C leftCollection,
             @NonNull final C rightCollection, @NonNull final SimilarityContext context) {
         final List<E> leftList = List.copyOf(leftCollection);
         final List<E> rightList = List.copyOf(rightCollection);
         // consider a cutoff of .9 and |left| = 3, then on average each element has .1 buffer
         // as soon as the current sum + buffer < index, the cutoff threshold cannot be passed (buffer used up)
-        final float cutoffBuffer = (1 - this.cutoff) * leftCollection.size();
-        float sum = 0;
+        final double cutoffBuffer = (1 - this.cutoff) * leftCollection.size();
+        double sum = 0;
         for (int leftIndex = 0; leftIndex < leftCollection.size() && (cutoffBuffer + sum) >= leftIndex;
                 leftIndex++) {
-            float max = 0;
+            double max = 0;
             for (int rightIndex = Math.max(0, leftIndex - this.maxPositionDiff),
                     rightMax = Math.min(rightCollection.size(), leftIndex + this.maxPositionDiff);
                     max < 1.0 && rightIndex < rightMax; rightIndex++) {
@@ -59,7 +59,7 @@ class MongeElkan<C extends Collection<? extends E>, E> implements CollectionSimi
     }
 
     @Override
-    public SimilarityMeasure<C> cutoff(final float threshold) {
+    public SimilarityMeasure<C> cutoff(final double threshold) {
         return new MongeElkan<>(this.pairMeasure, this.maxPositionDiff, threshold);
     }
 }

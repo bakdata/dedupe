@@ -86,7 +86,7 @@ public class CommonSimilarityMeasures {
     public static <E, C extends Collection<? extends E>> SetSimilarityMeasure<C, E> jaccard() {
         return (left, right, context) -> {
             final long intersectCount = left.stream().filter(right::contains).count();
-            return (float) intersectCount / (right.size() + left.size() - intersectCount);
+            return (double) intersectCount / (right.size() + left.size() - intersectCount);
         };
     }
 
@@ -95,7 +95,7 @@ public class CommonSimilarityMeasures {
      * known instance of edit distance.
      * <p>The similarity is calculated by normalizing the number of edits over the maximum input length.</p>
      * <p>Note that Levenshtein distance is really slow, but can be tremulously sped up by using a threshold (e.g.,
-     * {@link SimilarityMeasure#cutoff(float)} or {@link SimilarityMeasure#scaleWithThreshold(float)}).</p>
+     * {@link SimilarityMeasure#cutoff(double)} or {@link SimilarityMeasure#scaleWithThreshold(double)}).</p>
      *
      * @param <T> the type of the record.
      * @return the Levenshtein distance.
@@ -145,7 +145,7 @@ public class CommonSimilarityMeasures {
      * neighborhood, the matching approach is usually preferable.</p>
      * <p>Monge-Elkan prefers the left side over the right side.</p>
      * <p>Note that Monge-Elkan distance can be well sped up by using a threshold (e.g.,
-     * {@link SimilarityMeasure#cutoff(float)} or {@link SimilarityMeasure#scaleWithThreshold(float)}).</p>
+     * {@link SimilarityMeasure#cutoff(double)} or {@link SimilarityMeasure#scaleWithThreshold(double)}).</p>
      *
      * @param pairMeasure the similarity measure to use to calculate the preferences and the overall similarity.
      * @param <E> the element type.
@@ -199,7 +199,7 @@ public class CommonSimilarityMeasures {
      * neighborhood, the matching approach is usually preferable.</p>
      * <p>Monge-Elkan prefers the left side over the right side.</p>
      * <p>Note that Monge-Elkan distance can be well sped up by using a threshold (e.g.,
-     * {@link SimilarityMeasure#cutoff(float)} or {@link SimilarityMeasure#scaleWithThreshold(float)}).</p>
+     * {@link SimilarityMeasure#cutoff(double)} or {@link SimilarityMeasure#scaleWithThreshold(double)}).</p>
      *
      * @param pairMeasure the similarity measure to use to calculate the preferences and the overall similarity.
      * @param maxPositionDiff the maximum index difference of the left list item and the right list item.
@@ -237,43 +237,43 @@ public class CommonSimilarityMeasures {
 
     @SafeVarargs
     public static <T> SimilarityMeasure<T> max(final SimilarityMeasure<? super T>... measures) {
-        return new AggregatingSimilarityMeasure<T>((Stream<Float> similarities) -> similarities
+        return new AggregatingSimilarityMeasure<T>((Stream<Double> similarities) -> similarities
                 .filter(sim -> !SimilarityMeasure.isUnknown(sim))
-                .takeWhile(sim -> sim < 1f)
-                .max(Float::compareTo)
+                .takeWhile(sim -> sim < 1d)
+                .max(Double::compareTo)
                 .orElse(unknown()), measures);
     }
 
     public static <T extends Temporal> SimilarityMeasure<T> maxDiff(final int diff, final TemporalUnit unit) {
         return (left, right, context) ->
-                Math.max(0, 1 - (float) Math.abs(left.until(right, unit)) / diff);
+                Math.max(0, 1 - (double) Math.abs(left.until(right, unit)) / diff);
     }
 
     @SafeVarargs
     public static <T> SimilarityMeasure<T> min(final SimilarityMeasure<? super T>... measures) {
-        return new AggregatingSimilarityMeasure<T>((Stream<Float> similarities) -> similarities
+        return new AggregatingSimilarityMeasure<T>((Stream<Double> similarities) -> similarities
                 .filter(sim -> !SimilarityMeasure.isUnknown(sim))
-                .takeWhile(sim -> sim > 0f)
-                .min(Float::compareTo)
+                .takeWhile(sim -> sim > 0d)
+                .min(Double::compareTo)
                 .orElse(unknown()), measures);
     }
 
 //    @SafeVarargs
 //    public static <T> SimilarityMeasure<T> average(final SimilarityMeasure<? super T>... measures) {
-//        return new AggregatingSimilarityMeasure<T>((Stream<Float> similarities) -> similarities
+//        return new AggregatingSimilarityMeasure<T>((Stream<Double> similarities) -> similarities
 //                .filter(sim -> !SimilarityMeasure.isUnknown(sim))
-//                .reduce(Float::sum)
+//                .reduce(Double::sum)
 //                .orElse(unknown()), measures);
 //    }
 
     public static <T> WeightedAggregation.WeightedAggregationBuilder<T> weightedAggregation(
-            final BiFunction<List<Float>, List<Float>, Float> aggregator) {
+            final BiFunction<List<Double>, List<Double>, Double> aggregator) {
         return WeightedAggregation.<T>builder().aggregator(aggregator);
     }
 
     public static <T> WeightedAggregation.WeightedAggregationBuilder<T> weightedAverage() {
         return weightedAggregation((weightedSims, weights) ->
-                (float) (weightedSims.stream().mapToDouble(sim -> sim).sum() / weights.stream().mapToDouble(w -> w)
+                (double) (weightedSims.stream().mapToDouble(sim -> sim).sum() / weights.stream().mapToDouble(w -> w)
                         .sum()));
     }
 
@@ -282,7 +282,7 @@ public class CommonSimilarityMeasures {
         private final SimilarityScore<? extends Number> score;
 
         @Override
-        public float getNonNullSimilarity(final CharSequence left, final CharSequence right,
+        public double getNonNullSimilarity(final CharSequence left, final CharSequence right,
                 final SimilarityContext context) {
             return this.score.apply(left, right).floatValue();
         }
@@ -291,26 +291,26 @@ public class CommonSimilarityMeasures {
     @Builder
     @Value
     public static class WeightedAggregation<R> implements SimilarityMeasure<R> {
-        BiFunction<List<Float>, List<Float>, Float> aggregator;
+        BiFunction<List<Double>, List<Double>, Double> aggregator;
         @Singular
         List<WeightedSimilarity<R>> weightedSimilarities;
         @Getter(lazy = true)
-        List<Float> weights =
+        List<Double> weights =
                 this.weightedSimilarities.stream().map(WeightedSimilarity::getWeight).collect(Collectors.toList());
 
         @Override
-        public float getNonNullSimilarity(final R left, final R right, final SimilarityContext context) {
+        public double getNonNullSimilarity(final R left, final R right, final SimilarityContext context) {
             final var weightedSims = this.weightedSimilarities.stream()
                     .map(ws -> ws.getMeasure().getSimilarity(left, right, context) * ws.getWeight())
                     .collect(Collectors.toList());
-            List<Float> adjustedWeights = null;
+            List<Double> adjustedWeights = null;
             for (int i = 0; i < weightedSims.size(); i++) {
                 if (weightedSims.get(i).isNaN()) {
                     if (adjustedWeights == null) {
                         adjustedWeights = new ArrayList<>(this.getWeights());
                     }
-                    adjustedWeights.set(i, 0.0f);
-                    weightedSims.set(i, 0.0f);
+                    adjustedWeights.set(i, 0.0d);
+                    weightedSims.set(i, 0.0d);
                 }
             }
             return this.aggregator.apply(weightedSims, adjustedWeights == null ? this.getWeights() : adjustedWeights);
@@ -318,17 +318,17 @@ public class CommonSimilarityMeasures {
 
         @Value
         public static class WeightedSimilarity<T> {
-            float weight;
+            double weight;
             SimilarityMeasure<T> measure;
         }
 
         public static class WeightedAggregationBuilder<R> {
-            public <T> WeightedAggregationBuilder<R> add(final float weight, final Function<R, ? extends T> extractor,
+            public <T> WeightedAggregationBuilder<R> add(final double weight, final Function<R, ? extends T> extractor,
                     final SimilarityMeasure<? super T> measure) {
                 return this.add(weight, measure.of(extractor));
             }
 
-            public WeightedAggregationBuilder<R> add(final float weight, final SimilarityMeasure<R> measure) {
+            public WeightedAggregationBuilder<R> add(final double weight, final SimilarityMeasure<R> measure) {
                 return this.weightedSimilarity(new WeightedSimilarity<>(weight, measure));
             }
         }

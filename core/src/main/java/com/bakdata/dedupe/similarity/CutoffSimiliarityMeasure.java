@@ -43,7 +43,7 @@ public class CutoffSimiliarityMeasure<T> implements SimilarityMeasure<T> {
     /**
      * The threshold that divides the dissimilar and the similar values.
      */
-    float threshold;
+    double threshold;
 
     /**
      * Cuts the similarity, such that all values {@code <threshold} result in a similarity of 0, and all values {@code
@@ -55,18 +55,18 @@ public class CutoffSimiliarityMeasure<T> implements SimilarityMeasure<T> {
      * @param threshold the threshold that divides the dissimilar and the similar values.
      * @return a similarity measure replacing all similarities {@code <threshold} by 0.
      */
-    public static float cutoff(final float similarity, final float threshold) {
+    public static double cutoff(final double similarity, final double threshold) {
         return similarity < threshold ? 0 : similarity;
     }
 
     @Override
-    public float getNonNullSimilarity(@NonNull final T left, @NonNull final T right,
+    public double getNonNullSimilarity(@NonNull final T left, @NonNull final T right,
             @NonNull final SimilarityContext context) {
         return cutoff(this.inner.getSimilarity(left, right, context), this.threshold);
     }
 
     @Override
-    public SimilarityMeasure<T> cutoff(final float threshold) {
+    public SimilarityMeasure<T> cutoff(final double threshold) {
         if (threshold < this.threshold) {
             return this;
         }

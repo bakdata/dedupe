@@ -39,7 +39,7 @@ import lombok.NonNull;
 @FunctionalInterface
 public interface SetSimilarityMeasure<C extends Collection<? extends E>, E> extends CollectionSimilarityMeasure<C, E> {
     @Override
-    default float calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
+    default double calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
             @NonNull SimilarityContext context) {
         final Set<E> leftSet = leftCollection instanceof Set ? (Set<E>) leftCollection : new HashSet<>(leftCollection);
         final Set<E> rightSet =
@@ -56,6 +56,6 @@ public interface SetSimilarityMeasure<C extends Collection<? extends E>, E> exte
      * @return the similarity [0; 1] or {@link #unknown()} if no comparison can be performed (for example if
      * leftCollection or rightCollection are null).
      */
-    float calculateNonEmptySetSimilarity(@NonNull Set<E> leftCollection, @NonNull Set<E> rightCollection,
+    double calculateNonEmptySetSimilarity(@NonNull Set<E> leftCollection, @NonNull Set<E> rightCollection,
             @NonNull SimilarityContext context);
 }

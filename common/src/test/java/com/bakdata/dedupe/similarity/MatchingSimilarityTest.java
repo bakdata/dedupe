@@ -42,14 +42,14 @@ class MatchingSimilarityTest {
         final SimilarityMeasure<List<String>> stableMatching =
                 new MatchingSimilarity<>(new WeaklyStableMarriage<>(), levenshtein());
 
-        final float sim =
+        final double sim =
                 stableMatching.getSimilarity(men, women, SimilarityContext.builder().build());
         assertThat(sim).isEqualTo(
-                (1 / 3f + // aaa/ab
-                 2 / 3f + // bbb/bb
-                 2 / 3f + // ccc/cc
-                 1 / 4f) // ddd/abcd
-                / 4, offset(1e-4f)
+                (1 / 3d + // aaa/ab
+                 2 / 3d + // bbb/bb
+                 2 / 3d + // ccc/cc
+                 1 / 4d) // ddd/abcd
+                / 4, offset(1e-4d)
         );
     }
 
@@ -61,14 +61,14 @@ class MatchingSimilarityTest {
         final SimilarityMeasure<List<String>> stableMatching =
                 new MatchingSimilarity<>(new WeaklyStableMarriage<>(), levenshtein());
 
-        final float sim =
+        final double sim =
                 stableMatching.getSimilarity(men, women, SimilarityContext.builder().build());
         assertThat(sim).isEqualTo(
-                (1 / 3f + // aaa/ab
-                 2 / 3f + // bbb/bb
-                 2 / 3f + // ccc/cc
-                 1 / 4f) // ddd/abcd
-                / 5, offset(1e-4f)
+                (1 / 3d + // aaa/ab
+                 2 / 3d + // bbb/bb
+                 2 / 3d + // ccc/cc
+                 1 / 4d) // ddd/abcd
+                / 5, offset(1e-4d)
         );
     }
 
@@ -80,14 +80,14 @@ class MatchingSimilarityTest {
         final SimilarityMeasure<List<String>> stableMatching =
                 new MatchingSimilarity<>(new WeaklyStableMarriage<>(), levenshtein());
 
-        final float sim =
+        final double sim =
                 stableMatching.getSimilarity(men, women, SimilarityContext.builder().build());
         assertThat(sim).isEqualTo(
-                (1 / 3f + // aaa/ab
-                 2 / 3f + // bbb/bb
-                 2 / 3f + // ccc/cc
-                 1 / 4f) // ddd/abcd
-                / 5, offset(1e-4f)
+                (1 / 3d + // aaa/ab
+                 2 / 3d + // bbb/bb
+                 2 / 3d + // ccc/cc
+                 1 / 4d) // ddd/abcd
+                / 5, offset(1e-4d)
         );
     }
 }

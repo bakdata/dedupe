@@ -46,7 +46,7 @@ public class MatchingSimilarity<C extends Collection<? extends E>, E> implements
     @NonNull SimilarityMeasure<E> pairMeasure;
 
     @Override
-    public float calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
+    public double calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
             @NonNull SimilarityContext context) {
         final Collection<WeightedEdge<E>> leftScoreOfRight = getScores(leftCollection, rightCollection, context);
         final Collection<WeightedEdge<E>> rightScoreOfLeft = pairMeasure.isSymmetric()
@@ -56,7 +56,7 @@ public class MatchingSimilarity<C extends Collection<? extends E>, E> implements
         final Iterable<? extends WeightedEdge<E>> matches = bipartiteMatcher.match(leftScoreOfRight, rightScoreOfLeft);
         return StreamSupport.stream(matches.spliterator(), false)
                        .map(WeightedEdge::getWeight)
-                       .reduce(0f, Float::sum) /
+                       .reduce(0d, Double::sum) /
                Math.max(leftCollection.size(), rightCollection.size());
     }
 
@@ -69,7 +69,7 @@ public class MatchingSimilarity<C extends Collection<? extends E>, E> implements
         final Collection<WeightedEdge<E>> leftScoreOfRight = new ArrayList<>();
         for (E left : leftCollection) {
             for (E right : rightCollection) {
-                final float leftScore = pairMeasure.getSimilarity(left, right, context);
+                final double leftScore = pairMeasure.getSimilarity(left, right, context);
                 if (!isUnknown(leftScore)) {
                     leftScoreOfRight.add(new WeightedEdge<>(left, right, leftScore));
                 }
