@@ -28,7 +28,7 @@ import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.equality;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.jaroWinkler;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.levenshtein;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.max;
-import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.maxDiff;
+import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.scaledDifference;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.stableMatching;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.words;
 
@@ -120,7 +120,7 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
                     .add(4, overallNameSimilarity)
                     .add(1, Person::getGender, equality())
                     .add(2, Person::getBirthDate,
-                            max(levenshtein().of(ISO_FORMAT::format), maxDiff(2, ChronoUnit.DAYS)))
+                            max(levenshtein().of(ISO_FORMAT::format), scaledDifference(2, ChronoUnit.DAYS)))
                     .build()
                     .scaleWithThreshold(0.9d))
             .build();

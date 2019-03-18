@@ -23,8 +23,8 @@
  */
 package com.bakdata.dedupe.similarity;
 
+import java.util.function.DoublePredicate;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import lombok.NonNull;
 
 /**
@@ -200,7 +200,7 @@ public interface SimilarityMeasure<T> {
      *
      * @return a similarity measure replacing specific similarities with {@link #unknown()}.
      */
-    default @NonNull SimilarityMeasure<T> unknownIf(final @NonNull Predicate<Double> scorePredicate) {
+    default @NonNull SimilarityMeasure<T> unknownIf(final @NonNull DoublePredicate scorePredicate) {
         return (left, right, context) -> {
             final double similarity = this.getSimilarity(left, right, context);
             return scorePredicate.test(similarity) ? unknown() : similarity;

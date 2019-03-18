@@ -24,6 +24,8 @@
 
 package com.bakdata.dedupe.similarity;
 
+import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.toSimilarity;
+
 import lombok.Value;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
@@ -38,8 +40,8 @@ import org.apache.commons.text.similarity.LevenshteinDistance;
  */
 @Value
 public class Levensthein<T extends CharSequence> implements SimilarityMeasure<T> {
-    private static final DistanceAdapter<CharSequence> NoThresholdMeasure =
-            new DistanceAdapter<>(new LevenshteinDistance());
+    private static final SimilarityMeasure<CharSequence> NoThresholdMeasure =
+            toSimilarity(new LevenshteinDistance());
     /**
      * The threshold [0; 1], below which the calculation should be aborted. A high threshold saves tremendous time.
      */
@@ -53,7 +55,7 @@ public class Levensthein<T extends CharSequence> implements SimilarityMeasure<T>
         }
         final var maxLen = Math.max(left.length(), right.length());
         final var maxDiff = (int) (maxLen * (1 - this.threshold));
-        final var measure = new DistanceAdapter<T>(new LevenshteinDistance(maxDiff));
+        final var measure = toSimilarity(new LevenshteinDistance(maxDiff));
         return measure.getNonNullSimilarity(left, right, context);
     }
 

@@ -27,21 +27,18 @@ import static com.bakdata.dedupe.similarity.SimilarityMeasure.unknown;
 
 import com.bakdata.dedupe.matching.BipartiteMatcher;
 import com.bakdata.dedupe.matching.WeaklyStableMarriage;
+import com.bakdata.dedupe.similarity.WeightedAggregatingSimilarityMeasure.WeightedValue;
+import com.google.common.collect.Lists;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.Stream;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Singular;
-import lombok.Value;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.text.similarity.EditDistance;
 import org.apache.commons.text.similarity.JaroWinklerDistance;
 import org.apache.commons.text.similarity.SimilarityScore;
 
@@ -112,7 +109,31 @@ public class CommonSimilarityMeasures {
      * @return the Jaro-Winkler similarity.
      */
     public static <T extends CharSequence> SimilarityMeasure<T> jaroWinkler() {
-        return new SimilarityScoreMeasure<>(new JaroWinklerDistance());
+        return similarityScore(new JaroWinklerDistance());
+    }
+
+    /**
+     * Wraps a {@link SimilarityScore} of apache commons-text into a {@link SimilarityMeasure}.
+     *
+     * @param <T> the type of the record.
+     * @return the given similarity score wrapped into a SimilarityMeasure.
+     */
+    public static <T extends CharSequence, R extends Number> SimilarityMeasure<T> similarityScore(
+            SimilarityScore<R> similarityScore) {
+        return (left, right, context) -> similarityScore.apply(left, right).doubleValue();
+    }
+
+    /**
+     * Used to translate {@link EditDistance} of apache commons-text into a similarity score by using the formula {@code
+     * 1 - dist / maxDist} where maxDist is the maximum length of the input strings.
+     *
+     * @param <T> the type of the record.
+     * @return the given edit distance translated into a SimilarityMeasure.
+     */
+    public static <T extends CharSequence, R extends Number> SimilarityMeasure<T> toSimilarity(
+            EditDistance<R> editDistance) {
+        return (left, right, context) -> 1 - editDistance.apply(left, right).doubleValue() /
+                                             Math.max(left.length(), right.length());
     }
 
     /**
@@ -171,7 +192,7 @@ public class CommonSimilarityMeasures {
      * @return a matching similarity measure.
      */
     public static <E, C extends Collection<? extends E>> SimilarityMeasure<C> matching(BipartiteMatcher<E> matcher,
-            final SimilarityMeasure<E> pairMeasure) {
+            final SimilarityMeasure<? super E> pairMeasure) {
         return new MatchingSimilarity<>(new WeaklyStableMarriage<>(), pairMeasure);
     }
 
@@ -215,7 +236,10 @@ public class CommonSimilarityMeasures {
     /**
      * Swaps the lower and upper bound, such that equal pairs have a similarity of 0 and unequal pairs of 1.
      * <p>In particular, the returned similarity is {@code 1 - this.sim}.</p>
+     * <p>Note that this method offers somewhat better type inference than {@link SimilarityMeasure#negate()}.</p>
      *
+     * @param measure the measure to negate.
+     * @param <T> the type of the record.
      * @return a negated similarity measure.
      */
     public static <T> SimilarityMeasure<T> negate(final SimilarityMeasure<T> measure) {
@@ -235,103 +259,174 @@ public class CommonSimilarityMeasures {
         return mongeElkan(pairMeasure, 0);
     }
 
+    /**
+     * Returns the largest similarity of the given similarity measures.
+     * <p>If all of the similarities are {@link SimilarityMeasure#unknown()}, then the result is also unknown.</p>
+     *
+     * @param measures the non-empty list of similarity measures.
+     * @param <T> the type of the record.
+     * @return the largest similarity of the given similarity measures.
+     */
     @SafeVarargs
     public static <T> SimilarityMeasure<T> max(final SimilarityMeasure<? super T>... measures) {
-        return new AggregatingSimilarityMeasure<T>((Stream<Double> similarities) -> similarities
+        return new AggregatingSimilarityMeasure<>(similarities -> similarities
                 .filter(sim -> !SimilarityMeasure.isUnknown(sim))
                 .takeWhile(sim -> sim < 1d)
-                .max(Double::compareTo)
+                .max()
                 .orElse(unknown()), measures);
     }
 
-    public static <T extends Temporal> SimilarityMeasure<T> maxDiff(final int diff, final TemporalUnit unit) {
-        return (left, right, context) ->
-                Math.max(0, 1 - (double) Math.abs(left.until(right, unit)) / diff);
+    /**
+     * Returns the first similarity of the given similarity measures that is not {@link SimilarityMeasure#unknown()}.
+     * <p>If all of the similarities are unknown, then the result is also unknown.</p>
+     *
+     * @param measures the non-empty list of similarity measures.
+     * @param <T> the type of the record.
+     * @return the first known similarity of the given similarity measures.
+     */
+    @SafeVarargs
+    public static <T> SimilarityMeasure<T> first(final SimilarityMeasure<? super T>... measures) {
+        return new AggregatingSimilarityMeasure<>(similarities -> similarities
+                .filter(sim -> !SimilarityMeasure.isUnknown(sim))
+                .findFirst()
+                .orElse(unknown()), measures);
     }
 
+    /**
+     * Returns the first similarity of the given similarity measures that is not {@link SimilarityMeasure#unknown()}.
+     * <p>If all of the similarities are unknown, then the result is also unknown.</p>
+     *
+     * @param measures the non-empty list of similarity measures.
+     * @param <T> the type of the record.
+     * @return the first known similarity of the given similarity measures.
+     */
+    public static <T> SimilarityMeasure<T> first(final Iterable<? extends SimilarityMeasure<? super T>> measures) {
+        return new AggregatingSimilarityMeasure<>(similarities -> similarities
+                .filter(sim -> !SimilarityMeasure.isUnknown(sim))
+                .findFirst()
+                .orElse(unknown()), measures);
+    }
+
+    /**
+     * Returns the last similarity of the given similarity measures that is not {@link SimilarityMeasure#unknown()}.
+     * <p>If all of the similarities are unknown, then the result is also unknown.</p>
+     *
+     * @param measures the non-empty list of similarity measures.
+     * @param <T> the type of the record.
+     * @return the last known similarity of the given similarity measures.
+     */
+    @SafeVarargs
+    public static <T> SimilarityMeasure<T> last(final SimilarityMeasure<? super T>... measures) {
+        final ArrayList<SimilarityMeasure<? super T>> list = Lists.newArrayList(measures);
+        Collections.reverse(list);
+        return first(list);
+    }
+
+    /**
+     * Returns the last similarity of the given similarity measures that is not {@link SimilarityMeasure#unknown()}.
+     * <p>If all of the similarities are unknown, then the result is also unknown.</p>
+     *
+     * @param measures the non-empty list of similarity measures.
+     * @param <T> the type of the record.
+     * @return the last known similarity of the given similarity measures.
+     */
+    public static <T> SimilarityMeasure<T> last(final Iterable<? extends SimilarityMeasure<? super T>> measures) {
+        final ArrayList<SimilarityMeasure<? super T>> list = Lists.newArrayList(measures);
+        Collections.reverse(list);
+        return first(list);
+    }
+
+    /**
+     * Calculates the difference between the left and right {@link Temporal} and compares the absolute difference to
+     * {@code maxDiff}.
+     * <p>A difference of 0 will result in a similarity of 1 and a difference at or over {@code maxDiff} will result in
+     * a similarity of 0. Intermediate values will be linearly scaled.</p>
+     *
+     * @param maxDiff the maximum difference (exclusive) to yield a positive similarity.
+     * @param unit the time unit of {@code maxDiff}.
+     * @param <T> the type of the record.
+     * @return the scaled difference in [0; maxDiff) resulting in (0; 1] or 0 otherwise.
+     */
+    public static <T extends Temporal> SimilarityMeasure<T> scaledDifference(final int maxDiff,
+            final TemporalUnit unit) {
+        return (left, right, context) ->
+                Math.max(0, 1 - (double) Math.abs(left.until(right, unit)) / maxDiff);
+    }
+
+    /**
+     * Calculates the difference between the left and right number and compares the absolute difference to {@code
+     * maxDiff}.
+     * <p>A difference of 0 will result in a similarity of 1 and a difference at or over {@code maxDiff} will result in
+     * a similarity of 0. Intermediate values will be linearly scaled.</p>
+     *
+     * @param maxDiff the maximum difference (exclusive) to yield a positive similarity.
+     * @param <T> the type of the record.
+     * @return the scaled difference in [0; maxDiff) resulting in (0; 1] or 0 otherwise.
+     */
+    public static <T extends Number> SimilarityMeasure<T> scaledDifference(final T maxDiff) {
+        return (left, right, context) ->
+                Math.max(0, 1 - Math.abs(left.doubleValue() - right.doubleValue()) / maxDiff.doubleValue());
+    }
+
+    /**
+     * Returns the smallest similarity of the given similarity measures.
+     * <p>If all of the similarities are {@link SimilarityMeasure#unknown()}, then the result is also unknown.</p>
+     *
+     * @param measures the non-empty list of similarity measures.
+     * @param <T> the type of the record.
+     * @return the smallest similarity of the given similarity measures.
+     */
     @SafeVarargs
     public static <T> SimilarityMeasure<T> min(final SimilarityMeasure<? super T>... measures) {
-        return new AggregatingSimilarityMeasure<T>((Stream<Double> similarities) -> similarities
+        return new AggregatingSimilarityMeasure<T>(similarities -> similarities
                 .filter(sim -> !SimilarityMeasure.isUnknown(sim))
                 .takeWhile(sim -> sim > 0d)
-                .min(Double::compareTo)
+                .min()
                 .orElse(unknown()), measures);
     }
 
-//    @SafeVarargs
-//    public static <T> SimilarityMeasure<T> average(final SimilarityMeasure<? super T>... measures) {
-//        return new AggregatingSimilarityMeasure<T>((Stream<Double> similarities) -> similarities
-//                .filter(sim -> !SimilarityMeasure.isUnknown(sim))
-//                .reduce(Double::sum)
-//                .orElse(unknown()), measures);
-//    }
-
-    public static <T> WeightedAggregation.WeightedAggregationBuilder<T> weightedAggregation(
-            final BiFunction<List<Double>, List<Double>, Double> aggregator) {
-        return WeightedAggregation.<T>builder().aggregator(aggregator);
+    /**
+     * Returns the average similarity of the given similarity measures.
+     * <p>If all of the similarities are {@link SimilarityMeasure#unknown()}, then the result is also unknown.</p>
+     *
+     * @param measures the non-empty list of similarity measures.
+     * @param <T> the type of the record.
+     * @return the average similarity of the given similarity measures.
+     */
+    @SafeVarargs
+    public static <T> SimilarityMeasure<T> average(final SimilarityMeasure<? super T>... measures) {
+        return new AggregatingSimilarityMeasure<T>(similarities -> similarities
+                .filter(sim -> !SimilarityMeasure.isUnknown(sim))
+                .average()
+                .orElse(unknown()), measures);
     }
 
-    public static <T> WeightedAggregation.WeightedAggregationBuilder<T> weightedAverage() {
-        return weightedAggregation((weightedSims, weights) ->
-                (double) (weightedSims.stream().mapToDouble(sim -> sim).sum() / weights.stream().mapToDouble(w -> w)
-                        .sum()));
+    /**
+     * Starts the creation of a weighted aggregation of multiple {@link SimilarityMeasure}s.
+     * <p>{@link SimilarityMeasure#unknown()} values are not passed to the aggregation function.</p>
+     *
+     * @param aggregator the aggregation function to apply on the similarity values. Premature termination encouraged.
+     * @param <T> the type of the record.
+     * @return a builder for the weighted aggregation.
+     */
+    public static <T> WeightedAggregatingSimilarityMeasure.WeightedAggregatingSimilarityMeasureBuilder<T> weightedAggregation(
+            final ToDoubleFunction<Stream<WeightedValue>> aggregator) {
+        return WeightedAggregatingSimilarityMeasure.<T>builder().aggregator(aggregator);
     }
 
-    @RequiredArgsConstructor
-    public static class SimilarityScoreMeasure<T extends CharSequence> implements SimilarityMeasure<T> {
-        private final SimilarityScore<? extends Number> score;
-
-        @Override
-        public double getNonNullSimilarity(final CharSequence left, final CharSequence right,
-                final SimilarityContext context) {
-            return this.score.apply(left, right).floatValue();
-        }
-    }
-
-    @Builder
-    @Value
-    public static class WeightedAggregation<R> implements SimilarityMeasure<R> {
-        BiFunction<List<Double>, List<Double>, Double> aggregator;
-        @Singular
-        List<WeightedSimilarity<R>> weightedSimilarities;
-        @Getter(lazy = true)
-        List<Double> weights =
-                this.weightedSimilarities.stream().map(WeightedSimilarity::getWeight).collect(Collectors.toList());
-
-        @Override
-        public double getNonNullSimilarity(final R left, final R right, final SimilarityContext context) {
-            final var weightedSims = this.weightedSimilarities.stream()
-                    .map(ws -> ws.getMeasure().getSimilarity(left, right, context) * ws.getWeight())
-                    .collect(Collectors.toList());
-            List<Double> adjustedWeights = null;
-            for (int i = 0; i < weightedSims.size(); i++) {
-                if (weightedSims.get(i).isNaN()) {
-                    if (adjustedWeights == null) {
-                        adjustedWeights = new ArrayList<>(this.getWeights());
-                    }
-                    adjustedWeights.set(i, 0.0d);
-                    weightedSims.set(i, 0.0d);
-                }
-            }
-            return this.aggregator.apply(weightedSims, adjustedWeights == null ? this.getWeights() : adjustedWeights);
-        }
-
-        @Value
-        public static class WeightedSimilarity<T> {
-            double weight;
-            SimilarityMeasure<T> measure;
-        }
-
-        public static class WeightedAggregationBuilder<R> {
-            public <T> WeightedAggregationBuilder<R> add(final double weight, final Function<R, ? extends T> extractor,
-                    final SimilarityMeasure<? super T> measure) {
-                return this.add(weight, measure.of(extractor));
-            }
-
-            public WeightedAggregationBuilder<R> add(final double weight, final SimilarityMeasure<R> measure) {
-                return this.weightedSimilarity(new WeightedSimilarity<>(weight, measure));
-            }
-        }
+    /**
+     * Starts the creation of a weighted average of multiple {@link SimilarityMeasure}s.
+     * <p>{@link SimilarityMeasure#unknown()} values to not contribute to the average at all.</p>
+     *
+     * @param <T> the type of the record.
+     * @return a builder for the weighted aggregation.
+     */
+    public static <T> WeightedAggregatingSimilarityMeasure.WeightedAggregatingSimilarityMeasureBuilder<T> weightedAverage() {
+        return weightedAggregation(weightedValues -> weightedValues
+                .filter(wv -> SimilarityMeasure.isUnknown(wv.getValue()))
+                .mapToDouble(WeightedValue::getWeightedValue)
+                .average()
+                .orElse(unknown()));
     }
 
 }

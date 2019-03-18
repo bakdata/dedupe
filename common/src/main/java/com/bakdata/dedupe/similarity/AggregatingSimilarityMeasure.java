@@ -26,29 +26,50 @@ package com.bakdata.dedupe.similarity;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Stream;
+import java.util.function.ToDoubleFunction;
+import java.util.stream.DoubleStream;
+import java.util.stream.StreamSupport;
+import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
 /**
- * Aggregates similarities
- * @param <T>
+ * Aggregates similarities with a given aggregator. Depending of the aggregator not all similarity measures are used.
+ *
+ * @param <T> the type of the record.
  */
 @Value
+@Builder
 public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
+    /**
+     * The similarity measures that will successively applied on the input values.
+     */
     @NonNull List<SimilarityMeasure<? super T>> similarityMeasures;
-    @NonNull Function<? super Stream<Double>, Double> aggregator;
+    /**
+     * The aggregator that will be applied on the similarity values. Premature termination is encouraged.
+     */
+    @NonNull ToDoubleFunction<? super DoubleStream> aggregator;
 
+    /**
+     * Creates an AggregatingSimilarityMeasure with the given aggregator and the similarity measures.
+     *
+     * @param aggregator the aggregator.
+     * @param similarityMeasures the non-empty similarity measures.
+     */
     public AggregatingSimilarityMeasure(
-            final @NonNull Function<? super Stream<Double>, Double> aggregator,
+            final @NonNull ToDoubleFunction<? super DoubleStream> aggregator,
             @NonNull final SimilarityMeasure<? super T>... similarityMeasures) {
         this(aggregator, List.of(similarityMeasures));
     }
 
-
+    /**
+     * Creates an AggregatingSimilarityMeasure with the given aggregator and the similarity measures.
+     *
+     * @param aggregator the aggregator.
+     * @param similarityMeasures the non-empty similarity measures.
+     */
     public AggregatingSimilarityMeasure(
-            final @NonNull Function<? super Stream<Double>, Double> aggregator,
+            final @NonNull ToDoubleFunction<? super DoubleStream> aggregator,
             @NonNull final Iterable<? extends SimilarityMeasure<? super T>> similarityMeasures) {
         this.similarityMeasures = Lists.newArrayList(similarityMeasures);
         this.aggregator = aggregator;
@@ -58,8 +79,22 @@ public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
     }
 
     @Override
-    public double getNonNullSimilarity(@NonNull final T left, @NonNull final T right,
-            @NonNull final SimilarityContext context) {
-        return aggregator.apply(similarityMeasures.stream().map(m -> m.getNonNullSimilarity(left, right, context)));
+    public double getNonNullSimilarity(T left, T right, @NonNull SimilarityContext context) {
+        return getAggregator().applyAsDouble(
+                StreamSupport.stream(getSimilarityMeasures().spliterator(), false)
+                        .mapToDouble(m -> m.getNonNullSimilarity(left, right, context)));
+    }
+
+    public static class AggregatingSimilarityMeasureBuilder<T> {
+        /**
+         * Fluent cast of the type parameter. Can be used to overcome the limitations of the Java type inference.
+         *
+         * @param clazz the clazz representing the target type. Not used.
+         * @param <T> the new type of the target.
+         * @return this with casted type parameter.
+         */
+        public <T> AggregatingSimilarityMeasureBuilder<T> of(Class<T> clazz) {
+            return (AggregatingSimilarityMeasureBuilder<T>) this;
+        }
     }
 }
