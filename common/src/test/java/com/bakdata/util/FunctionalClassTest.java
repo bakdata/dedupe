@@ -81,6 +81,7 @@ class FunctionalClassTest {
 
             private String id;
 
+
             public String getId() {
                 throw new UnsupportedOperationException("Foo");
             }

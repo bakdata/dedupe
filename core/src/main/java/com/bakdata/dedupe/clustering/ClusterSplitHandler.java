@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 
+
 /**
  * A callback that is invoked when an already existing cluster is split up during the {@link Clustering} of (online)
  * deduplication.
@@ -56,12 +57,12 @@ public interface ClusterSplitHandler<C extends Comparable<C>, T> {
      * @param newRecord the new record triggering the clustering.
      * @return false if this handler would like to leave the cluster in-place.
      */
-    default boolean checkSplit(final @NonNull Collection<? extends Cluster<C, T>> clusters, @NonNull T newRecord) {
+    default boolean checkSplit(final @NonNull Collection<? extends Cluster<C, T>> clusters, final @NonNull T newRecord) {
         if (clusters.size() > 1) {
             final Cluster<C, T> mainCluster = Clusters.getContainingCluster(clusters.iterator(), newRecord);
             final List<Cluster<C, T>> splitParts = clusters.stream().filter(c -> c != mainCluster).collect(
                     Collectors.toList());
-            return clusterSplit(mainCluster, splitParts);
+            return this.clusterSplit(mainCluster, splitParts);
         }
         return true;
     }

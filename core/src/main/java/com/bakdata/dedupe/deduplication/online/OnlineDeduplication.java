@@ -26,6 +26,7 @@ package com.bakdata.dedupe.deduplication.online;
 import java.util.stream.Stream;
 import lombok.NonNull;
 
+
 /**
  * A full online deduplication process, which ensures that no duplicate record is emitted.
  * <p>Consider a stream of records A, B, A' and A, A' being duplicates. The resulting stream will be A, B, A", where A"
@@ -53,7 +54,7 @@ public interface OnlineDeduplication<T> extends com.bakdata.dedupe.deduplication
     @NonNull T deduplicate(@NonNull T newRecord);
 
     @Override
-    default @NonNull Stream<T> deduplicate(@NonNull Stream<? extends T> records) {
+    default @NonNull Stream<T> deduplicate(final @NonNull Stream<? extends T> records) {
         return records.map(this::deduplicate);
     }
 }

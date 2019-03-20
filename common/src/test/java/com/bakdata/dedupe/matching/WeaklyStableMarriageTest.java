@@ -44,17 +44,17 @@ class WeaklyStableMarriageTest {
     class MatchingWithRanking {
         @Test
         void shouldFindStableMatches() {
-            List<Queue<List<Integer>>> mensFavoriteWomen = asList(
-                    createRanking(1, 0, 2, 3),
-                    createRanking(3, 0, 1, 2),
-                    createRanking(0, 2, 1, 3),
-                    createRanking(1, 2, 0, 3)
+            final List<Queue<List<Integer>>> mensFavoriteWomen = asList(
+                    this.createRanking(1, 0, 2, 3),
+                    this.createRanking(3, 0, 1, 2),
+                    this.createRanking(0, 2, 1, 3),
+                    this.createRanking(1, 2, 0, 3)
             );
-            List<Queue<List<Integer>>> womensRankingForMen = asList(
-                    createRanking(0, 2, 1, 3),
-                    createRanking(2, 3, 0, 1),
-                    createRanking(3, 1, 2, 0),
-                    createRanking(2, 1, 0, 3));
+            final List<Queue<List<Integer>>> womensRankingForMen = asList(
+                    this.createRanking(0, 2, 1, 3),
+                    this.createRanking(2, 3, 0, 1),
+                    this.createRanking(3, 1, 2, 0),
+                    this.createRanking(2, 1, 0, 3));
 
             final Stream<WeightedEdge<Integer>> matches =
                     new WeaklyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
@@ -68,17 +68,17 @@ class WeaklyStableMarriageTest {
 
         @Test
         void shouldFindStableMatches2() {
-            List<Queue<List<Integer>>> mensFavoriteWomen = asList(
-                    createRanking(3, 0, 1, 2),
-                    createRanking(1, 2, 0, 3),
-                    createRanking(1, 3, 2, 0),
-                    createRanking(2, 0, 3, 1)
+            final List<Queue<List<Integer>>> mensFavoriteWomen = asList(
+                    this.createRanking(3, 0, 1, 2),
+                    this.createRanking(1, 2, 0, 3),
+                    this.createRanking(1, 3, 2, 0),
+                    this.createRanking(2, 0, 3, 1)
             );
-            List<Queue<List<Integer>>> womensRankingForMen = asList(
-                    createRanking(3, 0, 2, 1),
-                    createRanking(0, 2, 1, 3),
-                    createRanking(0, 1, 2, 3),
-                    createRanking(3, 0, 2, 1));
+            final List<Queue<List<Integer>>> womensRankingForMen = asList(
+                    this.createRanking(3, 0, 2, 1),
+                    this.createRanking(0, 2, 1, 3),
+                    this.createRanking(0, 1, 2, 3),
+                    this.createRanking(3, 0, 2, 1));
 
             final Stream<WeightedEdge<Integer>> matches =
                     new WeaklyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
@@ -92,17 +92,17 @@ class WeaklyStableMarriageTest {
 
         @Test
         void shouldFindStableMatchesWithUnacceptablePartners() {
-            List<Queue<List<Integer>>> mensFavoriteWomen = asList(
-                    createRanking(3, 0, 2),
-                    createRanking(1, 0, 3),
-                    createRanking(1, 3, 2),
-                    createRanking(0, 3, 1)
+            final List<Queue<List<Integer>>> mensFavoriteWomen = asList(
+                    this.createRanking(3, 0, 2),
+                    this.createRanking(1, 0, 3),
+                    this.createRanking(1, 3, 2),
+                    this.createRanking(0, 3, 1)
             );
-            List<Queue<List<Integer>>> womensRankingForMen = asList(
-                    createRanking(3, 0, 1),
-                    createRanking(2, 1, 3),
-                    createRanking(0, 2),
-                    createRanking(0, 3, 2, 1));
+            final List<Queue<List<Integer>>> womensRankingForMen = asList(
+                    this.createRanking(3, 0, 1),
+                    this.createRanking(2, 1, 3),
+                    this.createRanking(0, 2),
+                    this.createRanking(0, 3, 2, 1));
 
             final Stream<WeightedEdge<Integer>> matches =
                     new WeaklyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
@@ -115,17 +115,17 @@ class WeaklyStableMarriageTest {
 
         @Test
         void shouldFindStableMatchesWithTies() {
-            List<Queue<List<Integer>>> mensFavoriteWomen = asList(
-                    createRanking(3, 0, 1, 2),
-                    createRanking(3, 1, 2, 0),
-                    createRanking(1, 3, 2, 0),
-                    createRanking(2, 0, 3, 1)
+            final List<Queue<List<Integer>>> mensFavoriteWomen = asList(
+                    this.createRanking(3, 0, 1, 2),
+                    this.createRanking(3, 1, 2, 0),
+                    this.createRanking(1, 3, 2, 0),
+                    this.createRanking(2, 0, 3, 1)
             );
-            List<Queue<List<Integer>>> womensRankingForMen = asList(
-                    createRanking(3, 0, 2, 1),
-                    createRanking(new Integer[][]{{0}, {2, 1}, {3}}),
-                    createRanking(0, 1, 2, 3),
-                    createRanking(3, 0, 2, 1));
+            final List<Queue<List<Integer>>> womensRankingForMen = asList(
+                    this.createRanking(3, 0, 2, 1),
+                    this.createRanking(new Integer[][]{{0}, {2, 1}, {3}}),
+                    this.createRanking(0, 1, 2, 3),
+                    this.createRanking(3, 0, 2, 1));
 
             final Stream<WeightedEdge<Integer>> matches =
                     new WeaklyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
@@ -137,12 +137,12 @@ class WeaklyStableMarriageTest {
                             new WeightedEdge(3, 0, DUMMY_WEIGHT));
         }
 
-        private Queue<List<Integer>> createRanking(int... favorites) {
+        private Queue<List<Integer>> createRanking(final int... favorites) {
             return new LinkedList<>(
                     IntStream.of(favorites).mapToObj(fav -> Lists.newArrayList(fav)).collect(Collectors.toList()));
         }
 
-        private Queue<List<Integer>> createRanking(Integer[][] favorites) {
+        private Queue<List<Integer>> createRanking(final Integer[][] favorites) {
             return new LinkedList<>(
                     Stream.of(favorites).map(fav -> Lists.newArrayList(fav)).collect(Collectors.toList()));
         }

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;
+import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Delegate;
 
@@ -51,6 +52,7 @@ public class FusionContext {
         return value != null && !"".equals(value);
     }
 
+    @NonNull
     @SuppressWarnings("unchecked")
     public <T> List<AnnotatedValue<T>> retrieveValues(final ResolutionTag<T> resolutionTag) {
         return (List<AnnotatedValue<T>>) this.storedValues.computeIfAbsent(resolutionTag,

@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Set;
 import lombok.NonNull;
 
+
 /**
  * Implements an algorithm that solves an assignment problem.
  * <p>"It consists of finding, in a [undirected], weighted bipartite graph, a matching in which the sum of weights of
@@ -67,7 +68,7 @@ public interface Assigner<T> {
      * @return the set of edges.
      */
     default @NonNull Set<@NonNull ? extends WeightedEdge<T>> assignMaterialized(
-            @NonNull Collection<@NonNull WeightedEdge<T>> weightedEdges) {
-        return Sets.newHashSet(assign(weightedEdges));
+            final @NonNull Collection<@NonNull WeightedEdge<T>> weightedEdges) {
+        return Sets.newHashSet(this.assign(weightedEdges));
     }
 }

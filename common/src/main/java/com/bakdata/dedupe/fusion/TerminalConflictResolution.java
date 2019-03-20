@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 
+
 /**
  * A conflict resolution function that is guaranteed to produce a single value.
  * <p>For example, a resolution may simply retain all values in a list and thus will always resolve the conflict.</p>
@@ -38,10 +39,10 @@ import lombok.NonNull;
 public interface TerminalConflictResolution<I, O> extends ConflictResolution<I, O> {
     @Override
     default @NonNull List<@NonNull AnnotatedValue<O>> resolveNonEmptyPartially(
-            @NonNull List<@NonNull AnnotatedValue<I>> values, @NonNull FusionContext context) {
+            final @NonNull List<@NonNull AnnotatedValue<I>> values, final @NonNull FusionContext context) {
 
         return this.resolveFully(values, context).map(List::of).orElse(List.of());
     }
 
-    Optional<AnnotatedValue<O>> resolveFully(List<AnnotatedValue<I>> values, FusionContext context);
+    @NonNull Optional<AnnotatedValue<O>> resolveFully(List<AnnotatedValue<I>> values, FusionContext context);
 }

@@ -29,6 +29,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
 
+
 /**
  * A lambda wrapper around the no-arg constructor of a class. The wrapped contructor can be used as a lambda with {@code
  * new FunctionalConstructor(c)::invoke}.
@@ -55,9 +56,9 @@ public class FunctionalConstructor<T> {
     public T newInstance() {
         try {
             return this.ctor.newInstance();
-        } catch (final InstantiationException e) {
+        } catch (final @NonNull InstantiationException e) {
             throw new IllegalStateException(e);
-        } catch (final InvocationTargetException e) {
+        } catch (final @NonNull InvocationTargetException e) {
             throw e.getCause();
         }
     }

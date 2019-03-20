@@ -27,6 +27,7 @@ import com.bakdata.dedupe.clustering.Cluster;
 import java.util.Optional;
 import lombok.NonNull;
 
+
 /**
  * Fuses a cluster of duplicates to one representation.
  * <p>Fusion may be incomplete in which case {@link FusedValue} signals possible issues. The fusion should work
@@ -53,9 +54,9 @@ public interface Fusion<T> {
      * @param incompleteFusionHandler tries to complete an incomplete fusion.
      * @return a complete fusion value or {@link Optional#empty()}.
      */
-    default @NonNull Optional<T> fusedValue(@NonNull Cluster<?, T> cluster,
-            @NonNull IncompleteFusionHandler<T> incompleteFusionHandler) {
-        return incompleteFusionHandler.handlePartiallyFusedValue(fuse(cluster))
+    default @NonNull Optional<T> fusedValue(final @NonNull Cluster<?, T> cluster,
+            final @NonNull IncompleteFusionHandler<T> incompleteFusionHandler) {
+        return incompleteFusionHandler.handlePartiallyFusedValue(this.fuse(cluster))
                 .map(FusedValue::getValue);
     }
 }

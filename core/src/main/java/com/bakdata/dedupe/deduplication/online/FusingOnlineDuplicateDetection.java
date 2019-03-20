@@ -34,6 +34,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * A full online deduplication process, which
  * <ul>
@@ -70,7 +71,7 @@ public class FusingOnlineDuplicateDetection<C extends Comparable<C>, T> implemen
             return newRecord;
         }
 
-        @NonNull final FusedValue<T> fusedValue = this.fusion.fuse(Clusters.getContainingCluster(clusterIterator, newRecord));
+        final @NonNull FusedValue<T> fusedValue = this.fusion.fuse(Clusters.getContainingCluster(clusterIterator, newRecord));
         return this.incompleteFusionHandler.apply(fusedValue)
                 .map(FusedValue::getValue)
                 .orElse(newRecord);

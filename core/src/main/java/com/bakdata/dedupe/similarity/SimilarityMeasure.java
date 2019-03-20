@@ -87,11 +87,11 @@ public interface SimilarityMeasure<T> {
      * @implNote the default implementation returns {@link SimilarityContext#getSimilarityMeasureForNull()} if left or
      * right is null and delegates to {@link #getNonNullSimilarity(Object, Object, SimilarityContext)} otherwise.
      */
-    default double getSimilarity(T left, T right, @NonNull SimilarityContext context) {
+    default double getSimilarity(final T left, final T right, final @NonNull SimilarityContext context) {
         if (left == null || right == null) {
             return context.getSimilarityForNull(left, right, context);
         }
-        return getNonNullSimilarity(left, right, context);
+        return this.getNonNullSimilarity(left, right, context);
     }
 
     /**
@@ -158,7 +158,7 @@ public interface SimilarityMeasure<T> {
      */
     default @NonNull SimilarityMeasure<T> scaleWithThreshold(final double minExclusive) {
         // uses #cutoff first to allow optimizations for SimilarityMeasure
-        @NonNull final SimilarityMeasure<T> similarityMeasure = cutoff(minExclusive);
+        final @NonNull SimilarityMeasure<T> similarityMeasure = this.cutoff(minExclusive);
         return (left, right, context) -> {
             final double similarity = similarityMeasure.getSimilarity(left, right, context);
             return similarity > minExclusive ? (similarity - minExclusive) / (1 - minExclusive) : 0;
@@ -214,6 +214,6 @@ public interface SimilarityMeasure<T> {
      * @return a negated similarity measure.
      */
     default @NonNull SimilarityMeasure<T> negate() {
-        return (left, right, context) -> 1 - getSimilarity(left, right, context);
+        return (left, right, context) -> 1 - this.getSimilarity(left, right, context);
     }
 }

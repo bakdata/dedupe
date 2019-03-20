@@ -31,6 +31,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
+
 /**
  * A cluster is a coherent collection of duplicate records.
  * <p>All records inside the cluster are deemed to be pair-wise

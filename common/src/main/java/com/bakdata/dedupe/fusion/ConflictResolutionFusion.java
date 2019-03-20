@@ -36,6 +36,7 @@ import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
 
+
 /**
  * A fusion approach based on conflict resolution. A conflict are two or more different values that need to be merged
  * into a single value for the fused representation.
@@ -65,6 +66,7 @@ public class ConflictResolutionFusion<R> implements Fusion<R> {
      * The root resolution function; usually, {@link Merge}.
      */
     @NonNull ConflictResolution<R, R> rootResolution;
+
     @Getter(lazy = true, value = AccessLevel.PRIVATE)
     @NonNull Map<@NonNull String, @NonNull Source> sourceByName =
             this.sources.stream().collect(Collectors.toMap(Source::getName, s -> s));
@@ -84,6 +86,7 @@ public class ConflictResolutionFusion<R> implements Fusion<R> {
         return new FusedValue<>(resolvedValue, cluster, context.getExceptions());
     }
 
+    @NonNull
     private FusionException createException(final List<AnnotatedValue<R>> conflictingValues,
             final FusionContext context) {
         final FusionException fusionException =

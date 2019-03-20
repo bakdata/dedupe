@@ -31,6 +31,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+
 
 @Data
 @NoArgsConstructor
@@ -47,6 +49,7 @@ public class Person {
     private String originalId;
     private LocalDateTime lastModified;
     // fusion information
+    @NonNull
     @Builder.Default
     private Set<String> fusedIds = new HashSet<>();
 }

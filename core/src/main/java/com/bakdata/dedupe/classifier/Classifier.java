@@ -52,7 +52,7 @@ public interface Classifier<T> {
      * @param candidate the candidate to classify.
      * @return the {@link ClassifiedCandidate}.
      */
-    default @NonNull ClassifiedCandidate<T> classifyCandidate(@NonNull Candidate<T> candidate) {
-        return new ClassifiedCandidate<>(candidate, classify(candidate));
+    default @NonNull ClassifiedCandidate<T> classifyCandidate(final @NonNull Candidate<T> candidate) {
+        return new ClassifiedCandidate<>(candidate, this.classify(candidate));
     }
 }

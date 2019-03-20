@@ -79,9 +79,9 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
     ClusterSplitHandler splitHandler;
 
     @java.beans.ConstructorProperties({"refineCluster", "oldClusterIndex", "closure", "idExtractor", "splitHandler"})
-    RefinedTransitiveClosure(@NonNull RefineCluster<C, T> refineCluster,
-            Map<I, Cluster<C, T>> oldClusterIndex, TransitiveClosure<C, T, I> closure,
-            @NonNull Function<? super T, ? extends I> idExtractor, ClusterSplitHandler splitHandler) {
+    RefinedTransitiveClosure(final @NonNull RefineCluster<C, T> refineCluster,
+            final Map<I, Cluster<C, T>> oldClusterIndex, final TransitiveClosure<C, T, I> closure,
+            final @NonNull Function<? super T, ? extends I> idExtractor, final ClusterSplitHandler splitHandler) {
         this.refineCluster = refineCluster;
         this.oldClusterIndex = oldClusterIndex != null ? oldClusterIndex : new HashMap<>();
         this.closure = closure != null ? closure
@@ -91,7 +91,7 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
     }
 
     @Override
-    public @NonNull Stream<Cluster<C, T>> cluster(@NonNull final Stream<ClassifiedCandidate<T>> classifiedCandidates) {
+    public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
         final List<ClassifiedCandidate<T>> materializedCandidates = classifiedCandidates.collect(Collectors.toList());
         final @NonNull Stream<Cluster<C, T>> transitiveClosure = this.closure.cluster(materializedCandidates.stream());
         final Stream<Cluster<C, T>> refinedClusters =

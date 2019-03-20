@@ -81,7 +81,7 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
      * <p>Note that we need to be stricter (=higher threshold) than {@link #namesCorrectlySplitSimilarity} to avoid too
      * many false positives.</p>
      */
-    SimilarityMeasure<Person> namesIncorrectlySplitSimilarity = levenshtein().cutoff(.9d).of(concatNames());
+    SimilarityMeasure<Person> namesIncorrectlySplitSimilarity = levenshtein().cutoff(.9d).of(this.concatNames());
 
     /**
      * Case 4: Swapped first and last name.
@@ -94,7 +94,7 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
      */
     SimilarityMeasure<String> nameSimilarity =
             max(levenshtein().cutoff(0.9d), jaroWinkler(), equality().of(beiderMorse()));
-    SimilarityMeasure<Person> namesSwappedSimilarity = stableMatching(nameSimilarity)
+    SimilarityMeasure<Person> namesSwappedSimilarity = stableMatching(this.nameSimilarity)
             .of(person -> List.of(person.getFirstName(), person.getLastName()));
 
     /**
@@ -106,18 +106,18 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
      * match the right hand side several times.</p>
      * <p>Example: John Johnson and John Smith will match 1) John -> John = 1.0; 2) Johnson -> John = 0.91</p>
      */
-    SimilarityMeasure<Person> namesScrambledSimilarity = stableMatching(nameSimilarity)
-            .of(concatNames().andThen(words()));
+    SimilarityMeasure<Person> namesScrambledSimilarity = stableMatching(this.nameSimilarity)
+            .of(this.concatNames().andThen(words()));
 
-    SimilarityMeasure<Person> overallNameSimilarity = max(namesCorrectlySplitSimilarity,
-            namesIncorrectlySplitSimilarity,
-            namesSwappedSimilarity,
-            namesScrambledSimilarity);
+    SimilarityMeasure<Person> overallNameSimilarity = max(this.namesCorrectlySplitSimilarity,
+            this.namesIncorrectlySplitSimilarity,
+            this.namesSwappedSimilarity,
+            this.namesScrambledSimilarity);
 
     @Delegate
     Classifier<Person> classifier = RuleBasedClassifier.<Person>builder()
             .positiveRule("Basic comparison", CommonSimilarityMeasures.<Person>weightedAverage()
-                    .add(4, overallNameSimilarity)
+                    .add(4, this.overallNameSimilarity)
                     .add(1, Person::getGender, equality())
                     .add(2, Person::getBirthDate,
                             max(levenshtein().of(ISO_FORMAT::format), scaledDifference(2, ChronoUnit.DAYS)))

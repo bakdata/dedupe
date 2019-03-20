@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 
+
 /**
  * Solves a conflict during resolution - two or more different values that need to be merged into a single value for the
  * fused representation.
@@ -49,12 +50,13 @@ public interface ConflictResolution<I, O> {
      * @param context a fusion context with additional configurations.
      * @return the resolved values in a best-effort approach.
      */
-    default @NonNull List<@NonNull AnnotatedValue<O>> resolvePartially(@NonNull List<@NonNull AnnotatedValue<I>> values,
-            @NonNull FusionContext context) {
+    default @NonNull List<@NonNull AnnotatedValue<O>> resolvePartially(
+            final @NonNull List<@NonNull AnnotatedValue<I>> values,
+            final @NonNull FusionContext context) {
         if (values.isEmpty()) {
             return List.of();
         }
-        return resolveNonEmptyPartially(values, context);
+        return this.resolveNonEmptyPartially(values, context);
     }
 
     /**

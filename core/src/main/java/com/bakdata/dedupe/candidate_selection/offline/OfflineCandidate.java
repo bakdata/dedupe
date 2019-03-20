@@ -26,6 +26,7 @@ package com.bakdata.dedupe.candidate_selection.offline;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * Represents a candidate pair that was generated with an {@link OfflineCandidateSelection}.
  * <p>The order of the records depends on the implementation of the candidate selection and should be viewed as random

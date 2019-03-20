@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.NonNull;
 
+
 /**
  * A full deduplication process, which ensures that no duplicate record is emitted.
  * <p>In general, all implementations will ensure that the user receives a duplicate-free datasets, either through
@@ -66,8 +67,8 @@ public interface Deduplication<T> {
      * @implSpec For online algorithms, it is strongly encouraged that duplicates are filtered such that only the final
      * representation remains.
      */
-    default @NonNull Collection<T> materializedDeduplicate(@NonNull Iterable<? extends T> records) {
-        return deduplicate(StreamUtil.stream(records)).collect(Collectors.toList());
+    default @NonNull Collection<T> materializedDeduplicate(final @NonNull Iterable<? extends T> records) {
+        return this.deduplicate(StreamUtil.stream(records)).collect(Collectors.toList());
     }
 
     /**
@@ -81,9 +82,9 @@ public interface Deduplication<T> {
      * @implSpec For online algorithms, it is strongly encouraged that duplicates are filtered such that only the final
      * representation remains.
      */
-    default @NonNull Collection<T> materializedDeduplicate(@NonNull Iterable<? extends T> records,
-            @NonNull Function<? super T, Object> idExtractor) {
-        return deduplicate(StreamUtil.stream(records))
+    default @NonNull Collection<T> materializedDeduplicate(final @NonNull Iterable<? extends T> records,
+            final @NonNull Function<? super T, Object> idExtractor) {
+        return this.deduplicate(StreamUtil.stream(records))
                 .collect(Collectors.toMap(idExtractor, Function.identity()))
                 .values();
     }

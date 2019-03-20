@@ -40,6 +40,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * A clustering that knows the results perfectly as it receives the gold standard during creation.
  * <p>This clustering is used for evaluation if you want to evaluate the effectiveness of {@link
@@ -60,7 +61,7 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
      * The gold clustering. Every record pair inside a cluster is deemed duplicate and every record pair across clusters
      * is a non-duplicate.
      */
-    Collection<Cluster<C, T>> goldClusters;
+    @NonNull Collection<Cluster<C, T>> goldClusters;
     /**
      * A function to extract the id of a record for efficient, internal data structures.
      */
@@ -76,7 +77,7 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     @Override
-    public @NonNull Stream<Cluster<C, T>> cluster(@NonNull final Stream<ClassifiedCandidate<T>> classifiedCandidates) {
+    public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
         return classifiedCandidates
                 .map(candidate -> this.getIdToCluster()
                         .get(this.idExtractor.apply(candidate.getCandidate().getRecord2())))
@@ -86,6 +87,6 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
 
     @Override
     public Function<? super Iterable<? extends T>, C> getClusterIdGenerator() {
-        return goldClusters.stream().collect(Collectors.toMap((Cluster e) -> e.getElements(), e -> e.getId()))::get;
+        return this.goldClusters.stream().collect(Collectors.toMap((Cluster e) -> e.getElements(), e -> e.getId()))::get;
     }
 }

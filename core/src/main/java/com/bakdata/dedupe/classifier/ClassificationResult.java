@@ -27,6 +27,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * The classification of a {@link com.bakdata.dedupe.candidate_selection.Candidate} with additional information.
  */

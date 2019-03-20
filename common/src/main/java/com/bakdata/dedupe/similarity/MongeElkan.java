@@ -32,6 +32,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * Monge-Elkan is a simple list-based similarity measure, where elements from the left are matched with elements from
  * the right with the highest similarity within a certain index range.
@@ -53,7 +54,7 @@ class MongeElkan<C extends Collection<? extends E>, E> implements CollectionSimi
     /**
      * The similarity measure to use to calculate the preferences and the overall similarity.
      */
-    SimilarityMeasure<E> pairMeasure;
+    @NonNull SimilarityMeasure<E> pairMeasure;
     /**
      * The maximum index difference of the left list item and the right list item.
      */
@@ -65,8 +66,8 @@ class MongeElkan<C extends Collection<? extends E>, E> implements CollectionSimi
     double cutoff;
 
     @Override
-    public double calculateNonEmptyCollectionSimilarity(@NonNull final C leftCollection,
-            @NonNull final C rightCollection, @NonNull final SimilarityContext context) {
+    public double calculateNonEmptyCollectionSimilarity(final @NonNull C leftCollection,
+            final @NonNull C rightCollection, final @NonNull SimilarityContext context) {
         final List<E> leftList = List.copyOf(leftCollection);
         final List<E> rightList = List.copyOf(rightCollection);
         // consider a cutoff of .9 and |left| = 3, then on average each element has .1 buffer

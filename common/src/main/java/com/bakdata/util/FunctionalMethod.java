@@ -29,6 +29,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
 
+
 /**
  * A lambda wrapper around the a method of a class. The wrapped method can be used as a lambda with {@code new
  * FunctionalMethod(m)::invoke}.
@@ -52,12 +53,13 @@ public class FunctionalMethod<T> {
      * @throws IllegalAccessException (sneaky)
      * @throws Exception if any {@link InvocationTargetException} occurs
      */
+    @NonNull
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public <R> R invoke(final T instance, final Object... params) {
         try {
             return (R) this.method.invoke(instance, params);
-        } catch (final InvocationTargetException e) {
+        } catch (final @NonNull InvocationTargetException e) {
             throw e.getCause();
         }
     }

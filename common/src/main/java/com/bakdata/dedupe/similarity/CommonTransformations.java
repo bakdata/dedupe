@@ -40,6 +40,7 @@ import org.apache.commons.codec.language.RefinedSoundex;
 import org.apache.commons.codec.language.Soundex;
 import org.apache.commons.codec.language.bm.BeiderMorseEncoder;
 
+
 /**
  * A utility class that offers factory methods for common similarity transformations. Usually, these methods are
  * included through static imports.
@@ -105,7 +106,7 @@ public class CommonTransformations {
      * @return a normalizer for refined soundex.
      * @see RefinedSoundex implementation for details
      */
-    public static ValueTransformation<String, String> refinedSoundex(final char[] mapping) {
+    public static ValueTransformation<String, String> refinedSoundex(final @NonNull char[] mapping) {
         return codec(new RefinedSoundex(mapping));
     }
 
@@ -127,11 +128,11 @@ public class CommonTransformations {
      * @return the wrapped encode.
      * @throws Exception (sneaky)
      */
-    public static ValueTransformation<String, String> codec(final StringEncoder encoder) {
+    public static ValueTransformation<String, String> codec(final @NonNull StringEncoder encoder) {
         return new ValueTransformation<>() {
             @Override
             @SneakyThrows
-            public String transform(@NonNull String s, @NonNull SimilarityContext context) {
+            public String transform(final @NonNull String s, final @NonNull SimilarityContext context) {
                 return encoder.encode(s);
             }
         };
@@ -157,7 +158,7 @@ public class CommonTransformations {
      * @param <R> the return type of the function.
      * @return the wrapped function.
      */
-    public static <T, R> ValueTransformation<T, R> transform(final Function<? super T, ? extends R> function) {
+    public static <T, R> ValueTransformation<T, R> transform(final @NonNull Function<? super T, ? extends R> function) {
         return (t, context) -> function.apply(t);
     }
 

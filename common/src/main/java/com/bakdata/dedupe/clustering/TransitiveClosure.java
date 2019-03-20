@@ -39,6 +39,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * An amortized linear transitive closure implementation over the number of pairs.
  *
@@ -68,7 +69,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
     Map<I, Cluster<C, T>> clusterIndex = new HashMap<>();
 
     @Override
-    public @NonNull Stream<Cluster<C, T>> cluster(@NonNull final Stream<ClassifiedCandidate<T>> classifiedCandidates) {
+    public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
         final List<Candidate<T>> duplicates = classifiedCandidates
                 .filter(classifiedCandidate -> classifiedCandidate.getClassificationResult().getClassification()
                                                == Classification.DUPLICATE)

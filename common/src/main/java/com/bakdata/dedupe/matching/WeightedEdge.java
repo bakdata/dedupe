@@ -27,6 +27,7 @@ package com.bakdata.dedupe.matching;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * A weighted (directed) edge between two records.
  * <p>The consumer may decide to treat the edge directed or undirected, please refer to the respective API
@@ -59,6 +60,6 @@ public class WeightedEdge<T> {
      * @return the edge with reversed direction.
      */
     public @NonNull WeightedEdge<T> reversed() {
-        return new WeightedEdge<>(second, first, weight);
+        return new WeightedEdge<>(this.second, this.first, this.weight);
     }
 }

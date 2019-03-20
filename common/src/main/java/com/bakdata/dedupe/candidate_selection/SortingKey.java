@@ -27,6 +27,7 @@ import java.util.function.Function;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * A sorting key allows a dataset to be indexed by a specific (calculated) value of a record, such that duplicates have
  * a higher probability of being in close proximity and thus a {@link CandidateSelection} may prune the search space

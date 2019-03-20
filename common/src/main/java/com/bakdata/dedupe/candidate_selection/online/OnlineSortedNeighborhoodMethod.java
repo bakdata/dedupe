@@ -38,6 +38,7 @@ import lombok.Singular;
 import lombok.Value;
 import lombok.experimental.FieldDefaults;
 
+
 /**
  * A sorted neighborhood method (SNM) for online deduplication. Records are sorted in multiple passes by a specific
  * sorting key and all records within a window {@code w} are compared.
@@ -65,6 +66,7 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
     /**
      * The different passes used to select the candidates.
      */
+    @NonNull
     @Singular
     List<Pass<T, ?>> passes;
     /**
@@ -162,7 +164,8 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
          * @param sortingKeys the sorting keys to use in these passes.
          * @return this
          */
-        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(final Iterable<SortingKey<T, ?>> sortingKeys) {
+        @NonNull
+        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(final @NonNull Iterable<SortingKey<T, ?>> sortingKeys) {
             return this.sortingKeys(sortingKeys, this.defaultWindowSize);
         }
 
@@ -173,7 +176,8 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
          * @param windowSize the window size {@code >= 2}.
          * @return this
          */
-        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(final Iterable<SortingKey<T, ?>> sortingKeys,
+        @NonNull
+        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(final @NonNull Iterable<SortingKey<T, ?>> sortingKeys,
                 final int windowSize) {
             for (final var sortingKey : sortingKeys) {
                 this.sortingKey(sortingKey, windowSize);

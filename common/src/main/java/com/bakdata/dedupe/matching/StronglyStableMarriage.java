@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.Value;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.interfaces.MatchingAlgorithm.Matching;
@@ -80,48 +81,50 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
      */
     static class CriticalSetFinder {
         private final Graph<Integer, WeightedEdge<Integer>> graph = new SimpleGraph<>(null, null, false);
-        private Table<Integer, Integer, Boolean> engagements;
-        private Set<Integer> manVertexes = new HashSet<>();
-        private Set<Integer> womanVertexes = new HashSet<>();
+        private final Table<Integer, Integer, Boolean> engagements;
+        private final Set<Integer> manVertexes = new HashSet<>();
+        private final Set<Integer> womanVertexes = new HashSet<>();
 
         public CriticalSetFinder(final Table<Integer, Integer, Boolean> engagements) {
             this.engagements = engagements;
-            createGraph();
+            this.createGraph();
         }
 
+        @NonNull
         @VisibleForTesting
         Set<Integer> findMenInCriticalSubset() {
-            Set<Integer> criticalMen = new HashSet<>();
+            final Set<Integer> criticalMen = new HashSet<>();
 
             while (true) {
                 final Matching<Integer, WeightedEdge<Integer>> matching =
-                        new HopcroftKarpMaximumCardinalityBipartiteMatching(graph,
-                                manVertexes, womanVertexes).getMatching();
+                        new HopcroftKarpMaximumCardinalityBipartiteMatching(this.graph,
+                                this.manVertexes, this.womanVertexes).getMatching();
 
                 // check if "perfect" matching; that is, all remaining men are matched.
-                if (matching.getEdges().size() == manVertexes.size()) {
+                if (matching.getEdges().size() == this.manVertexes.size()) {
                     break;
                 }
 
                 // else at least one man did not get matched.
-                Set<Integer> unmatchedMen = new HashSet<>(manVertexes);
+                final Set<Integer> unmatchedMen = new HashSet<>(this.manVertexes);
                 unmatchedMen.removeAll(matching.getEdges().stream().map(WeightedEdge::getFirst).collect(toSet()));
 
                 // find neighboring women
-                final Set<Integer> newCriticalWomen = unmatchedMen.stream().flatMap(m -> graph.edgesOf(m).stream().map(
-                        match -> match.getSecond())).collect(toSet());
+                final Set<Integer> newCriticalWomen =
+                        unmatchedMen.stream().flatMap(m -> this.graph.edgesOf(m).stream().map(
+                                match -> match.getSecond())).collect(toSet());
 
                 // remove both and their edges
-                for (Integer w : newCriticalWomen) {
-                    graph.removeVertex(w);
+                for (final Integer w : newCriticalWomen) {
+                    this.graph.removeVertex(w);
                 }
-                for (Integer m : unmatchedMen) {
-                    graph.removeVertex(m);
+                for (final Integer m : unmatchedMen) {
+                    this.graph.removeVertex(m);
                 }
 
                 // also prune them from the input of the next iteration
-                manVertexes.removeAll(unmatchedMen);
-                womanVertexes.removeAll(newCriticalWomen);
+                this.manVertexes.removeAll(unmatchedMen);
+                this.womanVertexes.removeAll(newCriticalWomen);
                 criticalMen.addAll(unmatchedMen);
             }
 
@@ -132,15 +135,15 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
          * For each current engagement, add an edge into the graph.
          */
         private void createGraph() {
-            for (Cell<Integer, Integer, Boolean> engagement : engagements.cellSet()) {
+            for (final Cell<Integer, Integer, Boolean> engagement : this.engagements.cellSet()) {
                 if (engagement.getValue() != null) {
                     final Integer m = engagement.getRowKey();
                     final Integer w = engagement.getColumnKey();
-                    manVertexes.add(m);
-                    graph.addVertex(m);
-                    womanVertexes.add(-w - 1);
-                    graph.addVertex(-w - 1);
-                    graph.addEdge(m, -w - 1, new WeightedEdge<>(m, -w - 1, DUMMY_WEIGHT));
+                    this.manVertexes.add(m);
+                    this.graph.addVertex(m);
+                    this.womanVertexes.add(-w - 1);
+                    this.graph.addVertex(-w - 1);
+                    this.graph.addEdge(m, -w - 1, new WeightedEdge<>(m, -w - 1, DUMMY_WEIGHT));
                 }
             }
         }
@@ -160,33 +163,33 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
         protected void match() {
             // while (some man m is free) do
             Integer m;
-            while ((m = getNextFreeMen()) != null) {
-                final List<Integer> highestRankedWomen = mensFavoriteWomen.get(m).peek();
+            while ((m = this.getNextFreeMen()) != null) {
+                final List<Integer> highestRankedWomen = this.mensFavoriteWomen.get(m).peek();
                 //for each (woman w at the head of m's list) do
-                for (Integer w : highestRankedWomen) {
+                for (final Integer w : highestRankedWomen) {
                     //m proposes, and becomes engaged, to w;
-                    propose(m, w);
+                    this.propose(m, w);
 
                     //for each (strict successor m' of m on w’s list) do
-                    getStrictSuccessors(womensFavoriteMen.get(w), m).forEach(m_ -> {
-                        breakEngangement(m_, w);
-                        delete(m_, w);
+                    getStrictSuccessors(this.womensFavoriteMen.get(w), m).forEach(m_ -> {
+                        this.breakEngangement(m_, w);
+                        this.delete(m_, w);
                     });
                 }
                 //find the critical set Z of men;
-                Set<Integer> z = new CriticalSetFinder(engagements).findMenInCriticalSubset();
+                final Set<Integer> z = new CriticalSetFinder(this.engagements).findMenInCriticalSubset();
                 // perfect matching if no critical set
                 if (!z.isEmpty()) {
                     //for each (woman w who is engaged to a man in Z) do
-                    for (Integer criticalMan : z) {
-                        for (Integer w : engagements.row(criticalMan).keySet()) {
+                    for (final Integer criticalMan : z) {
+                        for (final Integer w : this.engagements.row(criticalMan).keySet()) {
                             //break all engagements involving w;
-                            engagements.column(w).clear();
+                            this.engagements.column(w).clear();
 
                             //for each (tail m' of m on w’s list) do
-                            getTail(womensFavoriteMen.get(w), m).forEach(m_ -> {
-                                breakEngangement(m_, w);
-                                delete(m_, w);
+                            getTail(this.womensFavoriteMen.get(w), m).forEach(m_ -> {
+                                this.breakEngangement(m_, w);
+                                this.delete(m_, w);
                             });
                         }
                     }

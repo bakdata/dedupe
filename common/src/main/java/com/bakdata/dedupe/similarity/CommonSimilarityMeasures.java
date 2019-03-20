@@ -28,6 +28,7 @@ import static com.bakdata.util.StreamUtil.takeWhileInclusive;
 
 import com.bakdata.dedupe.matching.BipartiteMatcher;
 import com.bakdata.dedupe.matching.WeaklyStableMarriage;
+import com.bakdata.dedupe.similarity.WeightedAggregatingSimilarityMeasure.WeightedAggregatingSimilarityMeasureBuilder;
 import com.bakdata.dedupe.similarity.WeightedAggregatingSimilarityMeasure.WeightedValue;
 import com.google.common.collect.Lists;
 import java.time.temporal.Temporal;
@@ -38,11 +39,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Stream;
+import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.text.similarity.EditDistance;
 import org.apache.commons.text.similarity.JaroWinklerDistance;
 import org.apache.commons.text.similarity.SimilarityScore;
+
 
 /**
  * A utility class that offers factory methods for common similarity measures. Usually, these methods are included
@@ -60,7 +63,7 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return A similarity measure that is 1 if {@code left.equals(right)} or {@code 0} otherwise.
      */
-    public static <T> SimilarityMeasure<T> equality() {
+    public static <T> @NonNull SimilarityMeasure<T> equality() {
         return ((left, right, context) -> left.equals(right) ? 1 : 0);
     }
 
@@ -70,7 +73,7 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return A similarity measure that is 0 if {@code left.equals(right)} or {@code 1} otherwise.
      */
-    public static <T> SimilarityMeasure<T> inequality() {
+    public static <T> @NonNull SimilarityMeasure<T> inequality() {
         return negate(equality());
     }
 
@@ -82,7 +85,7 @@ public class CommonSimilarityMeasures {
      * @param <C> the collection type.
      * @return the Jaccard set similarity.
      */
-    public static <E, C extends Collection<? extends E>> SetSimilarityMeasure<C, E> jaccard() {
+    public static @NonNull <E, C extends Collection<? extends E>> SetSimilarityMeasure<C, E> jaccard() {
         return (left, right, context) -> {
             final long intersectCount = left.stream().filter(right::contains).count();
             return (double) intersectCount / (right.size() + left.size() - intersectCount);
@@ -99,7 +102,7 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return the Levenshtein distance.
      */
-    public static <T extends CharSequence> SimilarityMeasure<T> levenshtein() {
+    public static @NonNull <T extends CharSequence> SimilarityMeasure<T> levenshtein() {
         return new Levensthein<>(0);
     }
 
@@ -110,7 +113,7 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return the Jaro-Winkler similarity.
      */
-    public static <T extends CharSequence> SimilarityMeasure<T> jaroWinkler() {
+    public static @NonNull <T extends CharSequence> SimilarityMeasure<T> jaroWinkler() {
         return similarityScore(new JaroWinklerDistance());
     }
 
@@ -120,8 +123,8 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return the given similarity score wrapped into a SimilarityMeasure.
      */
-    public static <T extends CharSequence, R extends Number> SimilarityMeasure<T> similarityScore(
-            SimilarityScore<R> similarityScore) {
+    public static @NonNull <T extends CharSequence, R extends Number> SimilarityMeasure<T> similarityScore(
+            final @NonNull SimilarityScore<R> similarityScore) {
         return (left, right, context) -> similarityScore.apply(left, right).doubleValue();
     }
 
@@ -132,8 +135,8 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return the given edit distance translated into a SimilarityMeasure.
      */
-    public static <T extends CharSequence, R extends Number> SimilarityMeasure<T> toSimilarity(
-            EditDistance<R> editDistance) {
+    public static @NonNull <T extends CharSequence, R extends Number> SimilarityMeasure<T> toSimilarity(
+            final @NonNull EditDistance<R> editDistance) {
         return (left, right, context) -> {
             final double distance = editDistance.apply(left, right).doubleValue();
             return distance == -1 ? 0 : (1 - distance / Math.max(left.length(), right.length()));
@@ -155,7 +158,7 @@ public class CommonSimilarityMeasures {
      * @see <a href="https://en.wikipedia.org/wiki/Stable_marriage_problem">Stable marriage on Wikipedia</a>
      * @return a stable matching similarity.
      */
-    public static <E, C extends Collection<? extends E>> SimilarityMeasure<C> stableMatching(
+    public static @NonNull <E, C extends Collection<? extends E>> SimilarityMeasure<C> stableMatching(
             final SimilarityMeasure<E> pairMeasure) {
         return new MatchingSimilarity<>(new WeaklyStableMarriage<>(), pairMeasure);
     }
@@ -177,7 +180,7 @@ public class CommonSimilarityMeasures {
      * @param <C> the collection type.
      * @return the Monge-Elkan list-based similarity.
      */
-    public static <E, C extends Collection<? extends E>> SimilarityMeasure<C> mongeElkan(
+    public static @NonNull <E, C extends Collection<? extends E>> SimilarityMeasure<C> mongeElkan(
             final SimilarityMeasure<E> pairMeasure) {
         return mongeElkan(pairMeasure, Integer.MAX_VALUE / 2);
     }
@@ -195,7 +198,8 @@ public class CommonSimilarityMeasures {
      * @param <C> the collection type.
      * @return a matching similarity measure.
      */
-    public static <E, C extends Collection<? extends E>> SimilarityMeasure<C> matching(BipartiteMatcher<E> matcher,
+    public static @NonNull <E, C extends Collection<? extends E>> SimilarityMeasure<C> matching(
+            final BipartiteMatcher<E> matcher,
             final SimilarityMeasure<? super E> pairMeasure) {
         return new MatchingSimilarity<>(new WeaklyStableMarriage<>(), pairMeasure);
     }
@@ -210,7 +214,7 @@ public class CommonSimilarityMeasures {
      * @param <C> the collection type.
      * @return the cosine similarity.
      */
-    public static <E, C extends Collection<? extends E>> CollectionSimilarityMeasure<C, E> cosine() {
+    public static @NonNull <E, C extends Collection<? extends E>> CollectionSimilarityMeasure<C, E> cosine() {
         return new CosineSimilarityMeasure<>();
     }
 
@@ -232,7 +236,7 @@ public class CommonSimilarityMeasures {
      * @param <C> the collection type.
      * @return the Monge-Elkan list-based similarity.
      */
-    public static <E, C extends Collection<? extends E>> SimilarityMeasure<C> mongeElkan(
+    public static @NonNull <E, C extends Collection<? extends E>> SimilarityMeasure<C> mongeElkan(
             final SimilarityMeasure<E> pairMeasure, final int maxPositionDiff) {
         return new MongeElkan<>(pairMeasure, maxPositionDiff, 0);
     }
@@ -246,7 +250,7 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return a negated similarity measure.
      */
-    public static <T> SimilarityMeasure<T> negate(final SimilarityMeasure<T> measure) {
+    public static <T> @NonNull SimilarityMeasure<T> negate(final SimilarityMeasure<T> measure) {
         return measure.negate();
     }
 
@@ -258,7 +262,7 @@ public class CommonSimilarityMeasures {
      * @param <C> the collection type.
      * @return a position-wise comparing, list-based similarity measure.
      */
-    public static <E, C extends List<? extends E>> SimilarityMeasure<C> positionWise(
+    public static @NonNull <E, C extends List<? extends E>> SimilarityMeasure<C> positionWise(
             final SimilarityMeasure<E> pairMeasure) {
         return mongeElkan(pairMeasure, 0);
     }
@@ -272,7 +276,7 @@ public class CommonSimilarityMeasures {
      * @return the largest similarity of the given similarity measures.
      */
     @SafeVarargs
-    public static <T> SimilarityMeasure<T> max(final SimilarityMeasure<? super T>... measures) {
+    public static <T> @NonNull SimilarityMeasure<T> max(final SimilarityMeasure<? super T>... measures) {
         return new AggregatingSimilarityMeasure<>(similarities ->
                 takeWhileInclusive(similarities, sim -> sim < 1d)
                 .max()
@@ -288,7 +292,7 @@ public class CommonSimilarityMeasures {
      * @return the first known similarity of the given similarity measures.
      */
     @SafeVarargs
-    public static <T> SimilarityMeasure<T> first(final SimilarityMeasure<? super T>... measures) {
+    public static <T> @NonNull SimilarityMeasure<T> first(final SimilarityMeasure<? super T>... measures) {
         return new AggregatingSimilarityMeasure<>(similarities -> similarities
                 .filter(sim -> !SimilarityMeasure.isUnknown(sim))
                 .findFirst()
@@ -303,7 +307,8 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return the first known similarity of the given similarity measures.
      */
-    public static <T> SimilarityMeasure<T> first(final Iterable<? extends SimilarityMeasure<? super T>> measures) {
+    public static <T> @NonNull SimilarityMeasure<T> first(
+            final Iterable<? extends SimilarityMeasure<? super T>> measures) {
         return new AggregatingSimilarityMeasure<>(similarities -> similarities
                 .filter(sim -> !SimilarityMeasure.isUnknown(sim))
                 .findFirst()
@@ -319,7 +324,7 @@ public class CommonSimilarityMeasures {
      * @return the last known similarity of the given similarity measures.
      */
     @SafeVarargs
-    public static <T> SimilarityMeasure<T> last(final SimilarityMeasure<? super T>... measures) {
+    public static <T> @NonNull SimilarityMeasure<T> last(final SimilarityMeasure<? super T>... measures) {
         final ArrayList<SimilarityMeasure<? super T>> list = Lists.newArrayList(measures);
         Collections.reverse(list);
         return first(list);
@@ -333,7 +338,8 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return the last known similarity of the given similarity measures.
      */
-    public static <T> SimilarityMeasure<T> last(final Iterable<? extends SimilarityMeasure<? super T>> measures) {
+    public static <T> @NonNull SimilarityMeasure<T> last(
+            final @NonNull Iterable<? extends SimilarityMeasure<? super T>> measures) {
         final ArrayList<SimilarityMeasure<? super T>> list = Lists.newArrayList(measures);
         Collections.reverse(list);
         return first(list);
@@ -350,7 +356,7 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return the scaled difference in [0; maxDiff) resulting in (0; 1] or 0 otherwise.
      */
-    public static <T extends Temporal> SimilarityMeasure<T> scaledDifference(final int maxDiff,
+    public static @NonNull <T extends Temporal> SimilarityMeasure<T> scaledDifference(final int maxDiff,
             final TemporalUnit unit) {
         return (left, right, context) ->
                 Math.max(0, 1 - (double) Math.abs(left.until(right, unit)) / maxDiff);
@@ -366,7 +372,7 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return the scaled difference in [0; maxDiff) resulting in (0; 1] or 0 otherwise.
      */
-    public static <T extends Number> SimilarityMeasure<T> scaledDifference(final T maxDiff) {
+    public static @NonNull <T extends Number> SimilarityMeasure<T> scaledDifference(final @NonNull T maxDiff) {
         return (left, right, context) ->
                 Math.max(0, 1 - Math.abs(left.doubleValue() - right.doubleValue()) / maxDiff.doubleValue());
     }
@@ -380,7 +386,7 @@ public class CommonSimilarityMeasures {
      * @return the smallest similarity of the given similarity measures.
      */
     @SafeVarargs
-    public static <T> SimilarityMeasure<T> min(final SimilarityMeasure<? super T>... measures) {
+    public static <T> @NonNull SimilarityMeasure<T> min(final SimilarityMeasure<? super T>... measures) {
         return new AggregatingSimilarityMeasure<T>(similarities -> similarities
                 .takeWhile(sim -> sim > 0d)
                 .min()
@@ -396,7 +402,7 @@ public class CommonSimilarityMeasures {
      * @return the average similarity of the given similarity measures.
      */
     @SafeVarargs
-    public static <T> SimilarityMeasure<T> mean(final SimilarityMeasure<? super T>... measures) {
+    public static <T> @NonNull SimilarityMeasure<T> mean(final SimilarityMeasure<? super T>... measures) {
         return new AggregatingSimilarityMeasure<T>(similarities -> similarities
                 .average()
                 .orElse(unknown()), measures);
@@ -410,7 +416,7 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return a builder for the weighted aggregation.
      */
-    public static <T> WeightedAggregatingSimilarityMeasure.WeightedAggregatingSimilarityMeasureBuilder<T> weightedAggregation(
+    public static <T> @NonNull WeightedAggregatingSimilarityMeasureBuilder<T> weightedAggregation(
             final ToDoubleFunction<Stream<WeightedValue>> aggregator) {
         return WeightedAggregatingSimilarityMeasure.<T>builder().aggregator(aggregator);
     }
@@ -422,14 +428,14 @@ public class CommonSimilarityMeasures {
      * @param <T> the type of the record.
      * @return a builder for the weighted aggregation.
      */
-    public static <T> WeightedAggregatingSimilarityMeasure.WeightedAggregatingSimilarityMeasureBuilder<T> weightedAverage() {
+    public static <T> @NonNull WeightedAggregatingSimilarityMeasureBuilder<T> weightedAverage() {
         @Value
         class TotalWeightedValue {
             double weight;
             double weightedValue;
 
-            TotalWeightedValue sum(TotalWeightedValue other) {
-                return new TotalWeightedValue(weight + other.weight, weightedValue + other.weightedValue);
+            TotalWeightedValue sum(final TotalWeightedValue other) {
+                return new TotalWeightedValue(this.weight + other.weight, this.weightedValue + other.weightedValue);
             }
         }
         return weightedAggregation(weightedValues -> weightedValues

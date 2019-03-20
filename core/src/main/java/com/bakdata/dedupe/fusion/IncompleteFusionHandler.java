@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import lombok.NonNull;
 
+
 @FunctionalInterface
 public interface IncompleteFusionHandler<T> extends Function<FusedValue<T>, Optional<FusedValue<T>>> {
     static <T> @NonNull IncompleteFusionHandler<T> dontFuse() {

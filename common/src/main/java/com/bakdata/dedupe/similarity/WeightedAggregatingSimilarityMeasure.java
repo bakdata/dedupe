@@ -33,15 +33,17 @@ import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
 
+
 @Builder
 @Value
 public class WeightedAggregatingSimilarityMeasure<R> implements SimilarityMeasure<R> {
     @NonNull ToDoubleFunction<@NonNull Stream<WeightedValue>> aggregator;
+
     @Singular
     @NonNull List<@NonNull WeightedSimilarity<R>> weightedSimilarities;
 
     @Override
-    public double getNonNullSimilarity(final R left, final R right, final SimilarityContext context) {
+    public double getNonNullSimilarity(final R left, final R right, final @NonNull SimilarityContext context) {
         return this.aggregator.applyAsDouble(this.weightedSimilarities.stream()
                 .map(ws -> new WeightedValue(ws.getWeight(), ws.getMeasure().getSimilarity(left, right, context)))
                 .filter(wv -> !SimilarityMeasure.isUnknown(wv.getValue())));
@@ -59,13 +61,14 @@ public class WeightedAggregatingSimilarityMeasure<R> implements SimilarityMeasur
         double value;
 
         public double getWeightedValue() {
-            return weight * value;
+            return this.weight * this.value;
         }
     }
 
     public static class WeightedAggregatingSimilarityMeasureBuilder<R> {
         public <T> @NonNull WeightedAggregatingSimilarityMeasureBuilder<R> add(final double weight,
-                final @NonNull Function<R, ? extends T> extractor, final SimilarityMeasure<? super T> measure) {
+                final @NonNull Function<R, ? extends T> extractor,
+                final @NonNull SimilarityMeasure<? super T> measure) {
             return this.add(weight, measure.of(extractor));
         }
 
@@ -81,7 +84,8 @@ public class WeightedAggregatingSimilarityMeasure<R> implements SimilarityMeasur
          * @param <T> the new type of the target.
          * @return this with casted type parameter.
          */
-        public <T> WeightedAggregatingSimilarityMeasureBuilder<T> of(Class<T> clazz) {
+        @NonNull
+        public <T> WeightedAggregatingSimilarityMeasureBuilder<T> of(final Class<T> clazz) {
             return (WeightedAggregatingSimilarityMeasureBuilder<T>) this;
         }
     }

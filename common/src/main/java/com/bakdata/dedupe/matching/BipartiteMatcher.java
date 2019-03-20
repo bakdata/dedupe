@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 
+
 /**
  * Implements an algorithm that finds a matching in a bipartite graph.
  * <p>"A matching or independent edge set in a graph is a set of edges without common vertices."[1]</p>
@@ -75,9 +76,9 @@ public interface BipartiteMatcher<T> extends Assigner<T> {
      * @return the set of edges as a subset of leftToRightWeightedEdges.
      */
     default @NonNull Set<@NonNull ? extends WeightedEdge<T>> matchMaterialized(
-            @NonNull Collection<WeightedEdge<T>> leftToRightWeightedEdges,
-            @NonNull Collection<WeightedEdge<T>> rightToLeftWeightedEdges) {
-        return Sets.newHashSet(match(leftToRightWeightedEdges, rightToLeftWeightedEdges));
+            final @NonNull Collection<WeightedEdge<T>> leftToRightWeightedEdges,
+            final @NonNull Collection<WeightedEdge<T>> rightToLeftWeightedEdges) {
+        return Sets.newHashSet(this.match(leftToRightWeightedEdges, rightToLeftWeightedEdges));
     }
 
     /**
@@ -86,7 +87,8 @@ public interface BipartiteMatcher<T> extends Assigner<T> {
      */
     @Override
     default @NonNull Iterable<? extends WeightedEdge<T>> assign(
-            @NonNull Collection<@NonNull WeightedEdge<T>> weightedEdges) {
-        return match(weightedEdges, weightedEdges.stream().map(WeightedEdge::reversed).collect(Collectors.toList()));
+            final @NonNull Collection<@NonNull WeightedEdge<T>> weightedEdges) {
+        return this
+                .match(weightedEdges, weightedEdges.stream().map(WeightedEdge::reversed).collect(Collectors.toList()));
     }
 }

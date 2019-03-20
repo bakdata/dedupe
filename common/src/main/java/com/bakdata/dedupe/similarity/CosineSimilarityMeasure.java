@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 
+
 /**
  * Calculates the cosine similarity measure over two bags of elements.
  * <p>It first calculates the histograms of the two bags, interprets them as count vectors, and computes the cosine
@@ -41,16 +42,16 @@ import lombok.NonNull;
 public class CosineSimilarityMeasure<C extends Collection<? extends E>, E>
         implements CollectionSimilarityMeasure<C, E> {
     private static <T> double getLength(final Map<T, Long> histogram) {
-        return (double) Math.sqrt(histogram.values().stream().mapToDouble(count -> count * count).sum());
+        return Math.sqrt(histogram.values().stream().mapToDouble(count -> count * count).sum());
     }
 
-    private static <C extends Collection<? extends E>, E> Map<E, Long> getHistogram(@NonNull C left) {
+    private static <C extends Collection<? extends E>, E> Map<E, Long> getHistogram(final @NonNull C left) {
         return left.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
     }
 
     @Override
-    public double calculateNonEmptyCollectionSimilarity(@NonNull C left, @NonNull C right,
-            @NonNull SimilarityContext context) {
+    public double calculateNonEmptyCollectionSimilarity(final @NonNull C left, final @NonNull C right,
+            final @NonNull SimilarityContext context) {
         final Map<E, Long> leftHistogram = getHistogram(left);
         final Map<E, Long> rightHistogram = getHistogram(right);
         double dotProduct = 0;

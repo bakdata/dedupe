@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * A similarity measure that finds the <i>best</i> matches between two bags of entities and calculates an overall
  * similarity by summing the similarity of these matches and normalize it over the (max) number of elements per
@@ -46,30 +47,32 @@ public class MatchingSimilarity<C extends Collection<? extends E>, E> implements
     @NonNull SimilarityMeasure<E> pairMeasure;
 
     @Override
-    public double calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
-            @NonNull SimilarityContext context) {
-        final Collection<WeightedEdge<E>> leftScoreOfRight = getScores(leftCollection, rightCollection, context);
-        final Collection<WeightedEdge<E>> rightScoreOfLeft = pairMeasure.isSymmetric()
-                ? reversed(leftScoreOfRight)
-                : getScores(rightCollection, leftCollection, context);
+    public double calculateNonEmptyCollectionSimilarity(final @NonNull C leftCollection, final @NonNull C rightCollection,
+            final @NonNull SimilarityContext context) {
+        final Collection<WeightedEdge<E>> leftScoreOfRight = this.getScores(leftCollection, rightCollection, context);
+        final Collection<WeightedEdge<E>> rightScoreOfLeft = this.pairMeasure.isSymmetric()
+                ? this.reversed(leftScoreOfRight)
+                : this.getScores(rightCollection, leftCollection, context);
 
-        final Iterable<? extends WeightedEdge<E>> matches = bipartiteMatcher.match(leftScoreOfRight, rightScoreOfLeft);
+        final Iterable<? extends WeightedEdge<E>> matches = this.bipartiteMatcher
+                .match(leftScoreOfRight, rightScoreOfLeft);
         return StreamUtil.stream(matches)
                        .map(WeightedEdge::getWeight)
                        .reduce(0d, Double::sum) /
                Math.max(leftCollection.size(), rightCollection.size());
     }
 
-    private Collection<WeightedEdge<E>> reversed(Collection<WeightedEdge<E>> scores) {
+    private Collection<WeightedEdge<E>> reversed(final Collection<WeightedEdge<E>> scores) {
         return scores.stream().map(score -> score.reversed()).collect(Collectors.toList());
     }
 
-    private Collection<WeightedEdge<E>> getScores(@NonNull C leftCollection, @NonNull C rightCollection,
-            @NonNull SimilarityContext context) {
+    @NonNull
+    private Collection<WeightedEdge<E>> getScores(final @NonNull C leftCollection, final @NonNull C rightCollection,
+            final @NonNull SimilarityContext context) {
         final Collection<WeightedEdge<E>> leftScoreOfRight = new ArrayList<>();
-        for (E left : leftCollection) {
-            for (E right : rightCollection) {
-                final double leftScore = pairMeasure.getSimilarity(left, right, context);
+        for (final E left : leftCollection) {
+            for (final E right : rightCollection) {
+                final double leftScore = this.pairMeasure.getSimilarity(left, right, context);
                 if (!isUnknown(leftScore)) {
                     leftScoreOfRight.add(new WeightedEdge<>(left, right, leftScore));
                 }

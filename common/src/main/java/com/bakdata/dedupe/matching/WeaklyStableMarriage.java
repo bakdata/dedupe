@@ -71,20 +71,20 @@ public class WeaklyStableMarriage<T> extends AbstractStableMarriage<T> {
             // Assign each person to be free;
             // while (some man m is free) do
             Integer m;
-            while ((m = getNextFreeMen()) != null) {
-                final List<Integer> highestRankedWomen = mensFavoriteWomen.get(m).peek();
+            while ((m = this.getNextFreeMen()) != null) {
+                final List<Integer> highestRankedWomen = this.mensFavoriteWomen.get(m).peek();
                 if (highestRankedWomen != null) {
                     // w := first woman on m’s list;
-                    Integer w = highestRankedWomen.get(0);
+                    final Integer w = highestRankedWomen.get(0);
                     // if (some man m' is engaged to w) then
-                    Integer m_ = Iterables.getFirst(engagements.column(w).keySet(), null);
+                    final Integer m_ = Iterables.getFirst(this.engagements.column(w).keySet(), null);
                     if (m_ != null) {
-                        breakEngangement(m_, w);
+                        this.breakEngangement(m_, w);
                     }
-                    propose(m, w);
+                    this.propose(m, w);
                     //for each (successor m" of m on w’s list) do
-                    getSuccessors(womensFavoriteMen.get(w), m).forEach(m__ -> {
-                        delete(m__, w);
+                    getSuccessors(this.womensFavoriteMen.get(w), m).forEach(m__ -> {
+                        this.delete(m__, w);
                     });
                 }
             }

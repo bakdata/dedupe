@@ -33,6 +33,7 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.java.Log;
 
+
 /**
  * The exception context allows the safe execution of code that may throw an exception. Exceptions are captured and
  * available for further investigations.
@@ -65,7 +66,7 @@ public class ExceptionContext {
     public <T> Optional<T> safeExecute(final @NonNull Callable<? extends T> function) {
         try {
             return Optional.of(function.call());
-        } catch (final Exception e) {
+        } catch (final @NonNull Exception e) {
             log.log(Level.FINE, "Suppressing exception", e);
             this.exceptions.add(e);
             return Optional.empty();
@@ -81,7 +82,7 @@ public class ExceptionContext {
     public void safeExecute(final @NonNull Runnable runnable) {
         try {
             runnable.run();
-        } catch (final RuntimeException e) {
+        } catch (final @NonNull RuntimeException e) {
             log.log(Level.FINE, "Suppressing exception", e);
             this.exceptions.add(e);
         }

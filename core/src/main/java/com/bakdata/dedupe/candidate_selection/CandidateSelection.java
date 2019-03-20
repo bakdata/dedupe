@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.NonNull;
 
+
 /**
  * Selects candidates from a static or dynamic dataset accessible through Iterables.
  * <p>The dataset might be stored off-heap and retrieved on demand.</p>
@@ -56,7 +57,7 @@ public interface CandidateSelection<T> {
      * @return the generated candidates.
      * @implSpec It is assumed that this method will work stateless. Derivations need to be documented.
      */
-    default @NonNull Collection<Candidate<T>> selectCandidates(@NonNull Iterable<? extends T> records) {
-        return selectCandidates(StreamUtil.stream(records)).collect(Collectors.toList());
+    default @NonNull Collection<Candidate<T>> selectCandidates(final @NonNull Iterable<? extends T> records) {
+        return this.selectCandidates(StreamUtil.stream(records)).collect(Collectors.toList());
     }
 }

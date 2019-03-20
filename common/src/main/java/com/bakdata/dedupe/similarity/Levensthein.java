@@ -26,8 +26,10 @@ package com.bakdata.dedupe.similarity;
 
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.toSimilarity;
 
+import lombok.NonNull;
 import lombok.Value;
 import org.apache.commons.text.similarity.LevenshteinDistance;
+
 
 /**
  * Provides the Levensthein similarity calculation, which calculates the number of insertions, deletions, and
@@ -48,9 +50,9 @@ public class Levensthein<T extends CharSequence> implements SimilarityMeasure<T>
     double threshold;
 
     @Override
-    public double getNonNullSimilarity(final CharSequence left, final CharSequence right,
+    public double getNonNullSimilarity(final @NonNull CharSequence left, final @NonNull CharSequence right,
             final SimilarityContext context) {
-        if(threshold == 0) {
+        if (this.threshold == 0) {
             return NoThresholdMeasure.getNonNullSimilarity(left, right, context);
         }
         final var maxLen = Math.max(left.length(), right.length());
@@ -59,6 +61,7 @@ public class Levensthein<T extends CharSequence> implements SimilarityMeasure<T>
         return measure.getNonNullSimilarity(left, right, context);
     }
 
+    @NonNull
     @Override
     public SimilarityMeasure<T> cutoff(final double threshold) {
         if (threshold < this.threshold) {

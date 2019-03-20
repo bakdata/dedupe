@@ -34,6 +34,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * A classifier that knows the results perfectly as it receives the gold standard during creation.
  * <p>This classifier is used for evaluation if you want to evaluate the effectiveness of {@link

@@ -27,6 +27,7 @@ package com.bakdata.dedupe.similarity;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * Cuts the similarity returned by this similarity, such that all values {@code <threshold} result in a similarity of 0,
  * and all values {@code [threshold, 1]} are left untouched.
@@ -60,11 +61,12 @@ public class CutoffSimiliarityMeasure<T> implements SimilarityMeasure<T> {
     }
 
     @Override
-    public double getNonNullSimilarity(@NonNull final T left, @NonNull final T right,
-            @NonNull final SimilarityContext context) {
+    public double getNonNullSimilarity(final @NonNull T left, final @NonNull T right,
+            final @NonNull SimilarityContext context) {
         return cutoff(this.inner.getSimilarity(left, right, context), this.threshold);
     }
 
+    @NonNull
     @Override
     public SimilarityMeasure<T> cutoff(final double threshold) {
         if (threshold < this.threshold) {

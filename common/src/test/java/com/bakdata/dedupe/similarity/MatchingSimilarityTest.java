@@ -36,8 +36,8 @@ import org.junit.jupiter.api.Test;
 class MatchingSimilarityTest {
     @Test
     void shouldCalculateSimilarityStableMatches() {
-        List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc");
-        List<String> women = Arrays.asList("abcd", "cc", "ab", "bb");
+        final List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc");
+        final List<String> women = Arrays.asList("abcd", "cc", "ab", "bb");
 
         final SimilarityMeasure<List<String>> stableMatching =
                 new MatchingSimilarity<>(new WeaklyStableMarriage<>(), levenshtein());
@@ -55,8 +55,8 @@ class MatchingSimilarityTest {
 
     @Test
     void shouldCalculateSimilarityStableMatchesWithAdditionalMen() {
-        List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc", "x");
-        List<String> women = Arrays.asList("abcd", "cc", "ab", "bb");
+        final List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc", "x");
+        final List<String> women = Arrays.asList("abcd", "cc", "ab", "bb");
 
         final SimilarityMeasure<List<String>> stableMatching =
                 new MatchingSimilarity<>(new WeaklyStableMarriage<>(), levenshtein());
@@ -74,8 +74,8 @@ class MatchingSimilarityTest {
 
     @Test
     void shouldCalculateSimilarityStableMatchesWithAdditionalWomen() {
-        List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc");
-        List<String> women = Arrays.asList("abcd", "cc", "ab", "bb", "x");
+        final List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc");
+        final List<String> women = Arrays.asList("abcd", "cc", "ab", "bb", "x");
 
         final SimilarityMeasure<List<String>> stableMatching =
                 new MatchingSimilarity<>(new WeaklyStableMarriage<>(), levenshtein());

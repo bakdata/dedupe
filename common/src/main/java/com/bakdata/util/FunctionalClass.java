@@ -31,6 +31,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
+
 /**
  * A wrapper around {@link Class} that can be used to extract callable lambdas to methods and fields.
  * <p>Currently, used in the DSL around {@link com.bakdata.dedupe.fusion.ConflictResolution}.</p>
@@ -69,7 +70,7 @@ public class FunctionalClass<T> {
         try {
             final Constructor<T> ctor = this.clazz.getDeclaredConstructor();
             return new FunctionalConstructor<>(ctor)::newInstance;
-        } catch (final NoSuchMethodException e) {
+        } catch (final @NonNull NoSuchMethodException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -77,10 +78,10 @@ public class FunctionalClass<T> {
     /**
      * Finds the property descriptor with the given name.
      */
-    private PropertyDescriptor getPropertyDescriptor(final String name) {
+    private PropertyDescriptor getPropertyDescriptor(final @NonNull String name) {
         try {
             return new PropertyDescriptor(name, this.clazz);
-        } catch (final IntrospectionException e) {
+        } catch (final @NonNull IntrospectionException e) {
             throw new IllegalArgumentException("Unknown property: " + name, e);
         }
     }

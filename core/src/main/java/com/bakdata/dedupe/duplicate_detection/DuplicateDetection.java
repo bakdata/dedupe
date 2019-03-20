@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.NonNull;
 
+
 /**
  * A duplicate detection algorithm processes a dataset of records and returns the distinct {@link Cluster}s.
  * <p>In general, all implementations will ensure that the user receives a complete clustering of the dataset, either
@@ -70,8 +71,8 @@ public interface DuplicateDetection<C extends Comparable<C>, T> {
      * @param records the records of which the duplicates should be detected.
      * @return all duplicates of the dataset.
      */
-    default @NonNull Collection<Cluster<C, T>> materializeDuplicates(@NonNull Iterable<? extends T> records) {
-        return detectDuplicates(StreamUtil.stream(records))
+    default @NonNull Collection<Cluster<C, T>> materializeDuplicates(final @NonNull Iterable<? extends T> records) {
+        return this.detectDuplicates(StreamUtil.stream(records))
                 .collect(Collectors.toMap(Cluster::getId, Function.identity()))
                 .values();
     }

@@ -33,6 +33,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * Aggregates similarities with a given aggregator. Depending of the aggregator not all similarity measures are used.
  *
@@ -58,7 +59,7 @@ public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
      */
     public AggregatingSimilarityMeasure(
             final @NonNull ToDoubleFunction<? super DoubleStream> aggregator,
-            @NonNull final SimilarityMeasure<? super T>... similarityMeasures) {
+            final @NonNull SimilarityMeasure<? super T>... similarityMeasures) {
         this(aggregator, List.of(similarityMeasures));
     }
 
@@ -70,7 +71,7 @@ public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
      */
     public AggregatingSimilarityMeasure(
             final @NonNull ToDoubleFunction<? super DoubleStream> aggregator,
-            @NonNull final Iterable<? extends SimilarityMeasure<? super T>> similarityMeasures) {
+            final @NonNull Iterable<? extends SimilarityMeasure<? super T>> similarityMeasures) {
         this.similarityMeasures = Lists.newArrayList(similarityMeasures);
         this.aggregator = aggregator;
         if (this.similarityMeasures.size() == 0) {
@@ -79,9 +80,9 @@ public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
     }
 
     @Override
-    public double getNonNullSimilarity(T left, T right, @NonNull SimilarityContext context) {
-        return getAggregator().applyAsDouble(
-                getSimilarityMeasures().stream()
+    public double getNonNullSimilarity(final T left, final T right, final @NonNull SimilarityContext context) {
+        return this.getAggregator().applyAsDouble(
+                this.getSimilarityMeasures().stream()
                         .mapToDouble(m -> m.getNonNullSimilarity(left, right, context))
                         .filter(sim -> !SimilarityMeasure.isUnknown(sim)));
     }
@@ -94,7 +95,8 @@ public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
          * @param <T> the new type of the target.
          * @return this with casted type parameter.
          */
-        public <T> AggregatingSimilarityMeasureBuilder<T> of(Class<T> clazz) {
+        @NonNull
+        public <T> AggregatingSimilarityMeasureBuilder<T> of(final Class<T> clazz) {
             return (AggregatingSimilarityMeasureBuilder<T>) this;
         }
     }

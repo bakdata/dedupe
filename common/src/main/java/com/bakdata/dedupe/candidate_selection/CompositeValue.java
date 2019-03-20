@@ -110,15 +110,15 @@ public class CompositeValue<T1 extends Comparable<T1>, T2 extends Comparable<T2>
         if (value == null) {
             return null;
         }
-        return new CompositeValue<>(first, new CompositeValue<>(second, value));
+        return new CompositeValue<>(this.first, new CompositeValue<>(this.second, value));
     }
 
     @Override
     public int compareTo(final CompositeValue<T1, T2> o) {
-        final int firstResult = first.compareTo(o.first);
+        final int firstResult = this.first.compareTo(o.first);
         if (firstResult != 0) {
             return firstResult;
         }
-        return second.compareTo(o.second);
+        return this.second.compareTo(o.second);
     }
 }

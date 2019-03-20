@@ -27,6 +27,7 @@ import com.bakdata.dedupe.candidate_selection.Candidate;
 import java.util.stream.Stream;
 import lombok.NonNull;
 
+
 /**
  * Selects candidates from a streaming dataset by processing the incoming elements one-at-a-time.
  *
@@ -50,7 +51,7 @@ public interface OnlineCandidateSelection<T>
      * @implNote Repeatedly invokes {@link #selectCandidates(Object)} to get all candidates.
      */
     @Override
-    default @NonNull Stream<Candidate<T>> selectCandidates(@NonNull Stream<? extends T> records) {
-        return records.flatMap(record -> selectCandidates(record));
+    default @NonNull Stream<Candidate<T>> selectCandidates(final @NonNull Stream<? extends T> records) {
+        return records.flatMap(record -> this.selectCandidates(record));
     }
 }

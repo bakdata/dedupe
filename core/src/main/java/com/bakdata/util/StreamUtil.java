@@ -34,7 +34,9 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+
 
 /**
  * Adds some functions that are missing in Java Streams. Although public, this class should be considered an
@@ -43,27 +45,31 @@ import lombok.experimental.UtilityClass;
  */
 @UtilityClass
 public class StreamUtil {
-    public static <T> Stream<T> takeWhileInclusive(Stream<T> stream, Predicate<T> predicate) {
-        AtomicBoolean test = new AtomicBoolean(true);
+    public static <T> @NonNull Stream<T> takeWhileInclusive(final @NonNull Stream<T> stream,
+            final @NonNull Predicate<T> predicate) {
+        final AtomicBoolean test = new AtomicBoolean(true);
         return stream.takeWhile(e -> test.get()).peek(e -> test.set(predicate.test(e)));
     }
 
-    public static DoubleStream takeWhileInclusive(DoubleStream stream, DoublePredicate predicate) {
-        AtomicBoolean test = new AtomicBoolean(true);
+    public static @NonNull DoubleStream takeWhileInclusive(final @NonNull DoubleStream stream,
+            final @NonNull DoublePredicate predicate) {
+        final AtomicBoolean test = new AtomicBoolean(true);
         return stream.takeWhile(e -> test.get()).peek(e -> test.set(predicate.test(e)));
     }
 
-    public static IntStream takeWhileInclusive(IntStream stream, IntPredicate predicate) {
-        AtomicBoolean test = new AtomicBoolean(true);
+    public static @NonNull IntStream takeWhileInclusive(final @NonNull IntStream stream,
+            final @NonNull IntPredicate predicate) {
+        final AtomicBoolean test = new AtomicBoolean(true);
         return stream.takeWhile(e -> test.get()).peek(e -> test.set(predicate.test(e)));
     }
 
-    public static LongStream takeWhileInclusive(LongStream stream, LongPredicate predicate) {
-        AtomicBoolean test = new AtomicBoolean(true);
+    public static @NonNull LongStream takeWhileInclusive(final @NonNull LongStream stream,
+            final @NonNull LongPredicate predicate) {
+        final AtomicBoolean test = new AtomicBoolean(true);
         return stream.takeWhile(e -> test.get()).peek(e -> test.set(predicate.test(e)));
     }
 
-    public static <T> Stream<T> stream(Iterable<T> iterable) {
+    public static <T> @NonNull Stream<T> stream(final @NonNull Iterable<T> iterable) {
         return StreamSupport.stream(iterable.spliterator(), false);
     }
 }

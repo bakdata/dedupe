@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.NonNull;
 
+
 /**
  * An online duplicate detection algorithm processes a stream of records and returns all changed {@link Cluster}s for
  * each record.
@@ -55,9 +56,9 @@ public interface OnlineDuplicateDetection<C extends Comparable<C>, T> extends Du
     @NonNull Stream<Cluster<C, T>> detectDuplicates(@NonNull T newRecord);
 
     @Override
-    default @NonNull Stream<Cluster<C, T>> detectDuplicates(@NonNull Stream<? extends T> records) {
+    default @NonNull Stream<Cluster<C, T>> detectDuplicates(final @NonNull Stream<? extends T> records) {
         return records
-                .flatMap(record -> detectDuplicates(record))
+                .flatMap(record -> this.detectDuplicates(record))
                 .collect(Collectors.toMap(Cluster::getId, Function.identity()))
                 .values()
                 .stream();

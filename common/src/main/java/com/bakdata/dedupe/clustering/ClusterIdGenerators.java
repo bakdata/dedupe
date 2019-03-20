@@ -53,7 +53,7 @@ public class ClusterIdGenerators {
     /**
      * Returns an id generator that generates strings with a given prefix starting from 0.
      */
-    public static <T> Function<Iterable<? extends T>, String> stringGenerator(String prefix) {
+    public static <T> Function<Iterable<? extends T>, String> stringGenerator(final String prefix) {
         final var nextId = new AtomicLong();
         return objects -> prefix + nextId.getAndIncrement();
     }

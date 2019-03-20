@@ -39,12 +39,12 @@ import lombok.NonNull;
 @FunctionalInterface
 public interface SetSimilarityMeasure<C extends Collection<? extends E>, E> extends CollectionSimilarityMeasure<C, E> {
     @Override
-    default double calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
-            @NonNull SimilarityContext context) {
+    default double calculateNonEmptyCollectionSimilarity(final @NonNull C leftCollection, final @NonNull C rightCollection,
+            final @NonNull SimilarityContext context) {
         final Set<E> leftSet = leftCollection instanceof Set ? (Set<E>) leftCollection : new HashSet<>(leftCollection);
         final Set<E> rightSet =
                 rightCollection instanceof Set ? (Set<E>) rightCollection : new HashSet<>(rightCollection);
-        return calculateNonEmptySetSimilarity(leftSet, rightSet, context);
+        return this.calculateNonEmptySetSimilarity(leftSet, rightSet, context);
     }
 
     /**

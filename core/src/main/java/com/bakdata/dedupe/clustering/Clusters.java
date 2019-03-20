@@ -36,6 +36,7 @@ import java.util.stream.StreamSupport;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
+
 /**
  * Utility methods for {@link Cluster}
  */
@@ -47,7 +48,7 @@ public class Clusters {
      * @throws IllegalArgumentException when there is not exactly one cluster
      */
     public static <C extends Comparable<C>, T> @NonNull Cluster<C, T> getContainingCluster(
-            @NonNull final Iterator<? extends Cluster<C, T>> clusterIterator, @NonNull T record) {
+            final @NonNull Iterator<? extends Cluster<C, T>> clusterIterator, final @NonNull T record) {
         final Spliterator<Cluster<C, T>> spliterator =
                 Spliterators.spliteratorUnknownSize(clusterIterator, ORDERED | NONNULL);
         final List<? extends Cluster<C, T>> mainClusters = StreamSupport.stream(spliterator, false)

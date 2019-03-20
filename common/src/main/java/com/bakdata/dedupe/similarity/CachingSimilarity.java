@@ -32,6 +32,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * A light-weight caching layer over {@link SimilarityMeasure} to allow implementations to repeatedly calculate
  * expensive similarities without implementing a cache on their own.
@@ -52,7 +53,7 @@ public class CachingSimilarity<T, I> implements SimilarityMeasure<T> {
      * @param <T> the type of the record
      * @return a cache based on the object identity
      */
-    public static <T> CachingSimilarity<T, Integer> identity(SimilarityMeasure<T> measure) {
+    public static <T> CachingSimilarity<T, Integer> identity(final SimilarityMeasure<T> measure) {
         return new CachingSimilarity<>(measure, System::identityHashCode);
     }
 
@@ -64,27 +65,27 @@ public class CachingSimilarity<T, I> implements SimilarityMeasure<T> {
      * @param <T> the type of the record
      * @return a cache based on the object equality
      */
-    public static <T extends Comparable<T>> CachingSimilarity<T, T> equality(SimilarityMeasure<T> measure) {
+    public static <T extends Comparable<T>> CachingSimilarity<T, T> equality(final SimilarityMeasure<T> measure) {
         return new CachingSimilarity<>(measure, Function.identity());
     }
 
     @Override
-    public double getNonNullSimilarity(@NonNull T left, @NonNull T right, @NonNull SimilarityContext context) {
-        I leftId = idExtractor.apply(left);
-        I rightId = idExtractor.apply(right);
-        if (measure.isSymmetric() && (leftId instanceof Comparable && ((Comparable) leftId).compareTo(rightId) > 0)) {
-            I temp = leftId;
+    public double getNonNullSimilarity(final @NonNull T left, final @NonNull T right, final @NonNull SimilarityContext context) {
+        I leftId = this.idExtractor.apply(left);
+        I rightId = this.idExtractor.apply(right);
+        if (this.measure.isSymmetric() && (leftId instanceof Comparable && ((Comparable) leftId).compareTo(rightId) > 0)) {
+            final I temp = leftId;
             leftId = rightId;
             rightId = temp;
         }
-        final Double cachedSim = cache.get(leftId, rightId);
+        final Double cachedSim = this.cache.get(leftId, rightId);
         if (cachedSim != null) {
             return cachedSim;
         }
-        double sim = measure.getNonNullSimilarity(left, right, context);
-        cache.put(leftId, rightId, sim);
-        if (measure.isSymmetric() && !(leftId instanceof Comparable)) {
-            cache.put(rightId, leftId, sim);
+        final double sim = this.measure.getNonNullSimilarity(left, right, context);
+        this.cache.put(leftId, rightId, sim);
+        if (this.measure.isSymmetric() && !(leftId instanceof Comparable)) {
+            this.cache.put(rightId, leftId, sim);
         }
         return sim;
     }

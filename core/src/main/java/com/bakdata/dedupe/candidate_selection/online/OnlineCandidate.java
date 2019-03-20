@@ -26,6 +26,7 @@ package com.bakdata.dedupe.candidate_selection.online;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * Represents a candidate pair that was generated with an {@link OnlineCandidateSelection}.
  *
@@ -46,11 +47,11 @@ public class OnlineCandidate<T> implements com.bakdata.dedupe.candidate_selectio
 
     @Override
     public @NonNull T getRecord1() {
-        return newRecord;
+        return this.newRecord;
     }
 
     @Override
     public @NonNull T getRecord2() {
-        return oldRecord;
+        return this.oldRecord;
     }
 }

@@ -28,6 +28,7 @@ import com.bakdata.dedupe.classifier.ClassificationResult;
 import com.bakdata.dedupe.classifier.ClassifiedCandidate;
 import lombok.NonNull;
 
+
 /**
  * A callback that is invoked when a {@link com.bakdata.dedupe.classifier.Classification#POSSIBLE_DUPLICATE} has been
  * founds during {@link DuplicateDetection}.

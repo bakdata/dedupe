@@ -26,6 +26,7 @@ package com.bakdata.dedupe.fusion;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * A resolution tag is a way to refer to a previously, resolved value in the current {@link FusionContext}.
  * <p>Such references are tremendously valuable if some values need to be kept consistent. For instance, if an address

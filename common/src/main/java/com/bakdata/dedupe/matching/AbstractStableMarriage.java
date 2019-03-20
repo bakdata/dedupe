@@ -46,24 +46,24 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
     @Override
-    public Iterable<? extends WeightedEdge<T>> match(@NonNull final Collection<WeightedEdge<T>> leftToRightWeights,
-            @NonNull final Collection<WeightedEdge<T>> rightToLeftWeights) {
+    public Iterable<? extends WeightedEdge<T>> match(final @NonNull Collection<WeightedEdge<T>> leftToRightWeights,
+            final @NonNull Collection<WeightedEdge<T>> rightToLeftWeights) {
         final List<T> men = leftToRightWeights.stream().map(WeightedEdge::getFirst).distinct().collect(toList());
         final List<T> women = rightToLeftWeights.stream().map(WeightedEdge::getFirst).distinct().collect(toList());
 
-        final List<Queue<List<Integer>>> mensFavoriteWomen = getRanking(leftToRightWeights, men, women);
-        final List<Queue<List<Integer>>> womensFavoriteMen = getRanking(rightToLeftWeights, women, men);
+        final List<Queue<List<Integer>>> mensFavoriteWomen = this.getRanking(leftToRightWeights, men, women);
+        final List<Queue<List<Integer>>> womensFavoriteMen = this.getRanking(rightToLeftWeights, women, men);
 
-        return createMatcher(mensFavoriteWomen, womensFavoriteMen).getStableMatches()
+        return this.createMatcher(mensFavoriteWomen, womensFavoriteMen).getStableMatches()
                 .map(match -> {
                     final T m = men.get(match.getFirst());
                     final T w = women.get(match.getSecond());
-                    return new WeightedEdge<>(m, w, getWeight(leftToRightWeights, m, w));
+                    return new WeightedEdge<>(m, w, this.getWeight(leftToRightWeights, m, w));
                 })
                 .collect(toList());
     }
 
-    private double getWeight(Collection<WeightedEdge<T>> leftScoreOfRight, T m, T w) {
+    private double getWeight(final Collection<WeightedEdge<T>> leftScoreOfRight, final T m, final T w) {
         return leftScoreOfRight.stream()
                 .filter(edge -> edge.getFirst().equals(m) &&
                                 edge.getSecond().equals(w))
@@ -71,6 +71,7 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
                 .orElseThrow().getWeight();
     }
 
+    @NonNull
     protected abstract Matcher createMatcher(List<? extends Queue<List<Integer>>> mensFavoriteWomen,
             List<? extends Queue<List<Integer>>> womensFavoriteMen);
 
@@ -82,10 +83,11 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
      * <li>Inner list groups all equally ranked targets.</li>
      * </ul>
      */
-    private List<Queue<List<Integer>>> getRanking(final Collection<WeightedEdge<T>> weightedEdges, List<T> source,
-            List<T> target) {
-        Table<T, T, Double> scores = HashBasedTable.create();
-        for (WeightedEdge<T> weightedEdge : weightedEdges) {
+    private List<Queue<List<Integer>>> getRanking(final Collection<WeightedEdge<T>> weightedEdges,
+            final @NonNull List<T> source,
+            final @NonNull List<T> target) {
+        final Table<T, T, Double> scores = HashBasedTable.create();
+        for (final WeightedEdge<T> weightedEdge : weightedEdges) {
             scores.put(weightedEdge.getFirst(), weightedEdge.getSecond(), weightedEdge.getWeight());
         }
 
@@ -114,81 +116,84 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
         Stream<WeightedEdge<Integer>> getStableMatches();
     }
 
-    protected static abstract class AbstractMatcher implements Matcher {
+    protected abstract static class AbstractMatcher implements Matcher {
         static final int DUMMY_WEIGHT = 1;
         protected final List<? extends Queue<List<Integer>>> mensFavoriteWomen;
         protected final List<? extends Queue<List<Integer>>> womensFavoriteMen;
 
         // engagements row = man, col = woman
+        @NonNull
         protected final Table<Integer, Integer, Boolean> engagements;
 
         protected AbstractMatcher(final List<? extends Queue<List<Integer>>> mensFavoriteWomen,
                 final List<? extends Queue<List<Integer>>> womensFavoriteMen) {
             this.mensFavoriteWomen = mensFavoriteWomen;
             this.womensFavoriteMen = womensFavoriteMen;
-            engagements = HashBasedTable.create();
+            this.engagements = HashBasedTable.create();
         }
 
-        protected static List<Integer> getStrictSuccessors(Queue<List<Integer>> favoriteMen, Integer m) {
+        protected static List<Integer> getStrictSuccessors(final @NonNull Queue<List<Integer>> favoriteMen,
+                final Integer m) {
             return getTailStream(favoriteMen, m).skip(1).flatMap(equallyGoodMen -> equallyGoodMen.stream())
                     .collect(toList());
         }
 
-        protected static List<Integer> getSuccessors(Queue<List<Integer>> favoriteMen, Integer m) {
+        protected static List<Integer> getSuccessors(final @NonNull Queue<List<Integer>> favoriteMen,
+                final @NonNull Integer m) {
             return getTailStream(favoriteMen, m).flatMap(equallyGoodMen -> equallyGoodMen.stream())
                     .dropWhile(m_ -> !m.equals(m_))
                     .skip(1)
                     .collect(toList());
         }
 
-        protected static List<Integer> getTail(Queue<List<Integer>> favoriteMen, Integer m) {
+        protected static List<Integer> getTail(final @NonNull Queue<List<Integer>> favoriteMen, final Integer m) {
             return getTailStream(favoriteMen, m).flatMap(equallyGoodMen -> equallyGoodMen.stream()).collect(toList());
         }
 
-        private static Stream<List<Integer>> getTailStream(Queue<List<Integer>> favoriteMen, Integer m) {
+        private static Stream<List<Integer>> getTailStream(final Queue<List<Integer>> favoriteMen, final Integer m) {
             return favoriteMen.stream().dropWhile(equallyGoodMen -> !equallyGoodMen.contains(m));
         }
 
         protected Integer getNextFreeMen() {
-            for (int m = 0; m < mensFavoriteWomen.size(); m++) {
-                if (engagements.row(m).isEmpty() && !mensFavoriteWomen.get(m).isEmpty()) {
+            for (int m = 0; m < this.mensFavoriteWomen.size(); m++) {
+                if (this.engagements.row(m).isEmpty() && !this.mensFavoriteWomen.get(m).isEmpty()) {
                     return m;
                 }
             }
             return null;
         }
 
-        protected void propose(Integer m, Integer w) {
-            engagements.put(m, w, true);
+        protected void propose(final @NonNull Integer m, final @NonNull Integer w) {
+            this.engagements.put(m, w, true);
         }
 
         @Override
         public Stream<WeightedEdge<Integer>> getStableMatches() {
-            match();
-            return engagements.cellSet().stream()
+            this.match();
+            return this.engagements.cellSet().stream()
                     .filter(cell -> cell.getValue() != null)
                     .map(cell -> {
-                        Integer first = cell.getRowKey();
-                        Integer second = cell.getColumnKey();
+                        final Integer first = cell.getRowKey();
+                        final Integer second = cell.getColumnKey();
                         return new WeightedEdge<>(first, second, DUMMY_WEIGHT);
                     });
         }
 
         protected abstract void match();
 
-        protected void breakEngangement(Integer m, Integer w) {
-            engagements.remove(m, w);
+        protected void breakEngangement(final Integer m, final Integer w) {
+            this.engagements.remove(m, w);
         }
 
-        protected void delete(Integer m, Integer w) {
-            deleteInFav(mensFavoriteWomen.get(m), w);
-            deleteInFav(womensFavoriteMen.get(w), m);
+        protected void delete(final Integer m, final Integer w) {
+            this.deleteInFav(this.mensFavoriteWomen.get(m), w);
+            this.deleteInFav(this.womensFavoriteMen.get(w), m);
         }
 
-        private void deleteInFav(Collection<List<Integer>> favs, Integer elem) {
+        private void deleteInFav(final Collection<List<Integer>> favs, final Integer elem) {
             final Iterator<List<Integer>> iterator = favs.iterator();
             while (iterator.hasNext()) {
-                List<Integer> equallyGood = iterator.next();
+                final List<Integer> equallyGood = iterator.next();
                 if (equallyGood.remove(elem)) {
                     if (equallyGood.isEmpty()) {
                         iterator.remove();

@@ -28,6 +28,7 @@ import java.util.List;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * A fused value with contextual information. If any exception occurred during fusion ({@link #exceptions} is not
  * empty), the value should be considered incomplete.

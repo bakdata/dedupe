@@ -38,6 +38,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * Wraps another clustering and keeps clusters together, when the wrapped clustering would split it.<br> Example:
  * consider a stable marriage-based clustering where A1-B have been previously matched and subsequently clustered. If a
@@ -76,7 +77,7 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
             .build();
 
     @Override
-    public @NonNull Stream<Cluster<C, T>> cluster(@NonNull final Stream<ClassifiedCandidate<T>> classifiedCandidates) {
+    public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
         final @NonNull List<Cluster<C, T>> clusters =
                 this.clustering.cluster(classifiedCandidates).collect(Collectors.toList());
         if (clusters.isEmpty()) {

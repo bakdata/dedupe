@@ -63,6 +63,7 @@ class ConflictResolutionsTest {
         return merge(Person::new);
     }
 
+
     private static AdditionalFieldMergeBuilder<String, Person> createWithId() {
         return create()
                 .field(Person::getId, Person::setId).with(min());
@@ -284,6 +285,7 @@ class ConflictResolutionsTest {
         String originalId;
         LocalDateTime lastModified;
         // fusion information
+
         @Builder.Default
         Set<String> fusedIds = new HashSet<>();
     }

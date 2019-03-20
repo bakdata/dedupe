@@ -29,6 +29,7 @@ import java.util.List;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * A technical implementation which stores the results of a given, wrapped resolution into the {@link FusionContext} for
  * later access.
@@ -39,12 +40,14 @@ import lombok.Value;
 @Value
 @Beta
 class TaggedResolution<T, R> implements ConflictResolution<T, R> {
+    @NonNull
     private final ConflictResolution<T, R> resolution;
+    @NonNull
     private final ResolutionTag<R> resolutionTag;
 
     @Override
     public @NonNull List<@NonNull AnnotatedValue<R>> resolveNonEmptyPartially(
-            @NonNull final List<@NonNull AnnotatedValue<T>> values, @NonNull final FusionContext context) {
+            final @NonNull List<@NonNull AnnotatedValue<T>> values, final @NonNull FusionContext context) {
         final List<AnnotatedValue<R>> annotatedValues = this.resolution.resolvePartially(values, context);
         context.storeValues(this.resolutionTag, annotatedValues);
         return annotatedValues;
@@ -52,7 +55,7 @@ class TaggedResolution<T, R> implements ConflictResolution<T, R> {
 
     @Override
     public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> values,
-            final FusionContext context) {
-        return resolveNonEmptyPartially(values, context);
+            final @NonNull FusionContext context) {
+        return this.resolveNonEmptyPartially(values, context);
     }
 }

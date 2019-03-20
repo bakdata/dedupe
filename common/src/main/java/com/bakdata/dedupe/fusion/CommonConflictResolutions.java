@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
+
 /**
  * Provides factory methods for common conflict resolutions. Usually, these methods are included through static
  * imports.
@@ -252,7 +253,7 @@ public class CommonConflictResolutions {
      * @param instanceSupplier creates a new instance of the class.
      * @return a new {@link com.bakdata.dedupe.fusion.Merge.MergeBuilder}.
      */
-    public static <T> Merge.MergeBuilder<T> merge(final Supplier<T> instanceSupplier) {
+    public static <T> Merge.MergeBuilder<T> merge(final @NonNull Supplier<T> instanceSupplier) {
         return Merge.builder(instanceSupplier);
     }
 
@@ -369,7 +370,7 @@ public class CommonConflictResolutions {
      * @param <T> the type of the value.
      * @return all values from a specific source.
      */
-    public static <T> ConflictResolution<T, T> preferSource(final List<Source> sourcePriority) {
+    public static <T> ConflictResolution<T, T> preferSource(final @NonNull List<Source> sourcePriority) {
         return ((values, context) -> values.stream()
                 .map(AnnotatedValue::getSource)
                 .min(Comparator.comparingInt(sourcePriority::indexOf))
@@ -407,7 +408,7 @@ public class CommonConflictResolutions {
      * @return all values.
      */
     public static <E, C extends Collection<E>, R extends Collection<E>> TerminalConflictResolution<C, R> unionAll(
-            final Supplier<? extends R> ctor) {
+            final @NonNull Supplier<? extends R> ctor) {
         return (annotatedValues, context) -> {
             final R collection = ctor.get();
             for (final AnnotatedValue<C> annotatedValue : annotatedValues) {
@@ -437,7 +438,7 @@ public class CommonConflictResolutions {
      * @param <R>the type of the transformed value.
      * @return a transformed value.
      */
-    public static <T, R> ConflictResolution<T, R> transform(final Function<? super T, R> transform) {
+    public static <T, R> ConflictResolution<T, R> transform(final @NonNull Function<? super T, R> transform) {
         return (annotatedValues, context) -> annotatedValues.stream()
                 .map(annotatedValue -> annotatedValue.withValue(transform.apply(annotatedValue.getValue())))
                 .collect(Collectors.toList());

@@ -27,6 +27,7 @@ package com.bakdata.dedupe.similarity;
 import java.util.Collection;
 import lombok.NonNull;
 
+
 /**
  * A {@link SimilarityMeasure} that is defined over {@link Collection}s.
  *
@@ -36,15 +37,15 @@ import lombok.NonNull;
 @FunctionalInterface
 public interface CollectionSimilarityMeasure<C extends Collection<? extends E>, E> extends SimilarityMeasure<C> {
     @Override
-    default double getNonNullSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
-            @NonNull SimilarityContext context) {
+    default double getNonNullSimilarity(final @NonNull C leftCollection, final @NonNull C rightCollection,
+            final @NonNull SimilarityContext context) {
         if (leftCollection.isEmpty() && rightCollection.isEmpty()) {
             return 1;
         }
         if (leftCollection.isEmpty() || rightCollection.isEmpty()) {
             return 0;
         }
-        return calculateNonEmptyCollectionSimilarity(leftCollection, rightCollection, context);
+        return this.calculateNonEmptyCollectionSimilarity(leftCollection, rightCollection, context);
     }
 
     /**

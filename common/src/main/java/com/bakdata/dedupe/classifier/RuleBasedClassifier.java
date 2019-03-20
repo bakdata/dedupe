@@ -35,6 +35,7 @@ import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
 
+
 /**
  * Successively applies a list of rules to the record and returns the respective {@link ClassificationResult} with the
  * following cases:
@@ -83,6 +84,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
      * The set of rules that are applied in the order of addition. The first rule that can be applied and gives a {@link
      * Classification} that is not unknown determines the {@link ClassificationResult}.
      */
+    @NonNull
     @Singular
     List<Rule<T>> rules;
     /**
@@ -99,8 +101,8 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     Supplier<SimilarityContext> contextSupplier = () -> SimilarityContext.builder().build();
 
     @Override
-    public ClassificationResult classify(final Candidate<T> candidate) {
-        final SimilarityContext context = contextSupplier.get();
+    public ClassificationResult classify(final @NonNull Candidate<T> candidate) {
+        final SimilarityContext context = this.contextSupplier.get();
         // find a rule that is applicable and gives a clear result
         ClassificationResult classificationResult = this.defaultClassificationResult;
         for (final Rule<T> rule : this.rules) {
@@ -122,6 +124,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     /**
      * Creates an exception with the first caught exception as root and all other exceptions as suppressed.
      */
+    @NonNull
     private ClassificationException createException(final Candidate<T> candidate, final SimilarityContext context) {
         final ClassificationException
                 fusionException = new ClassificationException("Could not classify candidate " + candidate,
@@ -133,11 +136,11 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     /**
      * Safely evaluates a rule for a candidate.
      */
-    private Optional<ClassificationResult> evaluateRule(final Rule<? super T> rule, final Candidate<? extends T> candidate,
+    private Optional<ClassificationResult> evaluateRule(final @NonNull Rule<? super T> rule, final @NonNull Candidate<? extends T> candidate,
             final SimilarityContext context) {
         return context.safeExecute(() ->
                 rule.evaluate(candidate.getRecord1(), candidate.getRecord2(), context))
-                .map(score -> mapScoreToResult(rule, score));
+                .map(score -> this.mapScoreToResult(rule, score));
     }
 
     /**
@@ -145,8 +148,8 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
      * <p>A negative rule returns a negative score [-1; -0] and results in a NON_DUPLICATE.</p>
      * <p>A positive rule returns a positive score [0; 1] and results in a DUPLICATE.</p>
      */
-    private ClassificationResult mapScoreToResult(Rule<? super T> rule, double score) {
-        if (didNotApply(score)) {
+    private ClassificationResult mapScoreToResult(final @NonNull Rule<? super T> rule, final double score) {
+        if (this.didNotApply(score)) {
             return UNKNOWN;
         }
         if (score <= -0.0d) {
@@ -168,7 +171,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     /**
      * Checks if score is equivalent to {@link #DOES_NOT_APPLY}.
      */
-    private boolean didNotApply(double score) {
+    private boolean didNotApply(final double score) {
         return SimilarityMeasure.isUnknown(score);
     }
 
@@ -179,7 +182,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
      */
     @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
     public static class RuleBasedClassifierBuilder<T> {
-        private static double scaleAtThreshold(double similarity, double threshold) {
+        private static double scaleAtThreshold(final double similarity, final double threshold) {
             if (similarity >= threshold) {
                 return (similarity - threshold) / (1 - threshold);
             }
@@ -200,7 +203,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
         public RuleBasedClassifierBuilder<T> positiveRule(final @NonNull String name,
                 final @NonNull BiPredicate<T, T> condition,
                 final @NonNull SimilarityMeasure<? super T> similarityMeasure) {
-            return this.positiveRule(name, conditional(similarityMeasure, condition));
+            return this.positiveRule(name, this.conditional(similarityMeasure, condition));
         }
 
         /**
@@ -231,7 +234,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
         public RuleBasedClassifierBuilder<T> negativeRule(final @NonNull String name,
                 final @NonNull BiPredicate<T, T> condition,
                 final @NonNull SimilarityMeasure<? super T> similarityMeasure) {
-            return this.negativeRule(name, conditional(similarityMeasure, condition));
+            return this.negativeRule(name, this.conditional(similarityMeasure, condition));
         }
 
         /**
@@ -265,16 +268,16 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          */
         public RuleBasedClassifierBuilder<T> thresholdRule(final @NonNull String name,
                 final @NonNull BiPredicate<T, T> condition,
-                final @NonNull SimilarityMeasure<? super T> similarityMeasure, double threshold) {
-            return this.thresholdRule(name, conditional(similarityMeasure, condition),
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure, final double threshold) {
+            return this.thresholdRule(name, this.conditional(similarityMeasure, condition),
                     threshold);
         }
 
         /**
          * Wraps a similarity measure, such that it is only applied when precondition hold.
          */
-        private SimilarityMeasure<T> conditional(@NonNull SimilarityMeasure<? super T> similarityMeasure,
-                @NonNull BiPredicate<T, T> condition) {
+        private SimilarityMeasure<T> conditional(final @NonNull SimilarityMeasure<? super T> similarityMeasure,
+                final @NonNull BiPredicate<T, T> condition) {
             return (left, right, context) -> condition.test(left, right) ?
                     similarityMeasure.getSimilarity(left, right, context) :
                     DOES_NOT_APPLY;
@@ -292,7 +295,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * @return this
          */
         public RuleBasedClassifierBuilder<T> thresholdRule(final @NonNull String name,
-                final @NonNull SimilarityMeasure<? super T> similarityMeasure, double threshold) {
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure, final double threshold) {
             return this.rule(new Rule<>(name, (left, right, context) ->
                     scaleAtThreshold(similarityMeasure.getSimilarity(left, right, context), threshold)));
         }
@@ -310,7 +313,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * @return this
          */
         public RuleBasedClassifierBuilder<T> defaultRule(
-                final @NonNull SimilarityMeasure<? super T> similarityMeasure, double threshold) {
+                final @NonNull SimilarityMeasure<? super T> similarityMeasure, final double threshold) {
             return this.thresholdRule("default", similarityMeasure, threshold);
         }
 
@@ -321,7 +324,8 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * @param <T> the new type of the target.
          * @return this with casted type parameter.
          */
-        public <T> RuleBasedClassifierBuilder<T> of(Class<T> clazz) {
+        @NonNull
+        public <T> RuleBasedClassifierBuilder<T> of(final Class<T> clazz) {
             return (RuleBasedClassifierBuilder<T>) this;
         }
     }
@@ -369,7 +373,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * @param context the context of the comparison.
          * @return the similarity or {@link #doesNotApply()}.
          */
-        double evaluate(final T left, final T right, final SimilarityContext context) {
+        double evaluate(final T left, final T right, final @NonNull SimilarityContext context) {
             return this.measure.getSimilarity(left, right, context);
         }
     }
