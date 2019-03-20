@@ -27,6 +27,7 @@ import static com.bakdata.dedupe.fusion.CommonConflictResolutions.assumeEqualVal
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.latest;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.longest;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.max;
+import static com.bakdata.dedupe.fusion.CommonConflictResolutions.merge;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.min;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.union;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.vote;
@@ -59,7 +60,7 @@ import org.junit.jupiter.api.Test;
 class ConflictResolutionsTest {
 
     private static MergeBuilder<Person> create() {
-        return ConflictResolutions.merge(Person::new);
+        return merge(Person::new);
     }
 
     private static AdditionalFieldMergeBuilder<String, Person> createWithId() {
@@ -166,7 +167,7 @@ class ConflictResolutionsTest {
     @Test
     void testFieldFromNameWithoutGetter() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> ConflictResolutions.merge(PersonWithoutGetter::new).field("id"))
+                .isThrownBy(() -> merge(PersonWithoutGetter::new).field("id"))
                 .withCauseInstanceOf(IntrospectionException.class)
                 .withMessageContaining("Unknown property: id")
                 .satisfies(
@@ -176,7 +177,7 @@ class ConflictResolutionsTest {
     @Test
     void testFieldFromNameWithoutSetter() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> ConflictResolutions.merge(PersonWithoutSetter::new).field("id"))
+                .isThrownBy(() -> merge(PersonWithoutSetter::new).field("id"))
                 .withCauseInstanceOf(IntrospectionException.class)
                 .withMessageContaining("Unknown property: id")
                 .satisfies(
@@ -203,21 +204,21 @@ class ConflictResolutionsTest {
 
     @Test
     void testFromClass() {
-        final MergeBuilder<Person> merge = ConflictResolutions.merge(Person.class);
+        final MergeBuilder<Person> merge = merge(Person.class);
         testMerge(merge);
     }
 
     @Test
     void testFromClassWithoutDefaultConstructor() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> ConflictResolutions.merge(PersonWithoutDefaultConstructor.class))
+                .isThrownBy(() -> merge(PersonWithoutDefaultConstructor.class))
                 .withCauseInstanceOf(NoSuchMethodException.class)
                 .withMessageContaining(PersonWithoutDefaultConstructor.class.getName() + ".<init>()");
     }
 
     @Test
     void testFromConstructor() {
-        final MergeBuilder<Person> merge = ConflictResolutions.merge(Person::new);
+        final MergeBuilder<Person> merge = merge(Person::new);
         testMerge(merge);
     }
 

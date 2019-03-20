@@ -293,7 +293,8 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          */
         public RuleBasedClassifierBuilder<T> thresholdRule(final @NonNull String name,
                 final @NonNull SimilarityMeasure<? super T> similarityMeasure, double threshold) {
-            return this.rule(new Rule<>(name, similarityMeasure.unknownIf(s -> s <= 0)));
+            return this.rule(new Rule<>(name, (left, right, context) ->
+                    scaleAtThreshold(similarityMeasure.getSimilarity(left, right, context), threshold)));
         }
 
         /**
@@ -313,6 +314,16 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
             return this.thresholdRule("default", similarityMeasure, threshold);
         }
 
+        /**
+         * Fluent cast of the type parameter. Can be used to overcome the limitations of the Java type inference.
+         *
+         * @param clazz the clazz representing the target type. Not used.
+         * @param <T> the new type of the target.
+         * @return this with casted type parameter.
+         */
+        public <T> RuleBasedClassifierBuilder<T> of(Class<T> clazz) {
+            return (RuleBasedClassifierBuilder<T>) this;
+        }
     }
 
     /**

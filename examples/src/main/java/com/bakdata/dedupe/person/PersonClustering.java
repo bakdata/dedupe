@@ -25,7 +25,7 @@ package com.bakdata.dedupe.person;
 
 import com.bakdata.dedupe.clustering.Clustering;
 import com.bakdata.dedupe.clustering.ConsistentClustering;
-import com.bakdata.dedupe.clustering.IdGenerators;
+import com.bakdata.dedupe.clustering.ClusterIdGenerators;
 import com.bakdata.dedupe.clustering.RefineCluster;
 import com.bakdata.dedupe.clustering.RefinedTransitiveClosure;
 import lombok.Value;
@@ -35,7 +35,7 @@ import lombok.experimental.Delegate;
 public class PersonClustering implements Clustering<Long, Person> {
     RefineCluster<Long, Person> refineCluster = RefineCluster.<Long, Person>builder()
             .classifier(new PersonClassifier())
-            .clusterIdGenerator(IdGenerators.longGenerator())
+            .clusterIdGenerator(ClusterIdGenerators.longGenerator())
             .build();
 
     Clustering<Long, Person> refinedTransitiveClosure = RefinedTransitiveClosure.<Long, Person, String>builder()

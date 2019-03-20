@@ -21,20 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package com.bakdata.dedupe.fusion;
 
-import java.util.function.Supplier;
-import lombok.experimental.UtilityClass;
+import com.google.common.annotations.Beta;
+import java.util.List;
+import lombok.NonNull;
+import lombok.Value;
 
-@UtilityClass
-public class ConflictResolutions {
+/**
+ * A technical implementation which stores the results of a given, wrapped resolution into the {@link FusionContext} for
+ * later access.
+ *
+ * @param <T> the input type of the wrapped resolution.
+ * @param <R>the output type of the wrapped resolution.
+ */
+@Value
+@Beta
+class TaggedResolution<T, R> implements ConflictResolution<T, R> {
+    private final ConflictResolution<T, R> resolution;
+    private final ResolutionTag<R> resolutionTag;
 
-    public static <T> Merge.MergeBuilder<T> merge(final Supplier<T> ctor) {
-        return Merge.builder(ctor);
+    @Override
+    public @NonNull List<@NonNull AnnotatedValue<R>> resolveNonEmptyPartially(
+            @NonNull final List<@NonNull AnnotatedValue<T>> values, @NonNull final FusionContext context) {
+        final List<AnnotatedValue<R>> annotatedValues = this.resolution.resolvePartially(values, context);
+        context.storeValues(this.resolutionTag, annotatedValues);
+        return annotatedValues;
     }
 
-    public static <T> Merge.MergeBuilder<T> merge(final Class<T> clazz) {
-        return Merge.builder(clazz);
+    @Override
+    public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> values,
+            final FusionContext context) {
+        return resolveNonEmptyPartially(values, context);
     }
-
 }

@@ -56,14 +56,37 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Wither;
 
+/**
+ * Splits large clusters into smaller clusters when the inter-cluster similarities are sub-optimal.
+ * <p>{@link RefineCluster} can be applied after aggressive clustering variations (leaning towards recall), such as
+ * {@link TransitiveClosure}, to boost the overall precision.</p>
+ * <p>To determine the inner-cluster similarities the confidence score of a {@link Classifier} is used. Negative scores
+ * are allowed and strongly discourage certain pairs.</p>
+ * <p>If all scores within a cluster are positive, the cluster will remain intact.</p>
+ * <p>Note, this algorithm implements a perfect clustering for small clusters and a heuristic for large clusters. Small
+ * clusters are below {@link #getMaxSmallClusterSize()}.</p>
+ *
+ * @param <C> the type of the cluster id.
+ * @param <T> the type of the record.
+ */
 @Value
 @Builder
 public class RefineCluster<C extends Comparable<C>, T> {
-    private static final int MAX_SUB_CLUSTERS = 100;
+    /**
+     * The maximum size (inclusive) of a cluster. This size limits the maximum amount of comparisons to {@code max *
+     * (max - 1) / 2}.
+     */
     @Builder.Default
     int maxSmallClusterSize = 10;
+    /**
+     * The classifier used to score the edges. Please note that binary classifiers (confidence always 1) can be used but
+     * will not unleash the full potential.
+     */
     @NonNull
     Classifier<T> classifier;
+    /**
+     * A function to generate the id for newly split clusters.
+     */
     @NonNull
     Function<? super Iterable<? extends T>, C> clusterIdGenerator;
 
@@ -98,7 +121,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
                     score += weightMatrix[rowIndex][colIndex] / partitionSizes[partitions[rowIndex]];
                 } else {
                     score -= weightMatrix[rowIndex][colIndex] / (n - partitionSizes[partitions[rowIndex]]) +
-                            weightMatrix[rowIndex][colIndex] / (n - partitionSizes[partitions[colIndex]]);
+                             weightMatrix[rowIndex][colIndex] / (n - partitionSizes[partitions[colIndex]]);
                 }
             }
         }
@@ -391,7 +414,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
 
         boolean overlaps(final WeightedEdge e) {
             return e.left == this.getLeft() || e.getLeft() == this.right || e.getRight() == this.getLeft()
-                    || e.getRight() == this
+                   || e.getRight() == this
                     .getRight();
         }
     }

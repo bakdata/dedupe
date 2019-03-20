@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.interfaces.MatchingAlgorithm.Matching;
@@ -53,6 +54,7 @@ import org.jgrapht.graph.SimpleGraph;
  * @param <T> the type of the record.
  */
 @Value
+@EqualsAndHashCode(callSuper = false)
 public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
     @Override
     protected AbstractStableMarriage.Matcher createMatcher(final List<? extends Queue<List<Integer>>> mensFavoriteWomen,

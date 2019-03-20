@@ -28,6 +28,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import java.util.List;
 import java.util.Queue;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 
 /**
@@ -46,6 +47,7 @@ import lombok.Value;
  * @param <T> the type of the record.
  */
 @Value
+@EqualsAndHashCode(callSuper = false)
 public class WeaklyStableMarriage<T> extends AbstractStableMarriage<T> {
     @Override
     protected AbstractStableMarriage.Matcher createMatcher(final List<? extends Queue<List<Integer>>> mensFavoriteWomen,

@@ -39,14 +39,30 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+/**
+ * An amortized linear transitive closure implementation over the number of pairs.
+ *
+ * @param <C> the type of the cluster id.
+ * @param <T> the type of the record.
+ * @param <I> the type of the record id.
+ */
 @Value
 @Builder
 public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>>
         implements Clustering<C, T> {
+    /**
+     * Extracts the id of the record. Used for {@link #clusterIndex}.
+     */
     @NonNull
     Function<? super T, ? extends I> idExtractor;
+    /**
+     * A function to generate the id for newly formed clusters.
+     */
     @NonNull
     Function<? super Iterable<? extends T>, C> clusterIdGenerator;
+    /**
+     * A backing map for old clusters. Defaults to an in-memory map if null during construction.
+     */
     @NonNull
     @Builder.Default
     Map<I, Cluster<C, T>> clusterIndex = new HashMap<>();
@@ -56,7 +72,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
             @NonNull final Iterable<ClassifiedCandidate<T>> classifiedCandidates) {
         final List<Candidate<T>> duplicates = StreamSupport.stream(classifiedCandidates.spliterator(), false)
                 .filter(classifiedCandidate -> classifiedCandidate.getClassificationResult().getClassification()
-                        == Classification.DUPLICATE)
+                                               == Classification.DUPLICATE)
                 .map(ClassifiedCandidate::getCandidate)
                 .collect(Collectors.toList());
         return this.clusterDuplicates(duplicates);

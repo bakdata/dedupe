@@ -23,16 +23,16 @@
  */
 package com.bakdata.dedupe.person;
 
-import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.beiderMorse;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.equality;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.jaroWinkler;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.levenshtein;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.max;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.scaledDifference;
+import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.weightedAverage;
+import static com.bakdata.dedupe.similarity.CommonTransformations.beiderMorse;
 
 import com.bakdata.dedupe.classifier.Classifier;
 import com.bakdata.dedupe.classifier.RuleBasedClassifier;
-import com.bakdata.dedupe.similarity.CommonSimilarityMeasures;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import lombok.Value;
@@ -44,15 +44,14 @@ public class PersonClassifier implements Classifier<Person> {
 
     @Delegate
     Classifier<Person> classifier = RuleBasedClassifier.<Person>builder()
-            .positiveRule("Basic comparison", CommonSimilarityMeasures.<Person>weightedAverage()
+            .defaultRule(weightedAverage().of(Person.class)
                     .add(2, Person::getFirstName, max(levenshtein().cutoff(0.5d), jaroWinkler()))
                     .add(2, Person::getLastName,
                             max(equality().of(beiderMorse()), levenshtein().cutoff(0.5d), jaroWinkler()))
                     .add(1, Person::getGender, equality())
                     .add(2, Person::getBirthDate,
                             max(levenshtein().of(ISO_FORMAT::format), scaledDifference(2, ChronoUnit.DAYS)))
-                    .build()
-                    .scaleWithThreshold(0.9d))
+                    .build(), 0.9d)
             .build();
 }
 

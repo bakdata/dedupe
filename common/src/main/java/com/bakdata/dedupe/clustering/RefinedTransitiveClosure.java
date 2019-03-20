@@ -35,22 +35,45 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+/**
+ * Executes {@link TransitiveClosure} and successively {@link RefineCluster}. This algorithm boosts both recall and
+ * precision, but is rather compute-heavy.
+ *
+ * @param <C> the type of the cluster id.
+ * @param <T> the type of the record.
+ * @param <I> the type of the record id.
+ */
 @Value
 @Builder
 public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>>
         implements Clustering<C, T> {
+    /**
+     * The configured refineCluster.
+     */
     @NonNull
     RefineCluster<C, T> refineCluster;
 
+    /**
+     * A backing map for old clusters. Defaults to an in-memory map if null during construction.
+     */
     @NonNull
     Map<I, Cluster<C, T>> oldClusterIndex;
 
+    /**
+     * The underlying transitive closure implementation.
+     */
     @NonNull
     TransitiveClosure<C, T, I> closure;
 
+    /**
+     * Extracts the id of the record. Used for {@link #oldClusterIndex}.
+     */
     @NonNull
     Function<? super T, ? extends I> idExtractor;
 
+    /**
+     * A callback that may veto cluster splits. Defaults to {@link ClusterSplitHandler#ignore()}.
+     */
     @NonNull
     ClusterSplitHandler splitHandler;
 

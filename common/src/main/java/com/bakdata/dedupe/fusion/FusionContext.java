@@ -32,8 +32,8 @@ import lombok.Value;
 import lombok.experimental.Delegate;
 
 /**
- * A fusion context captures exceptions in an {@link ExceptionContext} and provides additional configurations that
- * represent cross-cutting concerns, such as null handling.
+ * A fusion context captures exceptions in an {@link ExceptionContext} during resolution and provides additional
+ * context values.
  */
 @SuppressWarnings("WeakerAccess")
 @Value

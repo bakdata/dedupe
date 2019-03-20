@@ -36,10 +36,22 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.experimental.Wither;
 
+/**
+ * A nested conflict resolution for complex types.
+ * <p>The individual elements are resolved with specific {@link ConflictResolution} functions and then a new instance
+ * of the record type is created with the respective values.</p>
+ * <p>If any exception during fusion occurs, the following field resolutions are still applied and a joint {@link
+ * FusionException} is thrown.</p>
+ *
+ * @param <R> the type of the record.
+ * @see CommonConflictResolutions#merge(Class)
+ * @see CommonConflictResolutions#merge(Supplier)
+ */
 @Value
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Merge<R> implements ConflictResolution<R, R> {
@@ -57,8 +69,8 @@ public class Merge<R> implements ConflictResolution<R, R> {
     }
 
     @Override
-    public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<R>> annotatedValues,
-            final FusionContext context) {
+    public @NonNull List<@NonNull AnnotatedValue<R>> resolveNonEmptyPartially(
+            @NonNull final List<@NonNull AnnotatedValue<R>> annotatedValues, @NonNull final FusionContext context) {
         final R r = this.ctor.get();
         for (final FieldMerge<?, R> fieldMerge : this.fieldMerges) {
             fieldMerge.mergeInto(r, annotatedValues, context);
@@ -157,8 +169,8 @@ public class Merge<R> implements ConflictResolution<R, R> {
             final var last = this.mergeBuilder.getLast();
             final ResolutionTag tag;
             // auto tag previous merge if it is not tagged already
-            if (last.getResolution() instanceof CommonConflictResolutions.TaggedResolution) {
-                tag = ((CommonConflictResolutions.TaggedResolution<?, ?>) last.getResolution()).getResolutionTag();
+            if (last.getResolution() instanceof TaggedResolution) {
+                tag = ((TaggedResolution<?, ?>) last.getResolution()).getResolutionTag();
             } else {
                 final var fieldMerges = this.mergeBuilder.getFieldMerges();
                 tag = new ResolutionTag<>("tag-" + System.identityHashCode(fieldMerges) + "-" + fieldMerges.size());

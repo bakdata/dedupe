@@ -27,16 +27,44 @@ import java.time.LocalDateTime;
 import lombok.NonNull;
 import lombok.Value;
 
+/**
+ * A value with lineage information; in particular, the {@link Source} and the timestamp.
+ *
+ * @param <T> the type of the value.
+ */
 @Value
 public class AnnotatedValue<T> {
+    /**
+     * The wrapped value.
+     */
     @NonNull T value;
+    /**
+     * The source of the value.
+     */
     @NonNull Source source;
+    /**
+     * The time of creation/modification.
+     */
     @NonNull LocalDateTime dateTime;
 
+    /**
+     * Wraps the given value with a calculated source and the current timestamp.
+     *
+     * @param value the value to wrap.
+     * @param <T> the type of the value.
+     * @return the wrapped value.
+     */
     public static <T> AnnotatedValue<T> calculated(final T value) {
         return new AnnotatedValue<>(value, Source.getCalculated(), LocalDateTime.now());
     }
 
+    /**
+     * Creates a new instance with changed value and with potentially different type.
+     *
+     * @param value the new value to wrap.
+     * @param <S> the potentially new type.
+     * @return a new instance with the given value.
+     */
     @SuppressWarnings("unchecked")
     public <S> AnnotatedValue<S> withValue(final S value) {
         return this.value == value ? (AnnotatedValue<S>) this : new AnnotatedValue<>(value, this.source, this.dateTime);

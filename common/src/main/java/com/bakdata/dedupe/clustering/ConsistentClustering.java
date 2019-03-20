@@ -58,11 +58,19 @@ import lombok.Value;
 @Builder
 public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparable<? super I>>
         implements Clustering<C, T> {
-    @NonNull
-    Clustering<C, T> clustering;
-    Function<T, I> idExtractor;
+    /**
+     * The wrapped clustering.
+     */
+    @NonNull Clustering<C, T> clustering;
+    /**
+     * A function to extract the id of a record for efficient, internal data structures.
+     */
+    @NonNull Function<T, I> idExtractor;
+    /**
+     * An internal transitive closure over all past clusterings.
+     */
     @Getter(lazy = true, value = AccessLevel.PRIVATE)
-    TransitiveClosure<C, T, I> internalClosure = TransitiveClosure.<C, T, I>builder()
+    @NonNull TransitiveClosure<C, T, I> internalClosure = TransitiveClosure.<C, T, I>builder()
             .idExtractor(this.idExtractor)
             .clusterIdGenerator(this.clustering.getClusterIdGenerator())
             .build();

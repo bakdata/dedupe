@@ -24,6 +24,7 @@
 package com.bakdata.dedupe.similarity;
 
 import static com.bakdata.dedupe.similarity.SimilarityMeasure.unknown;
+import static com.bakdata.util.StreamUtil.takeWhileInclusive;
 
 import com.bakdata.dedupe.matching.BipartiteMatcher;
 import com.bakdata.dedupe.matching.WeaklyStableMarriage;
@@ -37,6 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Stream;
+import lombok.Value;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.text.similarity.EditDistance;
 import org.apache.commons.text.similarity.JaroWinklerDistance;
@@ -132,8 +134,10 @@ public class CommonSimilarityMeasures {
      */
     public static <T extends CharSequence, R extends Number> SimilarityMeasure<T> toSimilarity(
             EditDistance<R> editDistance) {
-        return (left, right, context) -> 1 - editDistance.apply(left, right).doubleValue() /
-                                             Math.max(left.length(), right.length());
+        return (left, right, context) -> {
+            final double distance = editDistance.apply(left, right).doubleValue();
+            return distance == -1 ? 0 : (1 - distance / Math.max(left.length(), right.length()));
+        };
     }
 
     /**
@@ -269,9 +273,8 @@ public class CommonSimilarityMeasures {
      */
     @SafeVarargs
     public static <T> SimilarityMeasure<T> max(final SimilarityMeasure<? super T>... measures) {
-        return new AggregatingSimilarityMeasure<>(similarities -> similarities
-                .filter(sim -> !SimilarityMeasure.isUnknown(sim))
-                .takeWhile(sim -> sim < 1d)
+        return new AggregatingSimilarityMeasure<>(similarities ->
+                takeWhileInclusive(similarities, sim -> sim < 1d)
                 .max()
                 .orElse(unknown()), measures);
     }
@@ -379,14 +382,13 @@ public class CommonSimilarityMeasures {
     @SafeVarargs
     public static <T> SimilarityMeasure<T> min(final SimilarityMeasure<? super T>... measures) {
         return new AggregatingSimilarityMeasure<T>(similarities -> similarities
-                .filter(sim -> !SimilarityMeasure.isUnknown(sim))
                 .takeWhile(sim -> sim > 0d)
                 .min()
                 .orElse(unknown()), measures);
     }
 
     /**
-     * Returns the average similarity of the given similarity measures.
+     * Returns the mean similarity of the given similarity measures.
      * <p>If all of the similarities are {@link SimilarityMeasure#unknown()}, then the result is also unknown.</p>
      *
      * @param measures the non-empty list of similarity measures.
@@ -394,9 +396,8 @@ public class CommonSimilarityMeasures {
      * @return the average similarity of the given similarity measures.
      */
     @SafeVarargs
-    public static <T> SimilarityMeasure<T> average(final SimilarityMeasure<? super T>... measures) {
+    public static <T> SimilarityMeasure<T> mean(final SimilarityMeasure<? super T>... measures) {
         return new AggregatingSimilarityMeasure<T>(similarities -> similarities
-                .filter(sim -> !SimilarityMeasure.isUnknown(sim))
                 .average()
                 .orElse(unknown()), measures);
     }
@@ -422,10 +423,19 @@ public class CommonSimilarityMeasures {
      * @return a builder for the weighted aggregation.
      */
     public static <T> WeightedAggregatingSimilarityMeasure.WeightedAggregatingSimilarityMeasureBuilder<T> weightedAverage() {
+        @Value
+        class TotalWeightedValue {
+            double weight;
+            double weightedValue;
+
+            TotalWeightedValue sum(TotalWeightedValue other) {
+                return new TotalWeightedValue(weight + other.weight, weightedValue + other.weightedValue);
+            }
+        }
         return weightedAggregation(weightedValues -> weightedValues
-                .filter(wv -> SimilarityMeasure.isUnknown(wv.getValue()))
-                .mapToDouble(WeightedValue::getWeightedValue)
-                .average()
+                .map(wv -> new TotalWeightedValue(wv.getWeight(), wv.getWeightedValue()))
+                .reduce(TotalWeightedValue::sum)
+                .map(total -> total.getWeightedValue() / total.getWeight())
                 .orElse(unknown()));
     }
 

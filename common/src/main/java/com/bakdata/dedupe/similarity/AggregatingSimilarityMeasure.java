@@ -42,13 +42,13 @@ import lombok.Value;
 @Builder
 public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
     /**
-     * The similarity measures that will successively applied on the input values.
-     */
-    @NonNull List<SimilarityMeasure<? super T>> similarityMeasures;
-    /**
      * The aggregator that will be applied on the similarity values. Premature termination is encouraged.
      */
     @NonNull ToDoubleFunction<? super DoubleStream> aggregator;
+    /**
+     * The similarity measures that will successively applied on the input values.
+     */
+    @NonNull List<SimilarityMeasure<? super T>> similarityMeasures;
 
     /**
      * Creates an AggregatingSimilarityMeasure with the given aggregator and the similarity measures.
@@ -81,8 +81,9 @@ public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
     @Override
     public double getNonNullSimilarity(T left, T right, @NonNull SimilarityContext context) {
         return getAggregator().applyAsDouble(
-                StreamSupport.stream(getSimilarityMeasures().spliterator(), false)
-                        .mapToDouble(m -> m.getNonNullSimilarity(left, right, context)));
+                getSimilarityMeasures().stream()
+                        .mapToDouble(m -> m.getNonNullSimilarity(left, right, context))
+                        .filter(sim -> !SimilarityMeasure.isUnknown(sim)));
     }
 
     public static class AggregatingSimilarityMeasureBuilder<T> {

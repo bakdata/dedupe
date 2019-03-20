@@ -24,13 +24,31 @@
 package com.bakdata.dedupe.fusion;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Value;
 
-@SuppressWarnings("WeakerAccess")
+/**
+ * The source of a value to be fused.
+ */
 @Value
 public class Source {
+    /**
+     * A tag to indicate that the respective value has no real source as it has been created during conflict
+     * resolution.
+     */
     @Getter
-    private static final Source Calculated = new Source("calculated", Double.NaN);
-    String name;
+    static Source Calculated = new Source("calculated", 1);
+    /**
+     * The unknown source is used whenever source extraction in {@link Fusion} failed.
+     */
+    @Getter
+    static Source Unknown = new Source("Unknown", 1);
+    /**
+     * The name of the source (mostly for debugging).
+     */
+    @NonNull String name;
+    /**
+     * The weight of the source, mostly used for weighted majority voting.
+     */
     double weight;
 }

@@ -23,14 +23,14 @@
  */
 package com.bakdata.dedupe.person;
 
-import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.beiderMorse;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.equality;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.jaroWinkler;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.levenshtein;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.max;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.scaledDifference;
 import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.stableMatching;
-import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.words;
+import static com.bakdata.dedupe.similarity.CommonTransformations.beiderMorse;
+import static com.bakdata.dedupe.similarity.CommonTransformations.words;
 
 import com.bakdata.dedupe.classifier.Classifier;
 import com.bakdata.dedupe.classifier.RuleBasedClassifier;

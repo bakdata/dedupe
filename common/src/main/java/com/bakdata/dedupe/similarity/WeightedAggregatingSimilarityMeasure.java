@@ -43,7 +43,8 @@ public class WeightedAggregatingSimilarityMeasure<R> implements SimilarityMeasur
     @Override
     public double getNonNullSimilarity(final R left, final R right, final SimilarityContext context) {
         return this.aggregator.applyAsDouble(this.weightedSimilarities.stream()
-                .map(ws -> new WeightedValue(ws.getMeasure().getSimilarity(left, right, context), ws.getWeight())));
+                .map(ws -> new WeightedValue(ws.getWeight(), ws.getMeasure().getSimilarity(left, right, context)))
+                .filter(wv -> !SimilarityMeasure.isUnknown(wv.getValue())));
     }
 
     @Value

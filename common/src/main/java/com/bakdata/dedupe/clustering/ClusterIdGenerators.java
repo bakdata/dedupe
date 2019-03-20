@@ -21,25 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.bakdata.dedupe.fusion;
 
-import java.util.List;
+package com.bakdata.dedupe.clustering;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import lombok.Value;
+import lombok.experimental.UtilityClass;
 
-@Value
-public class ResolutionPath<T, R> implements ConflictResolution<T, R> {
-    Function<T, R> extractor;
-    ConflictResolution<R, R> resolution;
+/**
+ * A collection of typical cluster id generators.
+ */
+@UtilityClass
+public class ClusterIdGenerators {
+    /**
+     * Returns an id generator that generates ints starting from 0.
+     */
+    public static <T> Function<Iterable<? extends T>, Integer> intGenerator() {
+        final var nextId = new AtomicInteger();
+        return objects -> nextId.getAndIncrement();
+    }
 
-    @Override
-    public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> annotatedValues,
-            final FusionContext context) {
-        final List<AnnotatedValue<R>> fieldValues = annotatedValues.stream()
-                .map(ar -> ar.withValue(this.extractor.apply(ar.getValue())))
-                .filter(ar -> context.isNonEmpty(ar.getValue()))
-                .collect(Collectors.toList());
-        return this.resolution.resolvePartially(fieldValues, context);
+    /**
+     * Returns an id generator that generates longs starting from 0.
+     */
+    public static <T> Function<Iterable<? extends T>, Long> longGenerator() {
+        final var nextId = new AtomicLong();
+        return objects -> nextId.getAndIncrement();
+    }
+
+    /**
+     * Returns an id generator that generates strings with a given prefix starting from 0.
+     */
+    public static <T> Function<Iterable<? extends T>, String> stringGenerator(String prefix) {
+        final var nextId = new AtomicLong();
+        return objects -> prefix + nextId.getAndIncrement();
     }
 }

@@ -23,9 +23,7 @@
  */
 package com.bakdata.dedupe.person;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bakdata.dedupe.duplicate_detection.PossibleDuplicateHandler;
 import java.io.IOException;
@@ -70,14 +68,14 @@ class PersonDeduplicationTest {
         // no fusion on the non-duplicated customers
         for (final Person customer : parseCsv("/customer.csv")) {
             final Person fusedPerson = deduplication.deduplicate(customer);
-            assertSame(customer, fusedPerson);
+            assertThat(fusedPerson).isSameAs(customer);
         }
 
         for (final Person customer : parseCsv("/exact_duplicates.csv")) {
             final Person fusedPerson = deduplication.deduplicate(customer);
-            assertNotSame(customer, fusedPerson);
+            assertThat(fusedPerson).isNotSameAs(customer);
             // should be the same except for fusion id
-            assertEquals(customer, fusedPerson.toBuilder().fusedIds(Set.of()).build());
+            assertThat(fusedPerson.toBuilder().fusedIds(Set.of()).build()).isEqualTo(customer);
         }
     }
 }

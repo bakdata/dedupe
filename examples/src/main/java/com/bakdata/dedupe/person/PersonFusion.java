@@ -27,13 +27,13 @@ import static com.bakdata.dedupe.fusion.CommonConflictResolutions.assumeEqualVal
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.latest;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.longest;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.max;
+import static com.bakdata.dedupe.fusion.CommonConflictResolutions.merge;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.min;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.union;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.vote;
 
 import com.bakdata.dedupe.fusion.ConflictResolution;
 import com.bakdata.dedupe.fusion.ConflictResolutionFusion;
-import com.bakdata.dedupe.fusion.ConflictResolutions;
 import com.bakdata.dedupe.fusion.Fusion;
 import java.util.Set;
 import lombok.Value;
@@ -41,7 +41,7 @@ import lombok.experimental.Delegate;
 
 @Value
 public class PersonFusion implements Fusion<Person> {
-    ConflictResolution<Person, Person> personMerge = ConflictResolutions.merge(Person::new)
+    ConflictResolution<Person, Person> personMerge = merge(Person::new)
             .field(Person::getId, Person::setId).with(min())
             .field(Person::getFirstName, Person::setFirstName).with(longest()).then(vote())
             .field(Person::getLastName, Person::setLastName).correspondingToPrevious()
