@@ -26,6 +26,7 @@ package com.bakdata.dedupe.clustering;
 import com.bakdata.dedupe.candidate_selection.Candidate;
 import com.bakdata.dedupe.classifier.Classification;
 import com.bakdata.dedupe.classifier.ClassifiedCandidate;
+import com.bakdata.util.StreamUtil;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
@@ -70,7 +70,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
     @Override
     public @NonNull Iterable<Cluster<C, T>> cluster(
             @NonNull final Iterable<ClassifiedCandidate<T>> classifiedCandidates) {
-        final List<Candidate<T>> duplicates = StreamSupport.stream(classifiedCandidates.spliterator(), false)
+        final List<Candidate<T>> duplicates = StreamUtil.stream(classifiedCandidates)
                 .filter(classifiedCandidate -> classifiedCandidate.getClassificationResult().getClassification()
                                                == Classification.DUPLICATE)
                 .map(ClassifiedCandidate::getCandidate)

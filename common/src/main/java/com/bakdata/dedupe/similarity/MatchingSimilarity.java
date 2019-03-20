@@ -28,10 +28,10 @@ import static com.bakdata.dedupe.similarity.SimilarityMeasure.isUnknown;
 
 import com.bakdata.dedupe.matching.BipartiteMatcher;
 import com.bakdata.dedupe.matching.WeightedEdge;
+import com.bakdata.util.StreamUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -54,7 +54,7 @@ public class MatchingSimilarity<C extends Collection<? extends E>, E> implements
                 : getScores(rightCollection, leftCollection, context);
 
         final Iterable<? extends WeightedEdge<E>> matches = bipartiteMatcher.match(leftScoreOfRight, rightScoreOfLeft);
-        return StreamSupport.stream(matches.spliterator(), false)
+        return StreamUtil.stream(matches)
                        .map(WeightedEdge::getWeight)
                        .reduce(0d, Double::sum) /
                Math.max(leftCollection.size(), rightCollection.size());

@@ -24,10 +24,10 @@
 
 package com.bakdata.dedupe.deduplication;
 
+import com.bakdata.util.StreamUtil;
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.NonNull;
 
 /**
@@ -66,7 +66,7 @@ public interface Deduplication<T> {
      * representation remains.
      */
     default @NonNull Collection<T> materializedDeduplicate(@NonNull Iterable<? extends T> records) {
-        return StreamSupport.stream(deduplicate(records).spliterator(), false).collect(Collectors.toList());
+        return StreamUtil.stream(deduplicate(records)).collect(Collectors.toList());
     }
 
     /**
@@ -82,7 +82,7 @@ public interface Deduplication<T> {
      */
     default @NonNull Collection<T> materializedDeduplicate(@NonNull Iterable<? extends T> records,
             @NonNull Function<? super T, Object> idExtractor) {
-        return StreamSupport.stream(deduplicate(records).spliterator(), false)
+        return StreamUtil.stream(deduplicate(records))
                 .collect(Collectors.toMap(idExtractor, Function.identity()))
                 .values();
     }

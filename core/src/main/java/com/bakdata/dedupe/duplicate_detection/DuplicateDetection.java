@@ -25,10 +25,10 @@
 package com.bakdata.dedupe.duplicate_detection;
 
 import com.bakdata.dedupe.clustering.Cluster;
+import com.bakdata.util.StreamUtil;
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.NonNull;
 
 /**
@@ -70,7 +70,7 @@ public interface DuplicateDetection<C extends Comparable<C>, T> {
      * @return all duplicates of the dataset.
      */
     default @NonNull Collection<Cluster<C, T>> materializeDuplicates(@NonNull Iterable<? extends T> records) {
-        return StreamSupport.stream(detectDuplicates(records).spliterator(), false)
+        return StreamUtil.stream(detectDuplicates(records))
                 .collect(Collectors.toMap(Cluster::getId, Function.identity()))
                 .values();
     }

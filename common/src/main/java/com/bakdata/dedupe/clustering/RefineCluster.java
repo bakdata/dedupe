@@ -28,6 +28,7 @@ import com.bakdata.dedupe.candidate_selection.online.OnlineCandidate;
 import com.bakdata.dedupe.classifier.ClassificationResult;
 import com.bakdata.dedupe.classifier.ClassifiedCandidate;
 import com.bakdata.dedupe.classifier.Classifier;
+import com.bakdata.util.StreamUtil;
 import com.google.common.primitives.Bytes;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -156,7 +157,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
             final Iterable<ClassifiedCandidate<T>> knownClassifications) {
         final Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex =
                 this.getRelevantClassificationIndex(knownClassifications);
-        return StreamSupport.stream(transitiveClosure.spliterator(), false)
+        return StreamUtil.stream(transitiveClosure)
                 .flatMap(cluster -> this.refineCluster(cluster,
                         this.getRelevantClassifications(cluster, relevantClassificationIndex)))
                 .collect(Collectors.toList());

@@ -25,9 +25,9 @@ package com.bakdata.dedupe.duplicate_detection.online;
 
 import com.bakdata.dedupe.clustering.Cluster;
 import com.bakdata.dedupe.duplicate_detection.DuplicateDetection;
+import com.bakdata.util.StreamUtil;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.NonNull;
 
 /**
@@ -56,8 +56,8 @@ public interface OnlineDuplicateDetection<C extends Comparable<C>, T> extends Du
 
     @Override
     default @NonNull Iterable<Cluster<C, T>> detectDuplicates(@NonNull Iterable<? extends T> records) {
-        return StreamSupport.stream(records.spliterator(), false)
-                .flatMap(record -> StreamSupport.stream(detectDuplicates(record).spliterator(), false))
+        return StreamUtil.stream(records)
+                .flatMap(record -> StreamUtil.stream(detectDuplicates(record)))
                 .collect(Collectors.toMap(Cluster::getId, Function.identity()))
                 .values();
     }

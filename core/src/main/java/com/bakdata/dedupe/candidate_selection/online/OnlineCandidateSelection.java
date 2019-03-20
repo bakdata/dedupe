@@ -24,7 +24,7 @@
 package com.bakdata.dedupe.candidate_selection.online;
 
 import com.bakdata.dedupe.candidate_selection.Candidate;
-import java.util.stream.StreamSupport;
+import com.bakdata.util.StreamUtil;
 import lombok.NonNull;
 
 /**
@@ -51,8 +51,8 @@ public interface OnlineCandidateSelection<T>
      */
     @Override
     default @NonNull Iterable<Candidate<T>> selectCandidates(@NonNull Iterable<? extends T> records) {
-        return () -> StreamSupport.stream(records.spliterator(), false)
-                .flatMap(record -> StreamSupport.stream(selectCandidates(record).spliterator(), false))
+        return () -> StreamUtil.stream(records)
+                .flatMap(record -> StreamUtil.stream(selectCandidates(record)))
                 .iterator();
     }
 }

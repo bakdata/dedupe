@@ -55,8 +55,7 @@ public interface Fusion<T> {
      */
     default @NonNull Optional<T> fusedValue(@NonNull Cluster<?, T> cluster,
             @NonNull IncompleteFusionHandler<T> incompleteFusionHandler) {
-        return Optional.of(this.fuse(cluster))
-                .flatMap(incompleteFusionHandler::handlePartiallyFusedValue)
+        return incompleteFusionHandler.handlePartiallyFusedValue(fuse(cluster))
                 .map(FusedValue::getValue);
     }
 }

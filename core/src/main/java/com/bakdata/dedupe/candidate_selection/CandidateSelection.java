@@ -24,9 +24,9 @@
 
 package com.bakdata.dedupe.candidate_selection;
 
+import com.bakdata.util.StreamUtil;
 import java.util.Collection;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.NonNull;
 
 /**
@@ -56,6 +56,6 @@ public interface CandidateSelection<T> {
      * @implSpec It is assumed that this method will work stateless. Derivations need to be documented.
      */
     default @NonNull Collection<Candidate<T>> materializeCandidates(@NonNull Iterable<? extends T> records) {
-        return StreamSupport.stream(selectCandidates(records).spliterator(), false).collect(Collectors.toList());
+        return StreamUtil.stream(selectCandidates(records)).collect(Collectors.toList());
     }
 }

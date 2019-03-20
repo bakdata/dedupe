@@ -31,9 +31,9 @@ import com.bakdata.dedupe.classifier.Classifier;
 import com.bakdata.dedupe.clustering.Cluster;
 import com.bakdata.dedupe.clustering.Clustering;
 import com.bakdata.dedupe.duplicate_detection.PossibleDuplicateHandler;
+import com.bakdata.util.StreamUtil;
 import java.util.Collection;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
@@ -77,7 +77,7 @@ public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> imple
     @Override
     public @NonNull Collection<Cluster<C, T>> detectDuplicates(final @NonNull T newRecord) {
         final Iterable<Candidate<T>> candidates = this.candidateSelection.selectCandidates(newRecord);
-        final var classified = StreamSupport.stream(candidates.spliterator(), false)
+        final var classified = StreamUtil.stream(candidates)
                 .map(candidate -> new ClassifiedCandidate<>(candidate, this.classifier.classify(candidate)))
                 .collect(Collectors.toList());
 
@@ -87,7 +87,7 @@ public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> imple
                         cc)
                 .collect(Collectors.toList());
 
-        return StreamSupport.stream(this.clustering.cluster(handledPairs).spliterator(), false)
+        return StreamUtil.stream(this.clustering.cluster(handledPairs))
                 .collect(Collectors.toList());
     }
 }

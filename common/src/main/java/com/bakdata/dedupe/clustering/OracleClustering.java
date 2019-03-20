@@ -28,13 +28,13 @@ import com.bakdata.dedupe.classifier.Classification;
 import com.bakdata.dedupe.classifier.ClassificationResult;
 import com.bakdata.dedupe.classifier.ClassifiedCandidate;
 import com.bakdata.dedupe.classifier.Classifier;
+import com.bakdata.util.StreamUtil;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -78,7 +78,7 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
     @Override
     public @NonNull Iterable<Cluster<C, T>> cluster(
             @NonNull final Iterable<ClassifiedCandidate<T>> classifiedCandidates) {
-        return StreamSupport.stream(classifiedCandidates.spliterator(), false)
+        return StreamUtil.stream(classifiedCandidates)
                 .map(candidate -> this.getIdToCluster()
                         .get(this.idExtractor.apply(candidate.getCandidate().getRecord2())))
                 .filter(Objects::nonNull)

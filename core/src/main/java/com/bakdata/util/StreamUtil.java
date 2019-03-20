@@ -33,8 +33,14 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import lombok.experimental.UtilityClass;
 
+/**
+ * Adds some functions that are missing in Java Streams. Although public, this class should be considered an
+ * implementation detail. Methods will be removed or changed even within a major.
+ * <p>If you need such functions in your code, consider using StreamEx or Jool instead.</p>
+ */
 @UtilityClass
 public class StreamUtil {
     public static <T> Stream<T> takeWhileInclusive(Stream<T> stream, Predicate<T> predicate) {
@@ -55,5 +61,9 @@ public class StreamUtil {
     public static LongStream takeWhileInclusive(LongStream stream, LongPredicate predicate) {
         AtomicBoolean test = new AtomicBoolean(true);
         return stream.takeWhile(e -> test.get()).peek(e -> test.set(predicate.test(e)));
+    }
+
+    public static <T> Stream<T> stream(Iterable<T> iterable) {
+        return StreamSupport.stream(iterable.spliterator(), false);
     }
 }
