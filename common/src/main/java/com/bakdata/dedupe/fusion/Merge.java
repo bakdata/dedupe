@@ -169,13 +169,13 @@ public class Merge<R> implements ConflictResolution<R, R> {
 
         @SuppressWarnings("unchecked")
         public @NonNull AdditionalFieldMergeBuilder<F, R> correspondingToPrevious() {
-            final var last = this.mergeBuilder.getLast();
+            final FieldMerge<?, R> last = this.mergeBuilder.getLast();
             final ResolutionTag tag;
             // auto tag previous merge if it is not tagged already
             if (last.getResolution() instanceof TaggedResolution) {
                 tag = ((TaggedResolution<?, ?>) last.getResolution()).getResolutionTag();
             } else {
-                final var fieldMerges = this.mergeBuilder.getFieldMerges();
+                final List<FieldMerge<?, R>> fieldMerges = this.mergeBuilder.getFieldMerges();
                 tag = new ResolutionTag<>("tag-" + fieldMerges.size() + "-" + System.identityHashCode(fieldMerges));
                 this.mergeBuilder.replaceLast(last.withResolution(
                         CommonConflictResolutions.saveAs(last.getResolution(), tag)));

@@ -50,8 +50,8 @@ public class FunctionalMethod<T> {
      * @param instance the instance, on which to invoke the method, or null for static methods.
      * @param params the parameters to pass to the method.
      * @return the result.
-     * @throws IllegalAccessException (sneaky)
-     * @throws Exception if any {@link InvocationTargetException} occurs
+     * @sneaky IllegalAccessException (sneaky)
+     * @sneaky Exception if any {@link InvocationTargetException} occurs
      */
     @SuppressWarnings("unchecked")
     @SneakyThrows

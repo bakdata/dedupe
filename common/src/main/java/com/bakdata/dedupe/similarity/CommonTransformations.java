@@ -126,7 +126,7 @@ public class CommonTransformations {
      *
      * @param encoder the encoder to wrap.
      * @return the wrapped encode.
-     * @throws Exception (sneaky)
+     * @sneaky Exception when encoder throws an exception
      */
     public static ValueTransformation<String, String> codec(final @NonNull StringEncoder encoder) {
         return new ValueTransformation<>() {

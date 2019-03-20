@@ -297,7 +297,7 @@ public class CommonConflictResolutions {
     }
 
     /**
-     * Selects all values with the same earliest {@link AnnotatedValue::getDateTime}.
+     * Selects all values with the same earliest {@link AnnotatedValue#getDateTime()}.
      * <p>These value retain their source tags.</p>
      *
      * @param <T> the type of the value.
@@ -312,7 +312,7 @@ public class CommonConflictResolutions {
     }
 
     /**
-     * Selects all values with the same latest {@link AnnotatedValue::getDateTime}.
+     * Selects all values with the same latest {@link AnnotatedValue#getDateTime()}.
      * <p>These value retain their source tags.</p>
      *
      * @param <T> the type of the value.

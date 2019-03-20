@@ -21,45 +21,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package com.bakdata.util;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import lombok.Value;
 
 
 /**
- * A lambda wrapper around the no-arg constructor of a class. The wrapped contructor can be used as a lambda with {@code
- * new FunctionalConstructor(c)::invoke}.
+ * A lambda wrapper around the a property of a class.
  *
  * @param <T> the type of the class.
+ * @param <F> the type of the field.
  */
 @Value
-public class FunctionalConstructor<T> {
+public final class FunctionalProperty<T, F> {
     /**
-     * The no-arg constructor
+     * The wrapped property.
      */
     @NonNull
-    Constructor<T> ctor;
+    PropertyDescriptor descriptor;
 
     /**
-     * Creates a new instance.
+     * Returns the getter as a {@link Function} that takes the instance as a parameter.
      *
-     * @return the new instance.
-     * @throws IllegalStateException if any {@link InstantiationException} occurs
-     * @sneaky IllegalAccessException
-     * @sneaky Exception if any {@link InvocationTargetException} occurs
+     * @return the read accessor of the property.
+     * @sneaky IllegalAccessException (sneaky)
+     * @sneaky Exception (sneaky)
      */
-    @SneakyThrows
-    public T newInstance() {
-        try {
-            return this.ctor.newInstance();
-        } catch (final @NonNull InstantiationException e) {
-            throw new IllegalStateException(e);
-        } catch (final @NonNull InvocationTargetException e) {
-            throw e.getCause();
-        }
+    public Function<T, F> getGetter() {
+        final Method getter = this.descriptor.getReadMethod();
+        return new FunctionalMethod<>(getter)::invoke;
     }
+
+    /**
+     * Returns the setter as a {@link Function} that takes the instance and the new value as parameters.
+     *
+     * @return the write accessor of the property.
+     * @sneaky IllegalAccessException (sneaky)
+     * @sneaky Exception (sneaky)
+     */
+    public BiConsumer<T, F> getSetter() {
+        final Method setter = this.descriptor.getWriteMethod();
+        return new FunctionalMethod<>(setter)::invoke;
+    }
+
 }

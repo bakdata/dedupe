@@ -96,7 +96,7 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
         @Getter
         @NonNull SortingKey<? super T, ? extends K> sortingKey;
         /**
-         * The window size >= 2.
+         * The window {@code >= 2}.
          */
         @Getter
         int windowSize;
@@ -110,18 +110,16 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
          * @throws IllegalArgumentException if {@code windowSize < 2}.
          */
         public Pass(final @NonNull SortingKey<? super T, ? extends K> sortingKey, final int windowSize) {
-            if (windowSize < 2) {
+            if (windowSize < 2)
                 throw new IllegalArgumentException("Window size is < 2: " + windowSize);
-            }
             this.sortingKey = sortingKey;
             this.windowSize = windowSize;
         }
 
         private List<Candidate<T>> getCandidates(final T newRecord) {
             final K newKey = this.sortingKey.getKeyExtractor().apply(newRecord);
-            if (newKey == null) {
+            if (newKey == null)
                 return List.of();
-            }
             final Stream<T> largerRecords = this.index.tailMap(newKey).values().stream().flatMap(List::stream).limit(
                     this.windowSize / 2);
             final Stream<T> smallerRecords =
@@ -180,9 +178,8 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
         public @NonNull OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(
                 final @NonNull Iterable<SortingKey<T, ?>> sortingKeys,
                 final int windowSize) {
-            for (final var sortingKey : sortingKeys) {
+            for (final SortingKey<T, ?> sortingKey : sortingKeys)
                 this.sortingKey(sortingKey, windowSize);
-            }
             return this;
         }
     }

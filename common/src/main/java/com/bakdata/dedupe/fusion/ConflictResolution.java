@@ -91,7 +91,7 @@ public interface ConflictResolution<I, O> {
             case 1:
                 return Optional.of(resolvedValues.get(0).getValue());
             default:
-                final var uniqueValues =
+                final List<O> uniqueValues =
                         resolvedValues.stream().map(AnnotatedValue::getValue).distinct().collect(Collectors.toList());
                 if (uniqueValues.size() == 1) {
                     return Optional.of(uniqueValues.get(0));
@@ -109,7 +109,7 @@ public interface ConflictResolution<I, O> {
      * @return the chained conflict resolution function.
      */
     default <O2> @NonNull ConflictResolution<I, O2> andThen(final @NonNull ConflictResolution<O, O2> successor) {
-        final var predecessor = this;
+        final ConflictResolution<I, O> predecessor = this;
         return ((values, context) -> successor
                 .resolvePartially(predecessor.resolvePartially(values, context), context));
     }

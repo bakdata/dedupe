@@ -83,8 +83,8 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
 
         // apply in-memory transitive closure
         for (final Candidate<T> candidate : duplicates) {
-            final var leftCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord1()));
-            final var rightCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord2()));
+            final Cluster<C, T> leftCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord1()));
+            final Cluster<C, T> rightCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord2()));
             if (leftCluster == null && rightCluster == null) {
                 final List<T> elements = Lists.newArrayList(candidate.getRecord1(), candidate.getRecord2());
                 final Cluster<C, T> newCluster = new Cluster<>(this.clusterIdGenerator.apply(elements), elements);

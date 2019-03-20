@@ -91,7 +91,8 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
      * <p></p>
      * <p>However, mongeElkan does not work for names, where first an last names are similar because mongeElkan can
      * match the right hand side several times.</p>
-     * <p>Example: John Johnson and John Smith will match 1) John -> John = 1.0; 2) Johnson -> John = 0.91</p>
+     * <p>{@literal Example: John Johnson and John Smith will match 1) John -> John = 1.0; 2) Johnson -> John = 0.91}
+     * </p>
      */
     SimilarityMeasure<String> nameSimilarity =
             max(levenshtein().cutoff(0.9d), jaroWinkler(), equality().of(beiderMorse()));
@@ -105,10 +106,11 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
      * <p></p>
      * <p>However, mongeElkan does not work for names, where first an last names are similar because mongeElkan can
      * match the right hand side several times.</p>
-     * <p>Example: John Johnson and John Smith will match 1) John -> John = 1.0; 2) Johnson -> John = 0.91</p>
+     * <p>{@literal Example: John Johnson and John Smith will match 1) John -> John = 1.0; 2) Johnson -> John = 0.91}
+     * </p>
      */
     SimilarityMeasure<Person> namesScrambledSimilarity = stableMatching(this.nameSimilarity)
-            .of(PersonClassifierWithMultipleNames.concatNames().andThen(words()));
+            .of(concatNames().andThen(words()));
 
     SimilarityMeasure<Person> overallNameSimilarity = max(this.namesCorrectlySplitSimilarity,
             this.namesIncorrectlySplitSimilarity,

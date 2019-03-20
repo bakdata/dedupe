@@ -21,26 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.bakdata.dedupe.fusion;
+package com.bakdata.dedupe.person;
 
-import lombok.NonNull;
-import lombok.Value;
-
-
-/**
- * A resolution tag is a way to refer to a previously, resolved value in the current {@link FusionContext}.
- * <p>Such references are tremendously valuable if some values need to be kept consistent. For instance, if an address
- * needs to be resolved, we can define a complex resolution for city, but we should use the corresponding zip code.</p>
- * <p>The resolution tag doubles as type tag that allows type-safe access to {@link
- * FusionContext#getStoredValues()}</p>.
- *
- * @param <T> the type of the record. Used to allow type-safe access.
- */
-@Value
-@SuppressWarnings({"unused", "squid:S2326"})
-public class ResolutionTag<T> {
-    /**
-     * The name of the tag for debugging.
-     */
-    @NonNull String name;
+@SuppressWarnings({"WeakerAccess", "unused"})
+public enum Gender {
+    MALE, FEMALE
 }

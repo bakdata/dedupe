@@ -65,7 +65,7 @@ import lombok.experimental.Wither;
  * are allowed and strongly discourage certain pairs.</p>
  * <p>If all scores within a cluster are positive, the cluster will remain intact.</p>
  * <p>Note, this algorithm implements a perfect clustering for small clusters and a heuristic for large clusters. Small
- * clusters are below {@link #getMaxSmallClusterSize()}.</p>
+ * clusters are below {@link #maxSmallClusterSize}.</p>
  *
  * @param <C> the type of the cluster id.
  * @param <T> the type of the record.
@@ -241,17 +241,17 @@ public class RefineCluster<C extends Comparable<C>, T> {
 
     private @NonNull double[][] getKnownWeightMatrix(final Cluster<C, T> cluster,
             final @NonNull Iterable<ClassifiedCandidate<T>> knownClassifications) {
-        final var n = cluster.size();
-        final var weightMatrix = new double[n][n];
-        for (final var row : weightMatrix) {
+        final int n = cluster.size();
+        final double[][] weightMatrix = new double[n][n];
+        for (final double[] row : weightMatrix) {
             Arrays.fill(row, Double.NaN);
         }
 
-        final var clusterIndex =
+        final Map<T, Integer> clusterIndex =
                 IntStream.range(0, n).boxed().collect(Collectors.toMap(cluster::get, i -> i));
         for (final ClassifiedCandidate<T> knownClassification : knownClassifications) {
-            final var firstIndex = clusterIndex.get(knownClassification.getCandidate().getRecord1());
-            final var secondIndex = clusterIndex.get(knownClassification.getCandidate().getRecord2());
+            final Integer firstIndex = clusterIndex.get(knownClassification.getCandidate().getRecord1());
+            final Integer secondIndex = clusterIndex.get(knownClassification.getCandidate().getRecord2());
             weightMatrix[Math.min(firstIndex, secondIndex)][Math.max(firstIndex, secondIndex)] =
                     getWeight(knownClassification.getClassificationResult());
         }

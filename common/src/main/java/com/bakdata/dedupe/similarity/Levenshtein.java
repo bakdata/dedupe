@@ -55,9 +55,9 @@ public class Levenshtein<T extends CharSequence> implements SimilarityMeasure<T>
         if (this.threshold <= 0) {
             return NoThresholdMeasure.getNonNullSimilarity(left, right, context);
         }
-        final var maxLen = Math.max(left.length(), right.length());
-        final var maxDiff = (int) (maxLen * (1 - this.threshold));
-        final var measure = toSimilarity(new LevenshteinDistance(maxDiff));
+        final int maxLen = Math.max(left.length(), right.length());
+        final int maxDiff = (int) (maxLen * (1 - this.threshold));
+        final SimilarityMeasure<CharSequence> measure = toSimilarity(new LevenshteinDistance(maxDiff));
         return measure.getNonNullSimilarity(left, right, context);
     }
 

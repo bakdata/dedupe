@@ -21,45 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.bakdata.util;
+package com.bakdata.dedupe.fusion;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import lombok.Value;
 
 
 /**
- * A lambda wrapper around the no-arg constructor of a class. The wrapped contructor can be used as a lambda with {@code
- * new FunctionalConstructor(c)::invoke}.
+ * A resolution tag is a way to refer to a previously, resolved value in the current {@link FusionContext}.
+ * <p>Such references are tremendously valuable if some values need to be kept consistent. For instance, if an address
+ * needs to be resolved, we can define a complex resolution for city, but we should use the corresponding zip code.</p>
+ * <p>The resolution tag doubles as type tag that allows type-safe access to {@link
+ * FusionContext#getStoredValues()}</p>.
  *
- * @param <T> the type of the class.
+ * @param <T> the type of the record. Used to allow type-safe access.
  */
 @Value
-public class FunctionalConstructor<T> {
+@SuppressWarnings({"unused", "squid:S2326"})
+public class ResolutionTag<T> {
     /**
-     * The no-arg constructor
+     * The name of the tag for debugging.
      */
-    @NonNull
-    Constructor<T> ctor;
-
-    /**
-     * Creates a new instance.
-     *
-     * @return the new instance.
-     * @throws IllegalStateException if any {@link InstantiationException} occurs
-     * @sneaky IllegalAccessException
-     * @sneaky Exception if any {@link InvocationTargetException} occurs
-     */
-    @SneakyThrows
-    public T newInstance() {
-        try {
-            return this.ctor.newInstance();
-        } catch (final @NonNull InstantiationException e) {
-            throw new IllegalStateException(e);
-        } catch (final @NonNull InvocationTargetException e) {
-            throw e.getCause();
-        }
-    }
+    @NonNull String name;
 }

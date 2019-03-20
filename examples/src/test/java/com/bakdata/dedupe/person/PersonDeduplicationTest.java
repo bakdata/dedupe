@@ -44,7 +44,7 @@ class PersonDeduplicationTest {
 
     private static List<Person> parseCsv(final String resourceName) throws IOException {
         final CSVFormat format = CSVFormat.newFormat('\t').withFirstRecordAsHeader().withQuote('"');
-        try (final var parser = CSVParser
+        try (final CSVParser parser = CSVParser
                 .parse(PersonDeduplicationTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8,
                         format)) {
             return parser.getRecords()
