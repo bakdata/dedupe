@@ -23,12 +23,10 @@
  */
 package com.bakdata.dedupe.clustering;
 
-import com.bakdata.dedupe.candidate_selection.Candidate;
 import com.bakdata.dedupe.candidate_selection.online.OnlineCandidate;
 import com.bakdata.dedupe.classifier.ClassificationResult;
 import com.bakdata.dedupe.classifier.ClassifiedCandidate;
 import com.bakdata.dedupe.classifier.Classifier;
-import com.bakdata.util.StreamUtil;
 import com.google.common.primitives.Bytes;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -36,10 +34,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -153,25 +149,18 @@ public class RefineCluster<C extends Comparable<C>, T> {
                 .collect(Collectors.toList());
     }
 
-    public List<Cluster<C, T>> refine(final Iterable<? extends Cluster<C, T>> transitiveClosure,
-            final Iterable<ClassifiedCandidate<T>> knownClassifications) {
+    public Stream<Cluster<C, T>> refine(final Stream<? extends Cluster<C, T>> clusters,
+            final Stream<ClassifiedCandidate<T>> knownClassifications) {
         final Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex =
                 this.getRelevantClassificationIndex(knownClassifications);
-        return StreamUtil.stream(transitiveClosure)
-                .flatMap(cluster -> this.refineCluster(cluster,
-                        this.getRelevantClassifications(cluster, relevantClassificationIndex)))
-                .collect(Collectors.toList());
+        return clusters.flatMap(cluster -> this.refineCluster(cluster,
+                this.getRelevantClassifications(cluster, relevantClassificationIndex)));
     }
 
     private Map<T, List<ClassifiedCandidate<T>>> getRelevantClassificationIndex(
-            final Iterable<ClassifiedCandidate<T>> knownClassifications) {
-        final Map<T, List<ClassifiedCandidate<T>>> relevantClassifications = new HashMap<>();
-        for (final ClassifiedCandidate<T> knownClassification : knownClassifications) {
-            final Candidate<T> candidate = knownClassification.getCandidate();
-            relevantClassifications.computeIfAbsent(candidate.getRecord1(), r -> new LinkedList<>())
-                    .add(knownClassification);
-        }
-        return relevantClassifications;
+            final Stream<ClassifiedCandidate<T>> knownClassifications) {
+        return knownClassifications
+                .collect(Collectors.groupingBy(classification -> classification.getCandidate().getRecord1()));
     }
 
     private byte[] refineBigCluster(final Cluster<C, T> cluster,

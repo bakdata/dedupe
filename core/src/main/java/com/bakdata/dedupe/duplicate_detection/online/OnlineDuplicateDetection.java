@@ -25,9 +25,9 @@ package com.bakdata.dedupe.duplicate_detection.online;
 
 import com.bakdata.dedupe.clustering.Cluster;
 import com.bakdata.dedupe.duplicate_detection.DuplicateDetection;
-import com.bakdata.util.StreamUtil;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.NonNull;
 
 /**
@@ -52,13 +52,14 @@ public interface OnlineDuplicateDetection<C extends Comparable<C>, T> extends Du
      * @implSpec It is assumed that the cluster containing the new record will be the first element of the cluster
      * list.
      */
-    @NonNull Iterable<Cluster<C, T>> detectDuplicates(@NonNull T newRecord);
+    @NonNull Stream<Cluster<C, T>> detectDuplicates(@NonNull T newRecord);
 
     @Override
-    default @NonNull Iterable<Cluster<C, T>> detectDuplicates(@NonNull Iterable<? extends T> records) {
-        return StreamUtil.stream(records)
-                .flatMap(record -> StreamUtil.stream(detectDuplicates(record)))
+    default @NonNull Stream<Cluster<C, T>> detectDuplicates(@NonNull Stream<? extends T> records) {
+        return records
+                .flatMap(record -> detectDuplicates(record))
                 .collect(Collectors.toMap(Cluster::getId, Function.identity()))
-                .values();
+                .values()
+                .stream();
     }
 }

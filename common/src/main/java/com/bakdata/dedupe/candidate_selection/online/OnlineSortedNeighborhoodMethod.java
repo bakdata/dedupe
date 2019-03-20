@@ -74,9 +74,8 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
     @Builder.Default
     int defaultWindowSize = 10;
 
-    public @NonNull List<Candidate<T>> selectCandidates(final @NonNull T newRecord) {
-        return this.passes.stream().flatMap(pass -> pass.getCandidates(newRecord).stream()).distinct()
-                .collect(Collectors.toList());
+    public @NonNull Stream<Candidate<T>> selectCandidates(final @NonNull T newRecord) {
+        return this.passes.stream().flatMap(pass -> pass.getCandidates(newRecord).stream()).distinct();
     }
 
     /**

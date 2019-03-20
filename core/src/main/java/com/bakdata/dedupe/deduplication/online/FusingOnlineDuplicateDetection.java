@@ -29,9 +29,7 @@ import com.bakdata.dedupe.duplicate_detection.online.OnlineDuplicateDetection;
 import com.bakdata.dedupe.fusion.FusedValue;
 import com.bakdata.dedupe.fusion.Fusion;
 import com.bakdata.dedupe.fusion.IncompleteFusionHandler;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Optional;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
@@ -76,12 +74,5 @@ public class FusingOnlineDuplicateDetection<C extends Comparable<C>, T> implemen
         return this.incompleteFusionHandler.apply(fusedValue)
                 .map(FusedValue::getValue)
                 .orElse(newRecord);
-    }
-
-    private boolean isEmpty(Iterable<Cluster<C, T>> clusters) {
-        if (clusters instanceof Collection<?>) {
-            return ((Collection<?>) clusters).isEmpty();
-        }
-        return !clusters.iterator().hasNext();
     }
 }

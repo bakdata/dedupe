@@ -26,12 +26,12 @@ package com.bakdata.dedupe.clustering;
 import com.bakdata.dedupe.candidate_selection.Candidate;
 import com.bakdata.dedupe.candidate_selection.online.OnlineCandidate;
 import com.bakdata.dedupe.classifier.ClassifiedCandidate;
-import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -76,16 +76,15 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
             .build();
 
     @Override
-    public @NonNull Iterable<Cluster<C, T>> cluster(
-            @NonNull final Iterable<ClassifiedCandidate<T>> classifiedCandidates) {
+    public @NonNull Stream<Cluster<C, T>> cluster(@NonNull final Stream<ClassifiedCandidate<T>> classifiedCandidates) {
         final @NonNull List<Cluster<C, T>> clusters =
-                Lists.newArrayList(this.clustering.cluster(classifiedCandidates));
+                this.clustering.cluster(classifiedCandidates).collect(Collectors.toList());
         if (clusters.isEmpty()) {
-            return clusters;
+            return clusters.stream();
         }
         // the returned cluster is not affected of this clustering
         if (clusters.size() == 1 && this.noRecordInIndex(clusters)) {
-            return clusters;
+            return clusters.stream();
         }
         final T firstElement = clusters.get(0).get(0);
         final List<Candidate<T>> candidates = clusters.stream()
@@ -100,7 +99,7 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
             // previously split cluster have been remerged, so we can remove it of our internal closure
             this.getInternalClosure().removeCluster(clusters.get(0));
         }
-        return transitiveClusters;
+        return transitiveClusters.stream();
     }
 
     @Override

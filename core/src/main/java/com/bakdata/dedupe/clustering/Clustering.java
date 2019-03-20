@@ -25,6 +25,7 @@ package com.bakdata.dedupe.clustering;
 
 import com.bakdata.dedupe.classifier.ClassifiedCandidate;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import lombok.NonNull;
 
 /**
@@ -42,7 +43,7 @@ public interface Clustering<C extends Comparable<C>, T> {
      * @param classifiedCandidates the list of classified candidates.
      * @return a coherent cluster over the classified candidates.
      */
-    @NonNull Iterable<Cluster<C, T>> cluster(@NonNull Iterable<ClassifiedCandidate<T>> classifiedCandidates);
+    @NonNull Stream<Cluster<C, T>> cluster(@NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates);
 
     /**
      * The cluster id generator that is used to create an id for a new cluster.

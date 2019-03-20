@@ -31,9 +31,8 @@ import com.bakdata.dedupe.classifier.Classifier;
 import com.bakdata.dedupe.clustering.Cluster;
 import com.bakdata.dedupe.clustering.Clustering;
 import com.bakdata.dedupe.duplicate_detection.PossibleDuplicateHandler;
-import com.bakdata.util.StreamUtil;
-import java.util.Collection;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
@@ -75,19 +74,17 @@ public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> imple
     PossibleDuplicateHandler<T> possibleDuplicateHandler = PossibleDuplicateHandler.keep();
 
     @Override
-    public @NonNull Collection<Cluster<C, T>> detectDuplicates(final @NonNull T newRecord) {
-        final Iterable<Candidate<T>> candidates = this.candidateSelection.selectCandidates(newRecord);
-        final var classified = StreamUtil.stream(candidates)
+    public @NonNull Stream<Cluster<C, T>> detectDuplicates(final @NonNull T newRecord) {
+        final Stream<Candidate<T>> candidates = this.candidateSelection.selectCandidates(newRecord);
+        final var classified = candidates
                 .map(candidate -> new ClassifiedCandidate<>(candidate, this.classifier.classify(candidate)))
                 .collect(Collectors.toList());
 
         final var handledPairs = classified.stream()
                 .map(cc -> cc.getClassificationResult().getClassification() == Classification.POSSIBLE_DUPLICATE ?
                         this.possibleDuplicateHandler.possibleDuplicateFound(cc) :
-                        cc)
-                .collect(Collectors.toList());
+                        cc);
 
-        return StreamUtil.stream(this.clustering.cluster(handledPairs))
-                .collect(Collectors.toList());
+        return this.clustering.cluster(handledPairs);
     }
 }

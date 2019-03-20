@@ -28,6 +28,7 @@ import com.bakdata.util.StreamUtil;
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.NonNull;
 
 /**
@@ -50,7 +51,7 @@ public interface Deduplication<T> {
      * @param records the record that should be freed from duplicates.
      * @return a duplicate-free dataset with the above mentioned limitation for online algorithms.
      */
-    @NonNull Iterable<T> deduplicate(@NonNull Iterable<? extends T> records);
+    @NonNull Stream<T> deduplicate(@NonNull Stream<? extends T> records);
 
     /**
      * Deduplicates the dataset.
@@ -66,7 +67,7 @@ public interface Deduplication<T> {
      * representation remains.
      */
     default @NonNull Collection<T> materializedDeduplicate(@NonNull Iterable<? extends T> records) {
-        return StreamUtil.stream(deduplicate(records)).collect(Collectors.toList());
+        return deduplicate(StreamUtil.stream(records)).collect(Collectors.toList());
     }
 
     /**
@@ -82,7 +83,7 @@ public interface Deduplication<T> {
      */
     default @NonNull Collection<T> materializedDeduplicate(@NonNull Iterable<? extends T> records,
             @NonNull Function<? super T, Object> idExtractor) {
-        return StreamUtil.stream(deduplicate(records))
+        return deduplicate(StreamUtil.stream(records))
                 .collect(Collectors.toMap(idExtractor, Function.identity()))
                 .values();
     }

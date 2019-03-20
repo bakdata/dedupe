@@ -23,8 +23,7 @@
  */
 package com.bakdata.dedupe.deduplication.online;
 
-import com.bakdata.util.StreamUtil;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 import lombok.NonNull;
 
 /**
@@ -54,9 +53,7 @@ public interface OnlineDeduplication<T> extends com.bakdata.dedupe.deduplication
     @NonNull T deduplicate(@NonNull T newRecord);
 
     @Override
-    default @NonNull Iterable<T> deduplicate(@NonNull Iterable<? extends T> records) {
-        return () -> StreamUtil.stream(records)
-                .map(this::deduplicate)
-                .iterator();
+    default @NonNull Stream<T> deduplicate(@NonNull Stream<? extends T> records) {
+        return records.map(this::deduplicate);
     }
 }
