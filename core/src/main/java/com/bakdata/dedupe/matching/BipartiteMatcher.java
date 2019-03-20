@@ -24,7 +24,7 @@
 
 package com.bakdata.dedupe.matching;
 
-import com.google.common.collect.Sets;
+import com.bakdata.util.StreamUtil;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,7 +78,8 @@ public interface BipartiteMatcher<T> extends Assigner<T> {
     default @NonNull Set<WeightedEdge<T>> matchMaterialized(
             final @NonNull Collection<WeightedEdge<T>> leftToRightWeightedEdges,
             final @NonNull Collection<WeightedEdge<T>> rightToLeftWeightedEdges) {
-        return Sets.newHashSet(this.match(leftToRightWeightedEdges, rightToLeftWeightedEdges));
+        return StreamUtil.stream(this.match(leftToRightWeightedEdges, rightToLeftWeightedEdges))
+                .collect(Collectors.toSet());
     }
 
     /**

@@ -24,9 +24,10 @@
 
 package com.bakdata.dedupe.matching;
 
-import com.google.common.collect.Sets;
+import com.bakdata.util.StreamUtil;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 
 
@@ -69,6 +70,6 @@ public interface Assigner<T> {
      */
     default @NonNull Set<WeightedEdge<T>> assignMaterialized(
             final @NonNull Collection<@NonNull WeightedEdge<T>> weightedEdges) {
-        return Sets.newHashSet(this.assign(weightedEdges));
+        return StreamUtil.stream(this.assign(weightedEdges)).collect(Collectors.toSet());
     }
 }
