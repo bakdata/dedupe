@@ -67,7 +67,7 @@ public class ConflictResolutionFusion<R> implements Fusion<R> {
      */
     @NonNull ConflictResolution<R, R> rootResolution;
 
-    @Getter(lazy = true, value = AccessLevel.PRIVATE)
+    @Getter(value = AccessLevel.PRIVATE, lazy = true)
     @NonNull Map<@NonNull String, @NonNull Source> sourceByName =
             this.sources.stream().collect(Collectors.toMap(Source::getName, s -> s));
 

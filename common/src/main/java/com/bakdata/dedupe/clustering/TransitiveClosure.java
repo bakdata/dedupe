@@ -72,7 +72,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
     public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
         final List<Candidate<T>> duplicates = classifiedCandidates
                 .filter(classifiedCandidate -> classifiedCandidate.getClassificationResult().getClassification()
-                                               == Classification.DUPLICATE)
+                        == Classification.DUPLICATE)
                 .map(ClassifiedCandidate::getCandidate)
                 .collect(Collectors.toList());
         return this.clusterDuplicates(duplicates).stream();

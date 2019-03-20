@@ -91,8 +91,10 @@ public interface ConflictResolution<I, O> {
             case 1:
                 return Optional.of(resolvedValues.get(0).getValue());
             default:
-                final List<O> uniqueValues =
-                        resolvedValues.stream().map(AnnotatedValue::getValue).distinct().collect(Collectors.toList());
+                final List<O> uniqueValues = resolvedValues.stream()
+                        .map(AnnotatedValue::getValue)
+                        .distinct()
+                        .collect(Collectors.toList());
                 if (uniqueValues.size() == 1) {
                     return Optional.of(uniqueValues.get(0));
                 }

@@ -70,7 +70,7 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
     /**
      * An internal transitive closure over all past clusterings.
      */
-    @Getter(lazy = true, value = AccessLevel.PRIVATE)
+    @Getter(value = AccessLevel.PRIVATE, lazy = true)
     @NonNull TransitiveClosure<C, T, I> internalClosure = TransitiveClosure.<C, T, I>builder()
             .idExtractor(this.idExtractor)
             .clusterIdGenerator(this.clustering.getClusterIdGenerator())

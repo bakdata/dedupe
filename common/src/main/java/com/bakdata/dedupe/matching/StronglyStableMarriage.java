@@ -182,6 +182,7 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
             }
         }
 
+        @SuppressWarnings("squid:CommentedOutCodeLine")
         private void breakCriticalEngagements(Integer m) {
             //find the critical set Z of men;
             final Set<Integer> z = new CriticalSetFinder(this.engagements).findMenInCriticalSubset();

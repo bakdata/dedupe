@@ -39,6 +39,7 @@ import lombok.Value;
 import lombok.experimental.Delegate;
 
 @Value
+@SuppressWarnings("squid:S109")
 public class PersonClassifier implements Classifier<Person> {
     public static final DateTimeFormatter ISO_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
 

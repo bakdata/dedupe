@@ -29,6 +29,7 @@ import com.bakdata.dedupe.candidate_selection.online.OnlineCandidateSelection;
 import com.bakdata.dedupe.candidate_selection.online.OnlineSortedNeighborhoodMethod;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import lombok.Value;
 import lombok.experimental.Delegate;
@@ -55,10 +56,10 @@ public class PersonCandidateSelection implements OnlineCandidateSelection<Person
         }
 
         // split umlauts into canonicals
+        final String normalized = Normalizer.normalize(value.toLowerCase(Locale.US), Form.NFD);
         // remove everything in braces
+        final String nonBraced = BRACED_TERMS.matcher(normalized).replaceAll("");
         // remove all non-alphanumericals
-        final String nonBraced =
-                BRACED_TERMS.matcher(Normalizer.normalize(value.toLowerCase(), Form.NFD)).replaceAll("");
         return NON_ALPHA.matcher(nonBraced).replaceAll("");
     }
 }

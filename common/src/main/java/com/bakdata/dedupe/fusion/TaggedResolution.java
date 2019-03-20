@@ -40,8 +40,8 @@ import lombok.Value;
 @Value
 @Beta
 class TaggedResolution<T, R> implements ConflictResolution<T, R> {
-    private final @NonNull ConflictResolution<T, R> resolution;
-    private final @NonNull ResolutionTag<R> resolutionTag;
+    @NonNull ConflictResolution<T, R> resolution;
+    @NonNull ResolutionTag<R> resolutionTag;
 
     @Override
     public @NonNull List<@NonNull AnnotatedValue<R>> resolveNonEmptyPartially(

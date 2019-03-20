@@ -47,7 +47,8 @@ public class MatchingSimilarity<C extends Collection<? extends E>, E> implements
     @NonNull SimilarityMeasure<E> pairMeasure;
 
     @Override
-    public double calculateNonEmptyCollectionSimilarity(final @NonNull C leftCollection, final @NonNull C rightCollection,
+    public double calculateNonEmptyCollectionSimilarity(final @NonNull C leftCollection,
+            final @NonNull C rightCollection,
             final @NonNull SimilarityContext context) {
         final Collection<WeightedEdge<E>> leftScoreOfRight = this.getScores(leftCollection, rightCollection, context);
         final Collection<WeightedEdge<E>> rightScoreOfLeft = this.pairMeasure.isSymmetric()
@@ -57,16 +58,17 @@ public class MatchingSimilarity<C extends Collection<? extends E>, E> implements
         final Iterable<? extends WeightedEdge<E>> matches = this.bipartiteMatcher
                 .match(leftScoreOfRight, rightScoreOfLeft);
         return StreamUtil.stream(matches)
-                       .map(WeightedEdge::getWeight)
-                       .reduce(0.0d, Double::sum) /
-               Math.max(leftCollection.size(), rightCollection.size());
+                .map(WeightedEdge::getWeight)
+                .reduce(0.0d, Double::sum) /
+                Math.max(leftCollection.size(), rightCollection.size());
     }
 
     private Collection<WeightedEdge<E>> reversed(final Collection<WeightedEdge<E>> scores) {
         return scores.stream().map(WeightedEdge::reversed).collect(Collectors.toList());
     }
 
-    private @NonNull Collection<WeightedEdge<E>> getScores(final @NonNull C leftCollection, final @NonNull C rightCollection,
+    private @NonNull Collection<WeightedEdge<E>> getScores(final @NonNull C leftCollection,
+            final @NonNull C rightCollection,
             final @NonNull SimilarityContext context) {
         final Collection<WeightedEdge<E>> leftScoreOfRight = new ArrayList<>();
         for (final E left : leftCollection) {

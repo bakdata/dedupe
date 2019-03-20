@@ -57,7 +57,8 @@ public interface ClusterSplitHandler<C extends Comparable<C>, T> {
      * @param newRecord the new record triggering the clustering.
      * @return false if this handler would like to leave the cluster in-place.
      */
-    default boolean checkSplit(final @NonNull Collection<? extends Cluster<C, T>> clusters, final @NonNull T newRecord) {
+    default boolean checkSplit(final @NonNull Collection<? extends Cluster<C, T>> clusters,
+            final @NonNull T newRecord) {
         if (clusters.size() > 1) {
             final Cluster<C, T> mainCluster = Clusters.getContainingCluster(clusters.iterator(), newRecord);
             final List<Cluster<C, T>> splitParts = clusters.stream().filter(c -> c != mainCluster).collect(

@@ -47,8 +47,8 @@ public class ClassificationResult {
      */
     double confidence;
     /**
-     * Additional explanation for humans, such as the similarity and threshold ({@literal 0.933 >= 0.9}) or the name
-     * of a rule that triggered.
+     * Additional explanation for humans, such as the similarity and threshold ({@literal 0.933 >= 0.9}) or the name of
+     * a rule that triggered.
      */
     @Builder.Default
     @NonNull

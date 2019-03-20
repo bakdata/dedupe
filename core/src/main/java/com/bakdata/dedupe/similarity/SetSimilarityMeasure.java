@@ -40,7 +40,8 @@ import lombok.NonNull;
 public interface SetSimilarityMeasure<C extends Collection<? extends E>, E> extends CollectionSimilarityMeasure<C, E> {
     @SuppressWarnings("unchecked")
     @Override
-    default double calculateNonEmptyCollectionSimilarity(final @NonNull C leftCollection, final @NonNull C rightCollection,
+    default double calculateNonEmptyCollectionSimilarity(final @NonNull C leftCollection,
+            final @NonNull C rightCollection,
             final @NonNull SimilarityContext context) {
         final Set<E> leftSet = leftCollection instanceof Set ? (Set<E>) leftCollection : new HashSet<>(leftCollection);
         final Set<E> rightSet =

@@ -40,7 +40,9 @@ import lombok.NonNull;
  * impossible, where non-existing edges should always be treated as impossible. </p>
  *
  * <p>[1]
- * <a href="https://en.wikipedia.org/wiki/Matching_(graph_theory)">https://en.wikipedia.org/wiki/Matching_(graph_theory)</a></p>
+ * <a
+ * href="https://en.wikipedia.org/wiki/Matching_(graph_theory)">https://en.wikipedia.org/wiki/Matching_(graph_theory)
+ * </a></p>
  *
  * @param <T> the type of the record
  * @see Assigner Assigner - a matcher on a bipartite graph with undirected edges

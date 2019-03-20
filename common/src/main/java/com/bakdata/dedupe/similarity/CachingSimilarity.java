@@ -71,10 +71,12 @@ public class CachingSimilarity<T, I> implements SimilarityMeasure<T> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public double getNonNullSimilarity(final @NonNull T left, final @NonNull T right, final @NonNull SimilarityContext context) {
+    public double getNonNullSimilarity(final @NonNull T left, final @NonNull T right,
+            final @NonNull SimilarityContext context) {
         I leftId = this.idExtractor.apply(left);
         I rightId = this.idExtractor.apply(right);
-        if (this.measure.isSymmetric() && (leftId instanceof Comparable && ((Comparable) leftId).compareTo(rightId) > 0)) {
+        if (this.measure.isSymmetric() && (leftId instanceof Comparable
+                && ((Comparable) leftId).compareTo(rightId) > 0)) {
             final I temp = leftId;
             leftId = rightId;
             rightId = temp;

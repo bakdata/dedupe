@@ -47,9 +47,10 @@ public interface OnlineDeduplication<T> extends com.bakdata.dedupe.deduplication
      * <li>At least one duplicate has been detected: The record is added to the duplicate {@link
      * com.bakdata.dedupe.clustering.Cluster} and a suitable representation for that cluster is returned.</li>
      * </ul>
+     *
      * @param newRecord the record that should be processed with all previously seen records
-     * @return the record or a representation of the duplicate {@link com.bakdata.dedupe.clustering.Cluster} of
-     * the record.
+     * @return the record or a representation of the duplicate {@link com.bakdata.dedupe.clustering.Cluster} of the
+     * record.
      */
     @NonNull T deduplicate(@NonNull T newRecord);
 

@@ -72,7 +72,8 @@ public class FusingOnlineDuplicateDetection<C extends Comparable<C>, T> implemen
             return newRecord;
         }
 
-        final @NonNull FusedValue<T> fusedValue = this.fusion.fuse(Clusters.getContainingCluster(clusterIterator, newRecord));
+        final @NonNull FusedValue<T> fusedValue =
+                this.fusion.fuse(Clusters.getContainingCluster(clusterIterator, newRecord));
         return this.incompleteFusionHandler.apply(fusedValue)
                 .map(FusedValue::getValue)
                 .orElse(newRecord);

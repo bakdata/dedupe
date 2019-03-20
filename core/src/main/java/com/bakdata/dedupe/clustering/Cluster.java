@@ -37,8 +37,8 @@ import lombok.NonNull;
  * <p>All records inside the cluster are deemed to be pair-wise
  * duplicates. No record outside the cluster is a duplicate with any record inside the cluster.</p>
  * <p>Any dataset can be divided into an exhaustive set of non-overlapping clusters with a {@link
- * com.bakdata.dedupe.classifier.Classifier} and {@link Clustering}. In that sense, the duplicate relation
- * becomes a mathematical partitioning of the dataset.</p>
+ * com.bakdata.dedupe.classifier.Classifier} and {@link Clustering}. In that sense, the duplicate relation becomes a
+ * mathematical partitioning of the dataset.</p>
  * <p>In general, a cluster returned by the {@link Clustering} should always contain at least one element. Temporarily,
  * a cluster may be constructed without elements.</p>
  *

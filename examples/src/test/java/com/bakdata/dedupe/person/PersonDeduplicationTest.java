@@ -63,7 +63,8 @@ class PersonDeduplicationTest {
 
     @Test
     void testDeduplication() throws IOException {
-        final PersonDeduplication deduplication = new PersonDeduplication(PossibleDuplicateHandler.keep(), Optional::of);
+        final PersonDeduplication deduplication =
+                new PersonDeduplication(PossibleDuplicateHandler.keep(), Optional::of);
 
         // no fusion on the non-duplicated customers
         for (final Person customer : parseCsv("/customer.csv")) {

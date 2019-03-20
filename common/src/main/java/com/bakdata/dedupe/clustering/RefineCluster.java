@@ -124,7 +124,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
                     score += weightMatrix[rowIndex][colIndex] / partitionSizes[partitions[rowIndex]];
                 } else {
                     score -= weightMatrix[rowIndex][colIndex] / (n - partitionSizes[partitions[rowIndex]]) +
-                             weightMatrix[rowIndex][colIndex] / (n - partitionSizes[partitions[colIndex]]);
+                            weightMatrix[rowIndex][colIndex] / (n - partitionSizes[partitions[colIndex]]);
                 }
             }
         }
@@ -258,7 +258,8 @@ public class RefineCluster<C extends Comparable<C>, T> {
         return weightMatrix;
     }
 
-    private Stream<Cluster<C, T>> getSubClusters(final byte[] bestClustering, final @NonNull Cluster<C, ? extends T> cluster) {
+    private Stream<Cluster<C, T>> getSubClusters(final byte[] bestClustering,
+            final @NonNull Cluster<C, ? extends T> cluster) {
         final Map<Byte, List<T>> subClusters = IntStream.range(0, bestClustering.length)
                 .mapToObj(index -> new AbstractMap.SimpleEntry<>(bestClustering[index], cluster.get(index)))
                 .collect(Collectors
@@ -298,7 +299,8 @@ public class RefineCluster<C extends Comparable<C>, T> {
         return clustering;
     }
 
-    private List<WeightedEdge> addRandomEdges(final @NonNull List<? extends WeightedEdge> edges, final int desiredNumEdges) {
+    private List<WeightedEdge> addRandomEdges(final @NonNull List<? extends WeightedEdge> edges,
+            final int desiredNumEdges) {
         // add random edges with distance 2..n of known edges (e.g., neighbors of known edges).
         List<WeightedEdge> lastAddedEdges;
         final Set<WeightedEdge> weightedEdges = new LinkedHashSet<>(edges);
@@ -394,10 +396,9 @@ public class RefineCluster<C extends Comparable<C>, T> {
 
     @Value
     private static class WeightedEdge {
-        private int left;
-        private int right;
+        int left;
+        int right;
         @Wither
-        private
         double weight;
 
         static WeightedEdge of(final int leftIndex, final int rightIndex, final double weight) {
@@ -415,7 +416,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
 
         boolean overlaps(final @NonNull WeightedEdge e) {
             return e.getLeft() == this.getLeft() || e.getLeft() == this.getRight() || e.getRight() == this.getLeft()
-                   || e.getRight() == this
+                    || e.getRight() == this
                     .getRight();
         }
     }

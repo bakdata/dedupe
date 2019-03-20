@@ -39,9 +39,11 @@ import lombok.NonNull;
  * edges do not need to be complete; that is, certain assignments may be impossible from the start. Edges may be
  * negatively weighted if the implementation supports it and it is up to the implementation to either see them as
  * discouraged or impossible, where non-existing edges should always be treated as impossible. </p>
- * <p>A generalization of Assigner is the {@link BipartiteMatcher} that operators on directed, weighted bipartite graphs.</p>
+ * <p>A generalization of Assigner is the {@link BipartiteMatcher} that operators on directed, weighted bipartite
+ * graphs.</p>
  *
- * <p>[1] <a href="https://en.wikipedia.org/wiki/Assignment_problem">https://en.wikipedia.org/wiki/Assignment_problem</a></p>
+ * <p>[1]
+ * <a href="https://en.wikipedia.org/wiki/Assignment_problem">https://en.wikipedia.org/wiki/Assignment_problem</a></p>
  *
  * @param <T> the type of the record
  * @see BipartiteMatcher

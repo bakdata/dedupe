@@ -70,7 +70,7 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
     /**
      * Lookup from record id to gold cluster.
      */
-    @Getter(lazy = true, value = AccessLevel.PRIVATE)
+    @Getter(value = AccessLevel.PRIVATE, lazy = true)
     Map<I, Cluster<C, T>> idToCluster = this.goldClusters.stream()
             .flatMap(cluster -> cluster.getElements().stream()
                     .map(e -> new AbstractMap.SimpleEntry<>(this.idExtractor.apply(e), cluster)))

@@ -48,8 +48,8 @@ import lombok.Value;
  * There are three types of rules:
  * <ul>
  * <li>Negatives rule are used to exclude false positives. For example, when two person records have completely
- * different social security numbers, we want to declare them non-duplicate, even if they share the same name.
- * Negative rules are usually combined with explicit or implicit preconditions (e.g., different SSN).</li>
+ * different social security numbers, we want to declare them non-duplicate, even if they share the same name. Negative
+ * rules are usually combined with explicit or implicit preconditions (e.g., different SSN).</li>
  * <li>A positive rule is used to explicitly include true positives. Positive rules can be used as exceptions of
  * negative rules or for very specific edge cases that are hard to model in a stable overall similarity measure. For
  * example, a person has changed the last name after marriage, so we exclude the last name of comparison and make
@@ -100,6 +100,13 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     @Builder.Default
     Supplier<SimilarityContext> contextSupplier = () -> SimilarityContext.builder().build();
 
+    /**
+     * Checks if score is equivalent to {@link #DOES_NOT_APPLY}.
+     */
+    private static boolean didNotApply(final double score) {
+        return SimilarityMeasure.isUnknown(score);
+    }
+
     @Override
     public ClassificationResult classify(final @NonNull Candidate<T> candidate) {
         final SimilarityContext context = this.contextSupplier.get();
@@ -124,7 +131,8 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     /**
      * Creates an exception with the first caught exception as root and all other exceptions as suppressed.
      */
-    private @NonNull ClassificationException createException(final Candidate<T> candidate, final SimilarityContext context) {
+    private @NonNull ClassificationException createException(final Candidate<T> candidate,
+            final SimilarityContext context) {
         final ClassificationException
                 fusionException = new ClassificationException("Could not classify candidate " + candidate,
                 context.getExceptions().get(0));
@@ -135,7 +143,8 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     /**
      * Safely evaluates a rule for a candidate.
      */
-    private Optional<ClassificationResult> evaluateRule(final @NonNull Rule<? super T> rule, final @NonNull Candidate<? extends T> candidate,
+    private Optional<ClassificationResult> evaluateRule(final @NonNull Rule<? super T> rule,
+            final @NonNull Candidate<? extends T> candidate,
             final SimilarityContext context) {
         return context.safeExecute(() ->
                 rule.evaluate(candidate.getRecord1(), candidate.getRecord2(), context))
@@ -165,13 +174,6 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
                     .explanation(rule.getName())
                     .build();
         }
-    }
-
-    /**
-     * Checks if score is equivalent to {@link #DOES_NOT_APPLY}.
-     */
-    private static boolean didNotApply(final double score) {
-        return SimilarityMeasure.isUnknown(score);
     }
 
     /**
@@ -283,8 +285,8 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
         }
 
         /**
-         * Creates a threshold rule that is always applied. Following rules are only evaluated
-         * if the similarity is {@link SimilarityMeasure#unknown()}.
+         * Creates a threshold rule that is always applied. Following rules are only evaluated if the similarity is
+         * {@link SimilarityMeasure#unknown()}.
          * <p>Threshold rules result in {@link Classification#DUPLICATE}s if {@code sim >= threshold} and in
          * {@link Classification#NON_DUPLICATE} if {@code sim < threshold}.</p>
          *

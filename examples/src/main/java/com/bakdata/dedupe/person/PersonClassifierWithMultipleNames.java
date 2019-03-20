@@ -62,6 +62,7 @@ import lombok.experimental.Delegate;
  * too weak. Usually, a few missed duplicates are not as bad as some wrongly classified non-duplicates!
  */
 @Value
+@SuppressWarnings("squid:S109")
 public class PersonClassifierWithMultipleNames implements Classifier<Person> {
     public static final DateTimeFormatter ISO_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
 

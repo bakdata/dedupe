@@ -165,8 +165,8 @@ public class CommonSimilarityMeasures {
      * @param pairMeasure the similarity measure to use to calculate the preferences and the overall similarity.
      * @param <E> the element type.
      * @param <C> the collection type.
-     * @see <a href="https://en.wikipedia.org/wiki/Stable_marriage_problem">Stable marriage on Wikipedia</a>
      * @return a stable matching similarity.
+     * @see <a href="https://en.wikipedia.org/wiki/Stable_marriage_problem">Stable marriage on Wikipedia</a>
      */
     public static @NonNull <E, C extends Collection<? extends E>> SimilarityMeasure<C> stableMatching(
             final SimilarityMeasure<E> pairMeasure) {
@@ -289,8 +289,8 @@ public class CommonSimilarityMeasures {
     public static <T> @NonNull SimilarityMeasure<T> max(final SimilarityMeasure<? super T>... measures) {
         return new AggregatingSimilarityMeasure<>(similarities ->
                 takeWhileInclusive(similarities, sim -> sim < 1.0d)
-                .max()
-                .orElse(unknown()), measures);
+                        .max()
+                        .orElse(unknown()), measures);
     }
 
     /**

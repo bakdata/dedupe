@@ -31,8 +31,9 @@ import lombok.NonNull;
 /**
  * A clustering algorithm takes a list of {@link ClassifiedCandidate}s and creates a coherent {@link Cluster}, such that
  * all pairs of records inside the cluster are duplicate and no record outside the cluster is a duplicate with any
- * record inside the cluster. This requirement implies that {@link com.bakdata.dedupe.classifier.Classification}s
- * are additionally performed, reevaluated, or discarded to obtain the necessary coherence.
+ * record inside the cluster. This requirement implies that {@link com.bakdata.dedupe.classifier.Classification}s are
+ * additionally performed, reevaluated, or discarded to obtain the necessary coherence.
+ *
  * @implSpec A clustering which also splits previously outputted clusters should give users a chance to react to the
  * changes with a {@link ClusterSplitHandler}. Implementations may decide to adhere to the non-splitting wish or not.
  */

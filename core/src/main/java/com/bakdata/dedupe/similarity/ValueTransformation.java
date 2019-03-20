@@ -53,7 +53,8 @@ public interface ValueTransformation<T, R> {
      * @param after the  to chain to this transformation.
      * @return the chained .
      */
-    default @NonNull <V> ValueTransformation<T, V> andThen(final @NonNull ValueTransformation<? super R, ? extends V> after) {
+    default @NonNull <V> ValueTransformation<T, V> andThen(
+            final @NonNull ValueTransformation<? super R, ? extends V> after) {
         Objects.requireNonNull(after);
         return (t, context) -> after.transform(this.transform(t, context), context);
     }

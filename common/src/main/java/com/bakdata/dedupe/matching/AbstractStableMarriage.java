@@ -66,7 +66,7 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
     private double getWeight(final Collection<WeightedEdge<T>> leftScoreOfRight, final T m, final T w) {
         return leftScoreOfRight.stream()
                 .filter(edge -> edge.getFirst().equals(m) &&
-                                edge.getSecond().equals(w))
+                        edge.getSecond().equals(w))
                 .findFirst()
                 .orElseThrow().getWeight();
     }

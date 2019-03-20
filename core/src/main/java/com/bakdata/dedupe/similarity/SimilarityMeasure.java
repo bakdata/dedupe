@@ -84,9 +84,9 @@ public interface SimilarityMeasure<T> {
      * @param context the context of the comparison.
      * @return the similarity [0; 1] or {@link #unknown()} if no comparison can be performed (for example if left or
      * right are null).
-     * @implNote the default implementation returns
-     * {@link SimilarityContext#getSimilarityForNull(Object, Object, SimilarityContext)} if left or
-     * right is null and delegates to {@link #getNonNullSimilarity(Object, Object, SimilarityContext)} otherwise.
+     * @implNote the default implementation returns {@link SimilarityContext#getSimilarityForNull(Object, Object,
+     * SimilarityContext)} if left or right is null and delegates to {@link #getNonNullSimilarity(Object, Object,
+     * SimilarityContext)} otherwise.
      */
     default double getSimilarity(final T left, final T right, final @NonNull SimilarityContext context) {
         if (left == null || right == null) {
@@ -162,7 +162,7 @@ public interface SimilarityMeasure<T> {
         final @NonNull SimilarityMeasure<T> similarityMeasure = this.cutoff(minExclusive);
         return (left, right, context) -> {
             final double similarity = similarityMeasure.getSimilarity(left, right, context);
-            return similarity > minExclusive ? (similarity - minExclusive) / (1 - minExclusive) : 0;
+            return similarity > minExclusive ? ((similarity - minExclusive) / (1 - minExclusive)) : 0;
         };
     }
 

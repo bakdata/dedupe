@@ -39,11 +39,11 @@ public class TransformingSimilarityMeasure<R, T> implements SimilarityMeasure<T>
     /**
      * The transformation that is applied to both inputs before calculating the similarity.
      */
-    private final @NonNull ValueTransformation<T, ? extends R> transformation;
+    @NonNull ValueTransformation<T, ? extends R> transformation;
     /**
      * The similarity measure to apply on the transformed values.
      */
-    private final @NonNull SimilarityMeasure<R> measure;
+    @NonNull SimilarityMeasure<R> measure;
 
     @Override
     public double getNonNullSimilarity(final @NonNull T left, final @NonNull T right,

@@ -71,6 +71,6 @@ public class CutoffSimiliarityMeasure<T> implements SimilarityMeasure<T> {
         if (threshold < this.threshold) {
             return this;
         }
-        return new com.bakdata.dedupe.similarity.CutoffSimiliarityMeasure<>(this.inner, threshold);
+        return new CutoffSimiliarityMeasure<>(this.inner, threshold);
     }
 }
