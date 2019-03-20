@@ -23,6 +23,11 @@
  */
 package com.bakdata.dedupe.fusion;
 
+/**
+ * An exception thrown by a {@link ConflictResolution} whenever an exception during fusion occurs.
+ * <p>If a conflict resolution experiences multiple exceptions, only the first one is chained and the remained is added
+ * with {@link #addSuppressed(Throwable)}.</p>
+ */
 public class FusionException extends RuntimeException {
     public FusionException() {
     }

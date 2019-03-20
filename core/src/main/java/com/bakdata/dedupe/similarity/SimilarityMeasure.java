@@ -23,8 +23,8 @@
  */
 package com.bakdata.dedupe.similarity;
 
+import java.util.function.DoublePredicate;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import lombok.NonNull;
 
 /**
@@ -43,15 +43,15 @@ public interface SimilarityMeasure<T> {
     /**
      * Returns a value indicating that the similarity value is unknown.
      * <p>Currently, unknown is encoded as NaN, which makes computation of compound similarity measures easier.</p>
-     * <p>Users that need to directly check for unknown results, should use {@link #isUnknown(float)} to keep the code
+     * <p>Users that need to directly check for unknown results, should use {@link #isUnknown(double)} to keep the code
      * stable even after that value is changed.</p>
      * <p>Note that unknown should not be used for comparison as {@code unknown() != unknown()}.</p>
      *
-     * @see #isUnknown(float)
+     * @see #isUnknown(double)
      */
     @SuppressWarnings("SameReturnValue")
-    static float unknown() {
-        return Float.NaN;
+    static double unknown() {
+        return Double.NaN;
     }
 
     /**
@@ -60,14 +60,23 @@ public interface SimilarityMeasure<T> {
      * @param value the value to check.
      * @return true if value is the result of {@code unknown()}.
      */
-    static boolean isUnknown(final float value) {
-        return Float.isNaN(value);
+    static boolean isUnknown(final double value) {
+        return Double.isNaN(value);
+    }
+
+    /**
+     * Returns true if {@code sim(a, b) = sim(b, a)}.
+     *
+     * @return true if {@code sim(a, b) = sim(b, a)}
+     */
+    default boolean isSymmetric() {
+        return false;
     }
 
     /**
      * Calculates the similarity of the left and right value.
      * <p>Note that some similarities are non-commutative, so that the order of the parameters matters.</p>
-     * <p>In contrast to {@link #calculateSimilarity(Object, Object, SimilarityContext)}, this method allows null
+     * <p>In contrast to {@link #getNonNullSimilarity(Object, Object, SimilarityContext)}, this method allows null
      * values for the left or right value.</p>
      *
      * @param left the left element for which the similarity should be calculated.
@@ -75,15 +84,15 @@ public interface SimilarityMeasure<T> {
      * @param context the context of the comparison.
      * @return the similarity [0; 1] or {@link #unknown()} if no comparison can be performed (for example if left or
      * right are null).
-     * @implNote the default implementation returns
-     * {@link SimilarityContext#getSimilarityForNull(Object, Object, SimilarityContext)} if left or
-     * right is null and delegates to {@link #calculateSimilarity(Object, Object, SimilarityContext)} otherwise.
+     * @implNote the default implementation returns {@link SimilarityContext#getSimilarityForNull(Object, Object,
+     * SimilarityContext)} if left or right is null and delegates to {@link #getNonNullSimilarity(Object, Object,
+     * SimilarityContext)} otherwise.
      */
-    default float getSimilarity(T left, T right, @NonNull SimilarityContext context) {
+    default double getSimilarity(final T left, final T right, final @NonNull SimilarityContext context) {
         if (left == null || right == null) {
             return context.getSimilarityForNull(left, right, context);
         }
-        return calculateSimilarity(left, right, context);
+        return this.getNonNullSimilarity(left, right, context);
     }
 
     /**
@@ -96,11 +105,11 @@ public interface SimilarityMeasure<T> {
      * @return the similarity [0; 1] or {@link #unknown()} if no comparison can be performed (for example if left or
      * right are null).
      */
-    float calculateSimilarity(@NonNull T left, @NonNull T right, @NonNull SimilarityContext context);
+    double getNonNullSimilarity(@NonNull T left, @NonNull T right, @NonNull SimilarityContext context);
 
     /**
      * Applies a {@link ValueTransformation} to the left and right value of a similarity comparison before applying this
-     * {@link SimilarityMeasure}.
+     * .
      * <p>For example, to compare {@link java.time.LocalDate} with the edit distance, we need to transform it into a
      * formatted string: {@code levenshtein.of(ISO_FORMAT::format)}</p>
      *
@@ -114,7 +123,7 @@ public interface SimilarityMeasure<T> {
 
     /**
      * Applies a {@link ValueTransformation} to the left and right value of a similarity comparison before applying this
-     * {@link SimilarityMeasure}.
+     * .
      * <p>For example, to compare {@link java.time.LocalDate} with the edit distance, we need to transform it into a
      * formatted string: {@code levenshtein.of(ISO_FORMAT::format)}</p>
      *
@@ -135,7 +144,7 @@ public interface SimilarityMeasure<T> {
      * @param threshold the threshold that divides the dissimilar and the similar values.
      * @return a similarity measure replacing all similarities {@code <threshold} by 0.
      */
-    default @NonNull SimilarityMeasure<T> cutoff(final float threshold) {
+    default @NonNull SimilarityMeasure<T> cutoff(final double threshold) {
         return new CutoffSimiliarityMeasure<>(this, threshold);
     }
 
@@ -148,10 +157,12 @@ public interface SimilarityMeasure<T> {
      * @param minExclusive the threshold that divides the dissimilar and the similar values.
      * @return a similarity measure rescaling {@code (minExclusive, 1]} to {@code (0, 1]}.
      */
-    default @NonNull SimilarityMeasure<T> scaleWithThreshold(final float minExclusive) {
+    default @NonNull SimilarityMeasure<T> scaleWithThreshold(final double minExclusive) {
+        // uses #cutoff first to allow optimizations for SimilarityMeasure
+        final @NonNull SimilarityMeasure<T> similarityMeasure = this.cutoff(minExclusive);
         return (left, right, context) -> {
-            final float similarity = this.getSimilarity(left, right, context);
-            return similarity > minExclusive ? (similarity - minExclusive) / (1 - minExclusive) : 0;
+            final double similarity = similarityMeasure.getSimilarity(left, right, context);
+            return similarity > minExclusive ? ((similarity - minExclusive) / (1 - minExclusive)) : 0;
         };
     }
 
@@ -159,7 +170,7 @@ public interface SimilarityMeasure<T> {
      * Binarizes the similarity returned by this similarity, such that all values {@code >0} result in a similarity of
      * 1.
      * <p>This method can be used to treat somewhat dissimilar values equal and is mostly used after applying {@link
-     * #cutoff(float)}.</p>
+     * #cutoff(double)}.</p>
      *
      * @return a similarity measure replacing all similarities {@code >0} with 1.
      */
@@ -171,14 +182,14 @@ public interface SimilarityMeasure<T> {
      * Replaces the similarity returned by this similarity, such that all values {@code =0} result in an {@link
      * #unknown()} similarity.
      * <p>This method makes parts of a compound similarity measure optional and is mostly used after applying {@link
-     * #cutoff(float)}.</p>
+     * #cutoff(double)}.</p>
      *
      * @return a similarity measure replacing all similarities {@code =0} with {@link #unknown()}.
      */
     default @NonNull SimilarityMeasure<T> unknownIfZero() {
         return (left, right, context) -> {
-            final float similarity = this.getSimilarity(left, right, context);
-            return similarity <= 0 ? unknown() : 1.0f;
+            final double similarity = this.getSimilarity(left, right, context);
+            return similarity <= 0 ? unknown() : 1.0d;
         };
     }
 
@@ -186,15 +197,24 @@ public interface SimilarityMeasure<T> {
      * Replaces the similarity returned by this similarity, such that all values, for which the given predicate
      * evaluates to true, result in an {@link #unknown()} similarity.
      * <p>This method makes parts of a compound similarity measure optional and is mostly used after applying {@link
-     * #cutoff(float)}.</p>
+     * #cutoff(double)}.</p>
      *
      * @return a similarity measure replacing specific similarities with {@link #unknown()}.
      */
-    default @NonNull SimilarityMeasure<T> unknownIf(final Predicate<Float> scorePredicate) {
+    default @NonNull SimilarityMeasure<T> unknownIf(final @NonNull DoublePredicate scorePredicate) {
         return (left, right, context) -> {
-            final float similarity = this.getSimilarity(left, right, context);
+            final double similarity = this.getSimilarity(left, right, context);
             return scorePredicate.test(similarity) ? unknown() : similarity;
         };
     }
 
+    /**
+     * Swaps the lower and upper bound, such that equal pairs have a similarity of 0 and unequal pairs of 1.
+     * <p>In particular, the returned similarity is {@code 1 - this.sim}.</p>
+     *
+     * @return a negated similarity measure.
+     */
+    default @NonNull SimilarityMeasure<T> negate() {
+        return (left, right, context) -> 1 - this.getSimilarity(left, right, context);
+    }
 }

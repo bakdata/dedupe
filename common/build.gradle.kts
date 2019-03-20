@@ -6,4 +6,5 @@ dependencies {
     "api"(group = "commons-codec", name = "commons-codec", version = "1.11")
 
     implementation(group = "com.google.guava", name = "guava", version = "26.0-jre")
+    implementation(group = "org.jgrapht", name = "jgrapht-core", version = "1.3.0")
 }

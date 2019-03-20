@@ -23,8 +23,9 @@
  */
 package com.bakdata.dedupe.deduplication.online;
 
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 import lombok.NonNull;
+
 
 /**
  * A full online deduplication process, which ensures that no duplicate record is emitted.
@@ -46,16 +47,15 @@ public interface OnlineDeduplication<T> extends com.bakdata.dedupe.deduplication
      * <li>At least one duplicate has been detected: The record is added to the duplicate {@link
      * com.bakdata.dedupe.clustering.Cluster} and a suitable representation for that cluster is returned.</li>
      * </ul>
+     *
      * @param newRecord the record that should be processed with all previously seen records
-     * @return the record or a representation of the duplicate {@link com.bakdata.dedupe.clustering.Cluster} of
-     * the record.
+     * @return the record or a representation of the duplicate {@link com.bakdata.dedupe.clustering.Cluster} of the
+     * record.
      */
     @NonNull T deduplicate(@NonNull T newRecord);
 
     @Override
-    default @NonNull Iterable<T> deduplicate(@NonNull Iterable<? extends T> records) {
-        return () -> StreamSupport.stream(records.spliterator(), false)
-                .map(this::deduplicate)
-                .iterator();
+    default @NonNull Stream<T> deduplicate(final @NonNull Stream<? extends T> records) {
+        return records.map(this::deduplicate);
     }
 }

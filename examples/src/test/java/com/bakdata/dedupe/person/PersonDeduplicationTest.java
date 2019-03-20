@@ -23,9 +23,7 @@
  */
 package com.bakdata.dedupe.person;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bakdata.dedupe.duplicate_detection.PossibleDuplicateHandler;
 import java.io.IOException;
@@ -46,7 +44,7 @@ class PersonDeduplicationTest {
 
     private static List<Person> parseCsv(final String resourceName) throws IOException {
         final CSVFormat format = CSVFormat.newFormat('\t').withFirstRecordAsHeader().withQuote('"');
-        try (final var parser = CSVParser
+        try (final CSVParser parser = CSVParser
                 .parse(PersonDeduplicationTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8,
                         format)) {
             return parser.getRecords()
@@ -65,19 +63,20 @@ class PersonDeduplicationTest {
 
     @Test
     void testDeduplication() throws IOException {
-        final PersonDeduplication deduplication = new PersonDeduplication(PossibleDuplicateHandler.ignore(), Optional::of);
+        final PersonDeduplication deduplication =
+                new PersonDeduplication(PossibleDuplicateHandler.keep(), Optional::of);
 
         // no fusion on the non-duplicated customers
         for (final Person customer : parseCsv("/customer.csv")) {
             final Person fusedPerson = deduplication.deduplicate(customer);
-            assertSame(customer, fusedPerson);
+            assertThat(fusedPerson).isSameAs(customer);
         }
 
         for (final Person customer : parseCsv("/exact_duplicates.csv")) {
             final Person fusedPerson = deduplication.deduplicate(customer);
-            assertNotSame(customer, fusedPerson);
+            assertThat(fusedPerson).isNotSameAs(customer);
             // should be the same except for fusion id
-            assertEquals(customer, fusedPerson.toBuilder().fusedIds(Set.of()).build());
+            assertThat(fusedPerson.toBuilder().fusedIds(Set.of()).build()).isEqualTo(customer);
         }
     }
 }

@@ -23,10 +23,24 @@
  */
 package com.bakdata.dedupe.fusion;
 
+import lombok.NonNull;
 import lombok.Value;
 
+
+/**
+ * A resolution tag is a way to refer to a previously, resolved value in the current {@link FusionContext}.
+ * <p>Such references are tremendously valuable if some values need to be kept consistent. For instance, if an address
+ * needs to be resolved, we can define a complex resolution for city, but we should use the corresponding zip code.</p>
+ * <p>The resolution tag doubles as a type tag that allows type-safe access to {@link
+ * FusionContext#retrieveValues(ResolutionTag)}</p>.
+ *
+ * @param <T> the type of the record. Used to allow type-safe access.
+ */
 @Value
-@SuppressWarnings("squid:S2326")
+@SuppressWarnings({"unused", "squid:S2326"})
 public class ResolutionTag<T> {
-    String name;
+    /**
+     * The name of the tag for debugging.
+     */
+    @NonNull String name;
 }

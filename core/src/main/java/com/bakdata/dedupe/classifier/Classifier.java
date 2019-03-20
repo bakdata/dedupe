@@ -41,17 +41,18 @@ public interface Classifier<T> {
      *
      * @param candidate the candidate to classify.
      * @return the {@link ClassificationResult} duplicateClass.
+     * @throws ClassificationException if one or more exceptions occur during classification.
      */
     @NonNull ClassificationResult classify(@NonNull Candidate<T> candidate);
 
     /**
-     * Classifies the {@link Candidate} as duplicate, non-duplicate, or other {@link Classification}s and stores
-     * the {@link ClassificationResult} together with the candidate.
+     * Classifies the {@link Candidate} as duplicate, non-duplicate, or other {@link Classification}s and stores the
+     * {@link ClassificationResult} together with the candidate.
      *
      * @param candidate the candidate to classify.
      * @return the {@link ClassifiedCandidate}.
      */
-    default @NonNull ClassifiedCandidate<T> classifiedCandidate(@NonNull Candidate<T> candidate) {
-        return new ClassifiedCandidate<>(candidate, classify(candidate));
+    default @NonNull ClassifiedCandidate<T> classifyCandidate(final @NonNull Candidate<T> candidate) {
+        return new ClassifiedCandidate<>(candidate, this.classify(candidate));
     }
 }

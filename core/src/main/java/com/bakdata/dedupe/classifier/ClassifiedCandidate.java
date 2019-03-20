@@ -29,6 +29,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * Contains a {@link ClassificationResult} with the corresponding {@link Candidate}.
  *

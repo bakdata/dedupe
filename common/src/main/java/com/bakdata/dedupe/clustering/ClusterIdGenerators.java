@@ -27,35 +27,34 @@ package com.bakdata.dedupe.clustering;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import lombok.experimental.UtilityClass;
 
-public class IdGenerators {
-    private static final Function INT_GENERATOR = new Function<Iterable<?>, Integer>() {
-        private final AtomicInteger nextId = new AtomicInteger();
-
-        @Override
-        public Integer apply(final Iterable<?> objects) {
-            return this.nextId.getAndIncrement();
-        }
-    };
-    private static final Function LONG_GENERATOR = new Function<Iterable<?>, Long>() {
-        private final AtomicLong nextId = new AtomicLong();
-
-        @Override
-        public Long apply(final Iterable<?> objects) {
-            return this.nextId.getAndIncrement();
-        }
-    };
-
+/**
+ * A collection of typical cluster id generators.
+ */
+@UtilityClass
+public class ClusterIdGenerators {
     /**
-     * Returns an id generator
+     * Returns an id generator that generates ints starting from 0.
      */
-    @SuppressWarnings("unchecked")
-    public static <T> Function<Iterable<? extends T>, Integer> intGenerator() {
-        return INT_GENERATOR;
+    public static <T> Function<? super Iterable<? extends T>, Integer> intGenerator() {
+        final AtomicInteger nextId = new AtomicInteger();
+        return objects -> nextId.getAndIncrement();
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Function<Iterable<? extends T>, Long> longGenerator() {
-        return (Function) LONG_GENERATOR;
+    /**
+     * Returns an id generator that generates longs starting from 0.
+     */
+    public static <T> Function<? super Iterable<? extends T>, Long> longGenerator() {
+        final AtomicLong nextId = new AtomicLong();
+        return objects -> nextId.getAndIncrement();
+    }
+
+    /**
+     * Returns an id generator that generates strings with a given prefix starting from 0.
+     */
+    public static <T> Function<? super Iterable<? extends T>, String> stringGenerator(final String prefix) {
+        final AtomicLong nextId = new AtomicLong();
+        return objects -> prefix + nextId.getAndIncrement();
     }
 }

@@ -30,7 +30,8 @@ import lombok.Value;
 import lombok.experimental.Delegate;
 
 /**
- * A similarity context captures exceptions in an {@link ExceptionContext} and provides additional configurations.
+ * A similarity context captures exceptions in an {@link ExceptionContext} and provides additional configurations that
+ * represent cross-cutting concerns, such as null handling.
  */
 @Value
 @Builder
@@ -50,7 +51,7 @@ public class SimilarityContext {
     /**
      * Calculates the similarity when any of the two values under comparison is null.
      */
-    public <T> float getSimilarityForNull(T left, T right, SimilarityContext context) {
-        return similarityMeasureForNull.getSimilarity(left, right, context);
+    public <T> double getSimilarityForNull(final T left, final T right, final SimilarityContext context) {
+        return this.similarityMeasureForNull.getSimilarity(left, right, context);
     }
 }

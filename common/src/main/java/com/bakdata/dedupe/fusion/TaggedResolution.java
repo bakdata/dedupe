@@ -22,37 +22,38 @@
  * SOFTWARE.
  */
 
-package com.bakdata.dedupe.similarity;
+package com.bakdata.dedupe.fusion;
 
+import com.google.common.annotations.Beta;
+import java.util.List;
+import lombok.NonNull;
 import lombok.Value;
-import org.apache.commons.text.similarity.LevenshteinDistance;
 
+
+/**
+ * A technical implementation which stores the results of a given, wrapped resolution into the {@link FusionContext} for
+ * later access.
+ *
+ * @param <T> the input type of the wrapped resolution.
+ * @param <R>the output type of the wrapped resolution.
+ */
 @Value
-public class Levensthein<T extends CharSequence> implements SimilarityMeasure<T> {
-    float threshold;
-    static DistanceSimilarityMeasure<CharSequence> NoThresholdMeasure = new DistanceSimilarityMeasure<>(new LevenshteinDistance());
+@Beta
+class TaggedResolution<T, R> implements ConflictResolution<T, R> {
+    @NonNull ConflictResolution<T, R> resolution;
+    @NonNull ResolutionTag<R> resolutionTag;
 
-    public Levensthein(final float threshold) {
-        this.threshold = threshold;
+    @Override
+    public @NonNull List<@NonNull AnnotatedValue<R>> resolveNonEmptyPartially(
+            final @NonNull List<@NonNull AnnotatedValue<T>> values, final @NonNull FusionContext context) {
+        final List<AnnotatedValue<R>> annotatedValues = this.resolution.resolvePartially(values, context);
+        context.storeValues(this.resolutionTag, annotatedValues);
+        return annotatedValues;
     }
 
     @Override
-    public float calculateSimilarity(final CharSequence left, final CharSequence right,
-            final SimilarityContext context) {
-        if(threshold == 0) {
-            return NoThresholdMeasure.calculateSimilarity(left, right, context);
-        }
-        final var maxLen = CommonSimilarityMeasures.getMaxLen(left, right);
-        final var maxDiff = (int) (maxLen * (1 - this.threshold));
-        final var measure = new DistanceSimilarityMeasure<T>(new LevenshteinDistance(maxDiff));
-        return measure.calculateSimilarity(left, right, context);
-    }
-
-    @Override
-    public SimilarityMeasure<T> cutoff(final float threshold) {
-        if (threshold < this.threshold) {
-            return this;
-        }
-        return new Levensthein<>(threshold);
+    public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> values,
+            final @NonNull FusionContext context) {
+        return this.resolveNonEmptyPartially(values, context);
     }
 }

@@ -21,26 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.bakdata.dedupe.similarity;
 
-public class SimilarityException extends RuntimeException {
-    public SimilarityException() {
-    }
+/**
+ * Base data structured shared by online and offline candidate selections that choose promising pairs to limit search
+ * space for duplicates.
+ */
+package com.bakdata.dedupe.candidate_selection;
 
-    public SimilarityException(final String message) {
-        super(message);
-    }
-
-    public SimilarityException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
-
-    public SimilarityException(final Throwable cause) {
-        super(cause);
-    }
-
-    public SimilarityException(final String message, final Throwable cause, final boolean enableSuppression,
-            final boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
-}

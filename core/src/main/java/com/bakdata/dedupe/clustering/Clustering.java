@@ -25,13 +25,15 @@ package com.bakdata.dedupe.clustering;
 
 import com.bakdata.dedupe.classifier.ClassifiedCandidate;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import lombok.NonNull;
 
 /**
  * A clustering algorithm takes a list of {@link ClassifiedCandidate}s and creates a coherent {@link Cluster}, such that
  * all pairs of records inside the cluster are duplicate and no record outside the cluster is a duplicate with any
- * record inside the cluster. This requirement implies that {@link com.bakdata.dedupe.classifier.Classification}s
- * are additionally performed, reevaluated, or discarded to obtain the necessary coherence.
+ * record inside the cluster. This requirement implies that {@link com.bakdata.dedupe.classifier.Classification}s are
+ * additionally performed, reevaluated, or discarded to obtain the necessary coherence.
+ *
  * @implSpec A clustering which also splits previously outputted clusters should give users a chance to react to the
  * changes with a {@link ClusterSplitHandler}. Implementations may decide to adhere to the non-splitting wish or not.
  */
@@ -42,7 +44,7 @@ public interface Clustering<C extends Comparable<C>, T> {
      * @param classifiedCandidates the list of classified candidates.
      * @return a coherent cluster over the classified candidates.
      */
-    @NonNull Iterable<Cluster<C, T>> cluster(@NonNull Iterable<ClassifiedCandidate<T>> classifiedCandidates);
+    @NonNull Stream<Cluster<C, T>> cluster(@NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates);
 
     /**
      * The cluster id generator that is used to create an id for a new cluster.

@@ -27,11 +27,18 @@ import com.bakdata.util.ExceptionContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Builder;
+import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Delegate;
 
+/**
+ * A fusion context captures exceptions in an {@link ExceptionContext} during resolution and provides additional context
+ * values.
+ */
 @SuppressWarnings("WeakerAccess")
 @Value
+@Builder
 public class FusionContext {
     @Delegate
     ExceptionContext exceptionContext = new ExceptionContext();
@@ -41,8 +48,12 @@ public class FusionContext {
         this.storedValues.put(resolutionTag, annotatedValues);
     }
 
+    public boolean isNonEmpty(final Object value) {
+        return value != null && !"".equals(value);
+    }
+
     @SuppressWarnings("unchecked")
-    public <T> List<AnnotatedValue<T>> retrieveValues(final ResolutionTag<T> resolutionTag) {
+    public @NonNull <T> List<AnnotatedValue<T>> retrieveValues(final ResolutionTag<T> resolutionTag) {
         return (List<AnnotatedValue<T>>) this.storedValues.computeIfAbsent(resolutionTag,
                 k -> {
                     throw new FusionException("Tried to retrieve " + resolutionTag + " without being stored");

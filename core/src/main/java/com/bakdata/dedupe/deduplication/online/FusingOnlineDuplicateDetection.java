@@ -29,12 +29,12 @@ import com.bakdata.dedupe.duplicate_detection.online.OnlineDuplicateDetection;
 import com.bakdata.dedupe.fusion.FusedValue;
 import com.bakdata.dedupe.fusion.Fusion;
 import com.bakdata.dedupe.fusion.IncompleteFusionHandler;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
+
 
 /**
  * A full online deduplication process, which
@@ -65,23 +65,17 @@ public class FusingOnlineDuplicateDetection<C extends Comparable<C>, T> implemen
 
     @Override
     public @NonNull T deduplicate(final @NonNull T newRecord) {
-        final var clusters = this.duplicateDetection.detectDuplicates(newRecord);
+        final Stream<Cluster<C, T>> clusters = this.duplicateDetection.detectDuplicates(newRecord);
         final Iterator<Cluster<C, T>> clusterIterator = clusters.iterator();
 
         if (!clusterIterator.hasNext()) {
             return newRecord;
         }
 
-        return Optional.of(this.fusion.fuse(Clusters.getContainingCluster(clusterIterator, newRecord)))
-                .flatMap(this.incompleteFusionHandler::handlePartiallyFusedValue)
+        final @NonNull FusedValue<T> fusedValue =
+                this.fusion.fuse(Clusters.getContainingCluster(clusterIterator, newRecord));
+        return this.incompleteFusionHandler.apply(fusedValue)
                 .map(FusedValue::getValue)
                 .orElse(newRecord);
-    }
-
-    private boolean isEmpty(Iterable<Cluster<C, T>> clusters) {
-        if (clusters instanceof Collection<?>) {
-            return ((Collection<?>) clusters).isEmpty();
-        }
-        return !clusters.iterator().hasNext();
     }
 }

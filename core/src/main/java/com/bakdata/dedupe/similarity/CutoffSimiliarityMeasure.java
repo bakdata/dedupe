@@ -27,6 +27,7 @@ package com.bakdata.dedupe.similarity;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * Cuts the similarity returned by this similarity, such that all values {@code <threshold} result in a similarity of 0,
  * and all values {@code [threshold, 1]} are left untouched.
@@ -43,7 +44,7 @@ public class CutoffSimiliarityMeasure<T> implements SimilarityMeasure<T> {
     /**
      * The threshold that divides the dissimilar and the similar values.
      */
-    float threshold;
+    double threshold;
 
     /**
      * Cuts the similarity, such that all values {@code <threshold} result in a similarity of 0, and all values {@code
@@ -55,21 +56,21 @@ public class CutoffSimiliarityMeasure<T> implements SimilarityMeasure<T> {
      * @param threshold the threshold that divides the dissimilar and the similar values.
      * @return a similarity measure replacing all similarities {@code <threshold} by 0.
      */
-    public static float cutoff(final float similarity, final float threshold) {
+    public static double cutoff(final double similarity, final double threshold) {
         return similarity < threshold ? 0 : similarity;
     }
 
     @Override
-    public float calculateSimilarity(@NonNull final T left, @NonNull final T right,
-            @NonNull final SimilarityContext context) {
+    public double getNonNullSimilarity(final @NonNull T left, final @NonNull T right,
+            final @NonNull SimilarityContext context) {
         return cutoff(this.inner.getSimilarity(left, right, context), this.threshold);
     }
 
     @Override
-    public SimilarityMeasure<T> cutoff(final float threshold) {
+    public @NonNull SimilarityMeasure<T> cutoff(final double threshold) {
         if (threshold < this.threshold) {
             return this;
         }
-        return new com.bakdata.dedupe.similarity.CutoffSimiliarityMeasure<>(this.inner, threshold);
+        return new CutoffSimiliarityMeasure<>(this.inner, threshold);
     }
 }

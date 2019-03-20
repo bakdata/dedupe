@@ -26,6 +26,7 @@ package com.bakdata.dedupe.similarity;
 import java.util.Objects;
 import lombok.NonNull;
 
+
 /**
  * Performs a transformation on a value, especially on input values for {@link SimilarityMeasure}.
  * <p>The ValueTransformation is basically a {@link java.util.function.Function} with access to the {@link
@@ -49,10 +50,11 @@ public interface ValueTransformation<T, R> {
      * Composes this and the other transformation, such that this transformation is first applied to values and the
      * given transformation is applied afterwards.
      *
-     * @param after the {@link ValueTransformation} to chain to this transformation.
-     * @return the chained {@link ValueTransformation}.
+     * @param after the  to chain to this transformation.
+     * @return the chained .
      */
-    default <V> ValueTransformation<T, V> andThen(final ValueTransformation<? super R, ? extends V> after) {
+    default @NonNull <V> ValueTransformation<T, V> andThen(
+            final @NonNull ValueTransformation<? super R, ? extends V> after) {
         Objects.requireNonNull(after);
         return (t, context) -> after.transform(this.transform(t, context), context);
     }

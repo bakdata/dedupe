@@ -31,33 +31,57 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+/**
+ * Executes {@link TransitiveClosure} and successively {@link RefineCluster}. This algorithm boosts both recall and
+ * precision, but is rather compute-heavy.
+ *
+ * @param <C> the type of the cluster id.
+ * @param <T> the type of the record.
+ * @param <I> the type of the record id.
+ */
 @Value
 @Builder
 public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>>
         implements Clustering<C, T> {
+    /**
+     * The configured refineCluster.
+     */
     @NonNull
     RefineCluster<C, T> refineCluster;
 
+    /**
+     * A backing map for old clusters. Defaults to an in-memory map if null during construction.
+     */
     @NonNull
     Map<I, Cluster<C, T>> oldClusterIndex;
 
+    /**
+     * The underlying transitive closure implementation.
+     */
     @NonNull
     TransitiveClosure<C, T, I> closure;
 
+    /**
+     * Extracts the id of the record. Used for {@link #oldClusterIndex}.
+     */
     @NonNull
     Function<? super T, ? extends I> idExtractor;
 
+    /**
+     * A callback that may veto cluster splits. Defaults to {@link ClusterSplitHandler#ignore()}.
+     */
     @NonNull
     ClusterSplitHandler splitHandler;
 
     @java.beans.ConstructorProperties({"refineCluster", "oldClusterIndex", "closure", "idExtractor", "splitHandler"})
-    RefinedTransitiveClosure(@NonNull RefineCluster<C, T> refineCluster,
-            Map<I, Cluster<C, T>> oldClusterIndex, TransitiveClosure<C, T, I> closure,
-            @NonNull Function<? super T, ? extends I> idExtractor, ClusterSplitHandler splitHandler) {
+    RefinedTransitiveClosure(final @NonNull RefineCluster<C, T> refineCluster,
+            final Map<I, Cluster<C, T>> oldClusterIndex, final TransitiveClosure<C, T, I> closure,
+            final @NonNull Function<? super T, ? extends I> idExtractor, final ClusterSplitHandler splitHandler) {
         this.refineCluster = refineCluster;
         this.oldClusterIndex = oldClusterIndex != null ? oldClusterIndex : new HashMap<>();
         this.closure = closure != null ? closure
@@ -67,13 +91,14 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
     }
 
     @Override
-    public @NonNull Iterable<Cluster<C, T>> cluster(
-            @NonNull final Iterable<ClassifiedCandidate<T>> classifiedCandidates) {
-        final @NonNull Iterable<Cluster<C, T>> transitiveClosure = this.closure.cluster(classifiedCandidates);
-        final List<Cluster<C, T>> refinedClusters = this.refineCluster.refine(transitiveClosure, classifiedCandidates);
+    public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
+        final List<ClassifiedCandidate<T>> materializedCandidates = classifiedCandidates.collect(Collectors.toList());
+        final @NonNull Stream<Cluster<C, T>> transitiveClosure = this.closure.cluster(materializedCandidates.stream());
+        final Stream<Cluster<C, T>> refinedClusters =
+                this.refineCluster.refine(transitiveClosure, materializedCandidates.stream());
 
         final Collection<Cluster<C, T>> changedClusters = new ArrayList<>();
-        for (final Cluster<C, T> refinedCluster : refinedClusters) {
+        refinedClusters.forEach(refinedCluster -> {
             for (final T element : refinedCluster.getElements()) {
                 final I id = this.idExtractor.apply(element);
                 final Cluster<C, T> oldCluster = this.oldClusterIndex.put(id, refinedCluster);
@@ -81,15 +106,14 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
                     changedClusters.add(refinedCluster);
                 }
             }
-        }
+        });
 
         // return the changed clusters but remove multiple occurences of the same cluster
         return changedClusters.stream()
                 .collect(Collectors.groupingBy(this::getClusterId))
                 .values()
                 .stream()
-                .map(clusters -> clusters.get(0))
-                .collect(Collectors.toList());
+                .map(clusters -> clusters.get(0));
     }
 
     private I getClusterId(final Cluster<C, ? extends T> cluster) {

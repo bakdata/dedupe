@@ -31,12 +31,13 @@ import com.bakdata.dedupe.classifier.Classifier;
 import com.bakdata.dedupe.clustering.Cluster;
 import com.bakdata.dedupe.clustering.Clustering;
 import com.bakdata.dedupe.duplicate_detection.PossibleDuplicateHandler;
-import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
+
 
 /**
  * A pair-based duplicate detection algorithm, which
@@ -72,22 +73,20 @@ public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> imple
      * A callback for {@link Classification#POSSIBLE_DUPLICATE}s.
      */
     @Builder.Default
-    PossibleDuplicateHandler<T> possibleDuplicateHandler = PossibleDuplicateHandler.ignore();
+    PossibleDuplicateHandler<T> possibleDuplicateHandler = PossibleDuplicateHandler.keep();
 
     @Override
-    public @NonNull Collection<Cluster<C, T>> detectDuplicates(final @NonNull T newRecord) {
-        final Iterable<Candidate<T>> candidates = this.candidateSelection.selectCandidates(newRecord);
-        final var classified = StreamSupport.stream(candidates.spliterator(), false)
+    public @NonNull Stream<Cluster<C, T>> detectDuplicates(final @NonNull T newRecord) {
+        final Stream<Candidate<T>> candidates = this.candidateSelection.selectCandidates(newRecord);
+        final List<ClassifiedCandidate<T>> classified = candidates
                 .map(candidate -> new ClassifiedCandidate<>(candidate, this.classifier.classify(candidate)))
                 .collect(Collectors.toList());
 
-        final var handledPairs = classified.stream()
+        final Stream<@NonNull ClassifiedCandidate<T>> handledPairs = classified.stream()
                 .map(cc -> cc.getClassificationResult().getClassification() == Classification.POSSIBLE_DUPLICATE ?
                         this.possibleDuplicateHandler.possibleDuplicateFound(cc) :
-                        cc)
-                .collect(Collectors.toList());
+                        cc);
 
-        return StreamSupport.stream(this.clustering.cluster(handledPairs).spliterator(), false)
-                .collect(Collectors.toList());
+        return this.clustering.cluster(handledPairs);
     }
 }

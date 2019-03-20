@@ -24,34 +24,59 @@
 
 package com.bakdata.dedupe.similarity;
 
+import com.bakdata.dedupe.matching.BipartiteMatcher;
 import java.util.Collection;
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 
-@Value
-class MongeElkan<C extends Collection<? extends T>, T> implements CollectionSimilarityMeasure<C, T> {
-    private final SimilarityMeasure<T> pairMeasure;
-    private final int maxPositionDiff;
-    private final float cutoff;
 
-    @SuppressWarnings("unchecked")
-    private static <T, C extends Collection<? extends T>> List<T> ensureList(final C leftCollection) {
-        return leftCollection instanceof List ? (List<T>) leftCollection : List.copyOf(leftCollection);
-    }
+/**
+ * Monge-Elkan is a simple list-based similarity measure, where elements from the left are matched with elements from
+ * the right with the highest similarity within a certain index range.
+ * <p>It is simple in the regard that the same element on the right side can be matched multiple times to left
+ * elements.</p>
+ * <p>For non-repeating matching, consider {@link CommonSimilarityMeasures#matching(BipartiteMatcher,
+ * SimilarityMeasure)}.</p>
+ * <p>However, it is comparably fast, as only the similarities within the neighborhood are calculated. For a larger
+ * neighborhood, the matching approach is usually preferable.</p>
+ * <p>Monge-Elkan prefers the left side over the right side.</p>
+ * <p>Note that Monge-Elkan distance can be well sped up by using a threshold (e.g.,
+ * {@link SimilarityMeasure#cutoff(double)} or {@link SimilarityMeasure#scaleWithThreshold(double)}).</p>
+ *
+ * @param <E> the element type.
+ * @param <C> the collection type.
+ */
+@Value
+class MongeElkan<C extends Collection<? extends E>, E> implements CollectionSimilarityMeasure<C, E> {
+    /**
+     * The similarity measure to use to calculate the preferences and the overall similarity.
+     */
+    @NonNull SimilarityMeasure<E> pairMeasure;
+    /**
+     * The maximum index difference of the left list item and the right list item.
+     */
+    int maxPositionDiff;
+    /**
+     * The cutoff value, which is used to prematurely terminate the calculation.
+     */
+    @Getter(AccessLevel.PRIVATE)
+    double cutoff;
 
     @Override
-    public float calculateNonEmptyCollectionSimilarity(@NonNull final C leftCollection,
-            @NonNull final C rightCollection, @NonNull final SimilarityContext context) {
-        final List<T> leftList = ensureList(leftCollection);
-        final List<T> rightList = ensureList(rightCollection);
-        // when cutoff is .9 and |left| = 3, then on average each element has .1 buffer
+    public double calculateNonEmptyCollectionSimilarity(final @NonNull C leftCollection,
+            final @NonNull C rightCollection, final @NonNull SimilarityContext context) {
+        final List<E> leftList = List.copyOf(leftCollection);
+        final List<E> rightList = List.copyOf(rightCollection);
+        // consider a cutoff of .9 and |left| = 3, then on average each element has .1 buffer
         // as soon as the current sum + buffer < index, the cutoff threshold cannot be passed (buffer used up)
-        final float cutoffBuffer = (1 - this.cutoff) * leftCollection.size();
-        float sum = 0;
+        final double cutoffBuffer = (1 - this.cutoff) * leftCollection.size();
+        double sum = 0;
         for (int leftIndex = 0; leftIndex < leftCollection.size() && (cutoffBuffer + sum) >= leftIndex;
                 leftIndex++) {
-            float max = 0;
+            double max = 0;
             for (int rightIndex = Math.max(0, leftIndex - this.maxPositionDiff),
                     rightMax = Math.min(rightCollection.size(), leftIndex + this.maxPositionDiff);
                     max < 1.0 && rightIndex < rightMax; rightIndex++) {
@@ -64,7 +89,7 @@ class MongeElkan<C extends Collection<? extends T>, T> implements CollectionSimi
     }
 
     @Override
-    public SimilarityMeasure<C> cutoff(final float threshold) {
+    public SimilarityMeasure<C> cutoff(final double threshold) {
         return new MongeElkan<>(this.pairMeasure, this.maxPositionDiff, threshold);
     }
 }

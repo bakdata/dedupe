@@ -26,6 +26,7 @@ package com.bakdata.dedupe.similarity;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * Applies a {@link SimilarityMeasure} to transformed input values. In particular, the same {@link ValueTransformation}
  * is applied to the left and right input.
@@ -38,15 +39,15 @@ public class TransformingSimilarityMeasure<R, T> implements SimilarityMeasure<T>
     /**
      * The transformation that is applied to both inputs before calculating the similarity.
      */
-    private final @NonNull ValueTransformation<T, ? extends R> transformation;
+    @NonNull ValueTransformation<T, ? extends R> transformation;
     /**
      * The similarity measure to apply on the transformed values.
      */
-    private final @NonNull SimilarityMeasure<R> measure;
+    @NonNull SimilarityMeasure<R> measure;
 
     @Override
-    public float calculateSimilarity(@NonNull final T left, @NonNull final T right,
-            @NonNull final SimilarityContext context) {
+    public double getNonNullSimilarity(final @NonNull T left, final @NonNull T right,
+            final @NonNull SimilarityContext context) {
         return context.safeExecute(() -> {
             R leftElement = this.transformation.transform(left, context);
             R rightElement = this.transformation.transform(right, context);
@@ -55,7 +56,7 @@ public class TransformingSimilarityMeasure<R, T> implements SimilarityMeasure<T>
     }
 
     @Override
-    public @NonNull SimilarityMeasure<T> cutoff(final float threshold) {
+    public @NonNull SimilarityMeasure<T> cutoff(final double threshold) {
         return new TransformingSimilarityMeasure<>(this.transformation, this.measure.cutoff(threshold));
     }
 }

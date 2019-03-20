@@ -26,63 +26,64 @@ package com.bakdata.util;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
+
+/**
+ * A wrapper around {@link Class} that can be used to extract callable lambdas to methods and fields.
+ * <p>Currently, used in the DSL around {@link com.bakdata.dedupe.fusion.ConflictResolution}.</p>
+ *
+ * @param <T> the type of the class.
+ */
 @Value
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class FunctionalClass<R> {
+@RequiredArgsConstructor(staticName = "of")
+public class FunctionalClass<T> {
+    /**
+     * The wrapped class.
+     */
     @NonNull
-    Class<R> clazz;
+    Class<T> clazz;
 
-    public static <T> FunctionalClass<T> from(final Class<T> clazz) {
-        return new FunctionalClass<>(clazz);
-    }
-
-    public <F> Field<R, F> field(final String name) {
+    /**
+     * Returns the functional field with the given name. The field can be used to newInstance a getter or setter.
+     *
+     * @param name the name of the field.
+     * @param <F> the type of the field.
+     * @return the field.
+     * @throws IllegalArgumentException if a field with the given name does not exist.
+     */
+    public <F> @NonNull FunctionalProperty<T, F> field(final @NonNull String name) {
         final PropertyDescriptor descriptor = this.getPropertyDescriptor(name);
-        return new Field<>(descriptor);
+        return new FunctionalProperty<>(descriptor);
     }
 
-    public Supplier<R> getConstructor() {
+    /**
+     * Returns the no-arg constructor as a {@link Supplier}.
+     *
+     * @return a supplier around the no-arg constructor.
+     * @throws IllegalStateException if no such constructor exists.
+     */
+    public Supplier<T> getConstructor() {
         try {
-            final Constructor<R> ctor = this.clazz.getDeclaredConstructor();
-            return new FunctionalConstructor<>(ctor)::invoke;
-        } catch (final NoSuchMethodException e) {
+            final Constructor<T> ctor = this.clazz.getDeclaredConstructor();
+            return new FunctionalConstructor<>(ctor)::newInstance;
+        } catch (final @NonNull NoSuchMethodException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    private PropertyDescriptor getPropertyDescriptor(final String name) {
+    /**
+     * Finds the property descriptor with the given name.
+     */
+    private PropertyDescriptor getPropertyDescriptor(final @NonNull String name) {
         try {
             return new PropertyDescriptor(name, this.clazz);
-        } catch (final IntrospectionException e) {
-            throw new IllegalArgumentException(e);
+        } catch (final @NonNull IntrospectionException e) {
+            throw new IllegalArgumentException("Unknown property: " + name, e);
         }
     }
 
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    @Value
-    public static final class Field<R, F> {
-
-        @NonNull
-        PropertyDescriptor descriptor;
-
-        public Function<R, F> getGetter() {
-            final Method getter = this.descriptor.getReadMethod();
-            return new FunctionalMethod<>(getter)::invoke;
-        }
-
-        public BiConsumer<R, F> getSetter() {
-            final Method setter = this.descriptor.getWriteMethod();
-            return new FunctionalMethod<>(setter)::invoke;
-        }
-
-    }
 }

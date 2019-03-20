@@ -27,6 +27,7 @@ import static com.bakdata.dedupe.fusion.CommonConflictResolutions.assumeEqualVal
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.latest;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.longest;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.max;
+import static com.bakdata.dedupe.fusion.CommonConflictResolutions.merge;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.min;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.union;
 import static com.bakdata.dedupe.fusion.CommonConflictResolutions.vote;
@@ -59,8 +60,9 @@ import org.junit.jupiter.api.Test;
 class ConflictResolutionsTest {
 
     private static MergeBuilder<Person> create() {
-        return ConflictResolutions.merge(Person::new);
+        return merge(Person::new);
     }
+
 
     private static AdditionalFieldMergeBuilder<String, Person> createWithId() {
         return create()
@@ -105,7 +107,7 @@ class ConflictResolutionsTest {
                 .birthDate(LocalDate.of(2017, Month.DECEMBER, 31))
                 .lastModified(LocalDateTime.MAX)
                 .build();
-        final Source source1 = new Source("source1", 1.0f);
+        final Source source1 = new Source("source1", 1.0d);
         final LocalDateTime dateTime = LocalDateTime.MIN;
         final Person person2 = Person.builder()
                 .id("id2")
@@ -115,7 +117,7 @@ class ConflictResolutionsTest {
                 .birthDate(LocalDate.of(2018, Month.JANUARY, 1))
                 .lastModified(LocalDateTime.MIN)
                 .build();
-        final Source source2 = new Source("source2", 2.0f);
+        final Source source2 = new Source("source2", 2.0d);
         final List<AnnotatedValue<Person>> values = List.of(
                 new AnnotatedValue<>(person1, source1, dateTime),
                 new AnnotatedValue<>(person2, source2, dateTime));
@@ -145,7 +147,7 @@ class ConflictResolutionsTest {
     @Test
     void testFieldFromField() {
         final FieldMergeBuilder<String, Person> field = create()
-                .field(FunctionalClass.from(Person.class).field("id"));
+                .field(FunctionalClass.of(Person.class).field("id"));
         testField(field);
     }
 
@@ -166,25 +168,30 @@ class ConflictResolutionsTest {
     @Test
     void testFieldFromNameWithoutGetter() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> ConflictResolutions.merge(PersonWithoutGetter::new).field("id"))
+                .isThrownBy(() -> merge(PersonWithoutGetter::new).field("id"))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: isId");
+                .withMessageContaining("Unknown property: id")
+                .satisfies(
+                        exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: isId"));
     }
 
     @Test
     void testFieldFromNameWithoutSetter() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> ConflictResolutions.merge(PersonWithoutSetter::new).field("id"))
+                .isThrownBy(() -> merge(PersonWithoutSetter::new).field("id"))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: setId");
+                .withMessageContaining("Unknown property: id")
+                .satisfies(
+                        exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: setId"));
     }
 
     @Test
     void testFieldFromWrongField() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> create().field(FunctionalClass.from(Person.class).field("i")))
+                .isThrownBy(() -> create().field(FunctionalClass.of(Person.class).field("i")))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: isI");
+                .withMessageContaining("Unknown property: i")
+                .satisfies(exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: isI"));
     }
 
     @Test
@@ -192,33 +199,34 @@ class ConflictResolutionsTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> create().field("i"))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: isI");
+                .withMessageContaining("Unknown property: i")
+                .satisfies(exception -> assertThat(exception.getCause()).hasMessageContaining("Method not found: isI"));
     }
 
     @Test
     void testFromClass() {
-        final MergeBuilder<Person> merge = ConflictResolutions.merge(Person.class);
+        final MergeBuilder<Person> merge = merge(Person.class);
         testMerge(merge);
     }
 
     @Test
     void testFromClassWithoutDefaultConstructor() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> ConflictResolutions.merge(PersonWithoutDefaultConstructor.class))
+                .isThrownBy(() -> merge(PersonWithoutDefaultConstructor.class))
                 .withCauseInstanceOf(NoSuchMethodException.class)
                 .withMessageContaining(PersonWithoutDefaultConstructor.class.getName() + ".<init>()");
     }
 
     @Test
     void testFromConstructor() {
-        final MergeBuilder<Person> merge = ConflictResolutions.merge(Person::new);
+        final MergeBuilder<Person> merge = merge(Person::new);
         testMerge(merge);
     }
 
     @Test
     void testNestedFieldFromField() {
         final FieldMergeBuilder<String, Person> nestedField = createWithId()
-                .field(FunctionalClass.from(Person.class).field("firstName"));
+                .field(FunctionalClass.of(Person.class).field("firstName"));
         testNestedField(nestedField);
     }
 
@@ -239,9 +247,11 @@ class ConflictResolutionsTest {
     @Test
     void testNestedFieldFromWrongField() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> createWithId().field(FunctionalClass.from(Person.class).field("fistName")))
+                .isThrownBy(() -> createWithId().field(FunctionalClass.of(Person.class).field("fistName")))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: isFistName");
+                .withMessageContaining("Unknown property: fistName")
+                .satisfies(exception -> assertThat(exception.getCause())
+                        .hasMessageContaining("Method not found: isFistName"));
     }
 
     @Test
@@ -249,7 +259,9 @@ class ConflictResolutionsTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> createWithId().field("fistName"))
                 .withCauseInstanceOf(IntrospectionException.class)
-                .withMessageContaining("Method not found: isFistName");
+                .withMessageContaining("Unknown property: fistName")
+                .satisfies(exception -> assertThat(exception.getCause())
+                        .hasMessageContaining("Method not found: isFistName"));
     }
 
     private enum Gender {
@@ -273,6 +285,7 @@ class ConflictResolutionsTest {
         String originalId;
         LocalDateTime lastModified;
         // fusion information
+
         @Builder.Default
         Set<String> fusedIds = new HashSet<>();
     }

@@ -29,41 +29,64 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
 
+
+/**
+ * A fusion approach based on conflict resolution. A conflict are two or more different values that need to be merged
+ * into a single value for the fused representation.
+ *
+ * @param <R> the type of the record.
+ */
 @Value
 @Builder
-public class ConflictResolutionFusion<T> implements Fusion<T> {
+public class ConflictResolutionFusion<R> implements Fusion<R> {
+    /**
+     * Finds the name of the source, which can then be used to retrieve the respective source from {@link
+     * #getSources()}.
+     */
     @NonNull
-    Function<T, String> sourceExtractor;
+    Function<@NonNull R, String> sourceExtractor;
+    /**
+     * A function that extract the last modification timestamp of a record. Useful for time-based resolutions.
+     */
     @NonNull
-    Function<T, LocalDateTime> lastModifiedExtractor;
+    Function<@NonNull R, @NonNull LocalDateTime> lastModifiedExtractor;
+    /**
+     * The list of possible sources. Superfluous sources are ignored.
+     */
     @Singular
-    List<Source> sources;
-    ConflictResolution<T, T> rootResolution;
-    @Getter(lazy = true)
-    Map<String, Source> sourceByName = this.sources.stream().collect(Collectors.toMap(Source::getName, s -> s));
+    @NonNull List<@NonNull Source> sources;
+    /**
+     * The root resolution function; usually, {@link Merge}.
+     */
+    @NonNull ConflictResolution<R, R> rootResolution;
+
+    @Getter(value = AccessLevel.PRIVATE, lazy = true)
+    @NonNull Map<@NonNull String, @NonNull Source> sourceByName =
+            this.sources.stream().collect(Collectors.toMap(Source::getName, s -> s));
 
     @Override
-    public FusedValue<T> fuse(final Cluster<?, T> cluster) {
+    public FusedValue<R> fuse(final Cluster<?, R> cluster) {
         if (cluster.size() < 2) {
             return new FusedValue<>(cluster.get(0), cluster, List.of());
         }
-        final List<AnnotatedValue<T>> conflictingValues = cluster.getElements().stream()
+        final List<AnnotatedValue<R>> conflictingValues = cluster.getElements().stream()
                 .map(e -> new AnnotatedValue<>(e, this.getSource(e), this.lastModifiedExtractor.apply(e)))
                 .collect(Collectors.toList());
         final FusionContext context = new FusionContext();
-        final T resolvedValue =
+        final R resolvedValue =
                 context.safeExecute(() -> this.rootResolution.resolve(conflictingValues, context)).flatMap(r -> r)
                         .orElseThrow(() -> this.createException(conflictingValues, context));
         return new FusedValue<>(resolvedValue, cluster, context.getExceptions());
     }
 
-    private FusionException createException(final List<AnnotatedValue<T>> conflictingValues,
+    private @NonNull FusionException createException(final List<AnnotatedValue<R>> conflictingValues,
             final FusionContext context) {
         final FusionException fusionException =
                 new FusionException("Could not resolve conflict in " + conflictingValues,
@@ -72,7 +95,11 @@ public class ConflictResolutionFusion<T> implements Fusion<T> {
         return fusionException;
     }
 
-    private Source getSource(final T e) {
-        return this.getSourceByName().computeIfAbsent(this.sourceExtractor.apply(e), name -> new Source(name, 1));
+    private Source getSource(final R e) {
+        final String source = this.sourceExtractor.apply(e);
+        if (source == null) {
+            return this.getSourceByName().computeIfAbsent(Source.Unknown.getName(), name -> Source.Unknown);
+        }
+        return this.getSourceByName().computeIfAbsent(source, name -> new Source(name, 1));
     }
 }

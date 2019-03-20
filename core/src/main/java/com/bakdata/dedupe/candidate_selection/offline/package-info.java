@@ -22,32 +22,9 @@
  * SOFTWARE.
  */
 
-package com.bakdata.dedupe.similarity;
-
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.text.similarity.SimilarityScore;
-
 /**
- * Used to translate {@link SimilarityScore} that are actually distance functions to similarity scores
+ * Interfaces and implementations for offline candidate selections that choose promising pairs to limit search space for
+ * duplicates in a materialized dataset.
  */
-@RequiredArgsConstructor
-public class DistanceSimilarityMeasure<T extends CharSequence> implements SimilarityMeasure<T> {
-    private final SimilarityScore<? extends Number> score;
+package com.bakdata.dedupe.candidate_selection.offline;
 
-    @Override
-    public float getSimilarity(final CharSequence left, final CharSequence right,
-            @NonNull final SimilarityContext context) {
-        return 0;
-    }
-
-    @Override
-    public float calculateSimilarity(final @NonNull CharSequence left, final @NonNull CharSequence right,
-            final @NonNull SimilarityContext context) {
-        final float distance = this.score.apply(left, right).floatValue();
-        if (distance == -1) {
-            return 0;
-        }
-        return 1.0f - distance / CommonSimilarityMeasures.getMaxLen(left, right);
-    }
-}

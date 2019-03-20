@@ -38,8 +38,8 @@ public enum Classification {
     DUPLICATE(false),
     /**
      * Possible duplicate may come from a high uncertainty of the {@link Classifier}. For example, if the classifier
-     * uses a {@link com.bakdata.dedupe.similarity.SimilarityMeasure} and a threshold, the classifier might have
-     * two thresholds:
+     * uses a {@link com.bakdata.dedupe.similarity.SimilarityMeasure} and a threshold, the classifier might have two
+     * thresholds:
      * <ul>
      * <li>an upper threshold which defines when a pair is a {@link #DUPLICATE}, and</li>
      * <li>a lower bound when defines all pairs as {@link #NON_DUPLICATE}.</li>

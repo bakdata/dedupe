@@ -27,6 +27,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+
 /**
  * The classification of a {@link com.bakdata.dedupe.candidate_selection.Candidate} with additional information.
  */
@@ -44,10 +45,10 @@ public class ClassificationResult {
      * <p>The general recommendation is to have confidence in [0; 1], but it should not be confused with a proper
      * mathematical probability.</p>
      */
-    float confidence;
+    double confidence;
     /**
-     * Additional explanation for humans, such as the similarity and threshold (0.933 >= 0.9) or the name of a rule that
-     * triggered.
+     * Additional explanation for humans, such as the similarity and threshold ({@literal 0.933 >= 0.9}) or the name of
+     * a rule that triggered.
      */
     @Builder.Default
     @NonNull

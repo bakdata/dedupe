@@ -27,6 +27,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import lombok.NonNull;
 
+/**
+ * A callback that allows incomplete fusions to be treated either with direct repair algorithms or through side-channel
+ * means (a.k.a ignore for now and repair asynchronously with the help of domain experts).
+ */
 @FunctionalInterface
 public interface IncompleteFusionHandler<T> extends Function<FusedValue<T>, Optional<FusedValue<T>>> {
     static <T> @NonNull IncompleteFusionHandler<T> dontFuse() {

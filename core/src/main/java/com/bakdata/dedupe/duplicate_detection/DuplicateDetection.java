@@ -25,11 +25,13 @@
 package com.bakdata.dedupe.duplicate_detection;
 
 import com.bakdata.dedupe.clustering.Cluster;
+import com.bakdata.util.StreamUtil;
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 import lombok.NonNull;
+
 
 /**
  * A duplicate detection algorithm processes a dataset of records and returns the distinct {@link Cluster}s.
@@ -59,7 +61,7 @@ public interface DuplicateDetection<C extends Comparable<C>, T> {
      * @param records the records of which the duplicates should be detected.
      * @return the duplicates with the above mentioned limitation for online algorithms.
      */
-    @NonNull Iterable<Cluster<C, T>> detectDuplicates(@NonNull Iterable<? extends T> records);
+    @NonNull Stream<Cluster<C, T>> detectDuplicates(@NonNull Stream<? extends T> records);
 
     /**
      * Finds all duplicates in the dataset.
@@ -69,8 +71,8 @@ public interface DuplicateDetection<C extends Comparable<C>, T> {
      * @param records the records of which the duplicates should be detected.
      * @return all duplicates of the dataset.
      */
-    default @NonNull Collection<Cluster<C, T>> materializeDuplicates(@NonNull Iterable<? extends T> records) {
-        return StreamSupport.stream(detectDuplicates(records).spliterator(), false)
+    default @NonNull Collection<Cluster<C, T>> materializeDuplicates(final @NonNull Iterable<? extends T> records) {
+        return this.detectDuplicates(StreamUtil.stream(records))
                 .collect(Collectors.toMap(Cluster::getId, Function.identity()))
                 .values();
     }

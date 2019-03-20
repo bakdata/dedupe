@@ -21,27 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.bakdata.dedupe.fusion;
 
-import static com.bakdata.util.ObjectUtils.isNonEmpty;
+/**
+ * Full online deduplication for streaming data.
+ */
+package com.bakdata.dedupe.deduplication.online;
 
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import lombok.Value;
-
-@Value
-public class ResolutionPath<T, R> implements ConflictResolution<T, R> {
-    Function<T, R> extractor;
-    ConflictResolution<R, R> resolution;
-
-    @Override
-    public List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> annotatedValues,
-            final FusionContext context) {
-        final List<AnnotatedValue<R>> fieldValues = annotatedValues.stream()
-                .map(ar -> ar.withValue(this.extractor.apply(ar.getValue())))
-                .filter(ar -> isNonEmpty(ar.getValue()))
-                .collect(Collectors.toList());
-        return this.resolution.resolvePartially(fieldValues, context);
-    }
-}

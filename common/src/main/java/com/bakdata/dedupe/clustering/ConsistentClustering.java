@@ -26,17 +26,18 @@ package com.bakdata.dedupe.clustering;
 import com.bakdata.dedupe.candidate_selection.Candidate;
 import com.bakdata.dedupe.candidate_selection.online.OnlineCandidate;
 import com.bakdata.dedupe.classifier.ClassifiedCandidate;
-import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
+
 
 /**
  * Wraps another clustering and keeps clusters together, when the wrapped clustering would split it.<br> Example:
@@ -46,7 +47,7 @@ import lombok.Value;
  * <p>
  * This clustering is similar to {@link TransitiveClosure} but allows the wrapped clustering to split temporary
  * (=not-returned) clusters. Thus, in the example above, we have the following two situations: - If A1-B and A2-B would
- * be passed in the same invocation of {@link #cluster(Iterable)}}, only cluster [A2, B] would be returned. - If A-B is
+ * be passed in the same invocation of {@link #cluster(Stream)}, only cluster [A2, B] would be returned. - If A-B is
  * passed in a first invocation, this invocation returns [A1, B]. The following invocation with A2-B would then return
  * [A1, A2, B].
  * </p>
@@ -58,26 +59,33 @@ import lombok.Value;
 @Builder
 public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparable<? super I>>
         implements Clustering<C, T> {
-    @NonNull
-    Clustering<C, T> clustering;
-    Function<T, I> idExtractor;
-    @Getter(lazy = true, value = AccessLevel.PRIVATE)
-    TransitiveClosure<C, T, I> internalClosure = TransitiveClosure.<C, T, I>builder()
+    /**
+     * The wrapped clustering.
+     */
+    @NonNull Clustering<C, T> clustering;
+    /**
+     * A function to extract the id of a record for efficient, internal data structures.
+     */
+    @NonNull Function<T, I> idExtractor;
+    /**
+     * An internal transitive closure over all past clusterings.
+     */
+    @Getter(value = AccessLevel.PRIVATE, lazy = true)
+    @NonNull TransitiveClosure<C, T, I> internalClosure = TransitiveClosure.<C, T, I>builder()
             .idExtractor(this.idExtractor)
             .clusterIdGenerator(this.clustering.getClusterIdGenerator())
             .build();
 
     @Override
-    public @NonNull Iterable<Cluster<C, T>> cluster(
-            @NonNull final Iterable<ClassifiedCandidate<T>> classifiedCandidates) {
+    public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
         final @NonNull List<Cluster<C, T>> clusters =
-                Lists.newArrayList(this.clustering.cluster(classifiedCandidates));
+                this.clustering.cluster(classifiedCandidates).collect(Collectors.toList());
         if (clusters.isEmpty()) {
-            return clusters;
+            return clusters.stream();
         }
-        // the returned cluster is not affected from this clustering
+        // the returned cluster is not affected of this clustering
         if (clusters.size() == 1 && this.noRecordInIndex(clusters)) {
-            return clusters;
+            return clusters.stream();
         }
         final T firstElement = clusters.get(0).get(0);
         final List<Candidate<T>> candidates = clusters.stream()
@@ -89,10 +97,10 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
             throw new IllegalStateException("Expected exactly one transitive cluster");
         }
         if (clusters.size() == 1 && clusters.get(0).equals(transitiveClusters.get(0))) {
-            // previously split cluster have been remerged, so we can remove it from our internal closure
+            // previously split cluster have been remerged, so we can remove it of our internal closure
             this.getInternalClosure().removeCluster(clusters.get(0));
         }
-        return transitiveClusters;
+        return transitiveClusters.stream();
     }
 
     @Override
@@ -100,7 +108,7 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
         return this.clustering.getClusterIdGenerator();
     }
 
-    private boolean noRecordInIndex(final Collection<Cluster<C, T>> clusters) {
+    private boolean noRecordInIndex(final Collection<? extends Cluster<C, T>> clusters) {
         final Map<I, Cluster<C, T>> clusterIndex = this.getInternalClosure().getClusterIndex();
         return clusters.stream().flatMap(cluster -> cluster.getElements().stream())
                 .allMatch(record -> clusterIndex.get(this.idExtractor.apply(record)) == null);

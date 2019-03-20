@@ -27,23 +27,25 @@ package com.bakdata.dedupe.similarity;
 import java.util.Collection;
 import lombok.NonNull;
 
+
 /**
  * A {@link SimilarityMeasure} that is defined over {@link Collection}s.
  *
- * @param <T> the element type.
+ * @param <E> the element type.
  * @param <C> the collection type.
  */
-public interface CollectionSimilarityMeasure<C extends Collection<? extends T>, T> extends SimilarityMeasure<C> {
+@FunctionalInterface
+public interface CollectionSimilarityMeasure<C extends Collection<? extends E>, E> extends SimilarityMeasure<C> {
     @Override
-    default float calculateSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
-            @NonNull SimilarityContext context) {
+    default double getNonNullSimilarity(final @NonNull C leftCollection, final @NonNull C rightCollection,
+            final @NonNull SimilarityContext context) {
         if (leftCollection.isEmpty() && rightCollection.isEmpty()) {
             return 1;
         }
         if (leftCollection.isEmpty() || rightCollection.isEmpty()) {
             return 0;
         }
-        return calculateNonEmptyCollectionSimilarity(leftCollection, rightCollection, context);
+        return this.calculateNonEmptyCollectionSimilarity(leftCollection, rightCollection, context);
     }
 
     /**
@@ -55,6 +57,6 @@ public interface CollectionSimilarityMeasure<C extends Collection<? extends T>, 
      * @return the similarity [0; 1] or {@link #unknown()} if no comparison can be performed (for example if
      * leftCollection or rightCollection are null).
      */
-    float calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
+    double calculateNonEmptyCollectionSimilarity(@NonNull C leftCollection, @NonNull C rightCollection,
             @NonNull SimilarityContext context);
 }

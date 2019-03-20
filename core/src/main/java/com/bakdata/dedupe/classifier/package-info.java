@@ -21,14 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.bakdata.util;
 
-import lombok.experimental.UtilityClass;
+/**
+ * Interfaces, data structures, and implementations for the classification of {@link
+ * com.bakdata.dedupe.candidate_selection.Candidate} pairs into duplicates and non-duplicates.
+ */
+package com.bakdata.dedupe.classifier;
 
-@UtilityClass
-public class ObjectUtils {
-
-    public static boolean isNonEmpty(final Object value) {
-        return value != null && !"".equals(value);
-    }
-}

@@ -25,13 +25,24 @@ package com.bakdata.dedupe.fusion;
 
 import java.util.List;
 import java.util.Optional;
+import lombok.NonNull;
 
+
+/**
+ * A conflict resolution function that is guaranteed to produce a single value.
+ * <p>For example, a resolution may simply retain all values in a list and thus will always resolve the conflict.</p>
+ *
+ * @param <I> the input type of the value.
+ * @param <O> the output type of the value.
+ */
 @FunctionalInterface
-public interface TerminalConflictResolution<T, R> extends ConflictResolution<T, R> {
-    default List<AnnotatedValue<R>> resolvePartially(final List<AnnotatedValue<T>> values,
-            final FusionContext context) {
+public interface TerminalConflictResolution<I, O> extends ConflictResolution<I, O> {
+    @Override
+    default @NonNull List<@NonNull AnnotatedValue<O>> resolveNonEmptyPartially(
+            final @NonNull List<@NonNull AnnotatedValue<I>> values, final @NonNull FusionContext context) {
+
         return this.resolveFully(values, context).map(List::of).orElse(List.of());
     }
 
-    Optional<AnnotatedValue<R>> resolveFully(List<AnnotatedValue<T>> values, FusionContext context);
+    @NonNull Optional<AnnotatedValue<O>> resolveFully(List<AnnotatedValue<I>> values, FusionContext context);
 }

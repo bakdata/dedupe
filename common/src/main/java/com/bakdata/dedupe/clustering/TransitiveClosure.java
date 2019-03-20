@@ -34,32 +34,48 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+
+/**
+ * An amortized linear transitive closure implementation over the number of pairs.
+ *
+ * @param <C> the type of the cluster id.
+ * @param <T> the type of the record.
+ * @param <I> the type of the record id.
+ */
 @Value
 @Builder
 public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>>
         implements Clustering<C, T> {
+    /**
+     * Extracts the id of the record. Used for {@link #clusterIndex}.
+     */
     @NonNull
     Function<? super T, ? extends I> idExtractor;
+    /**
+     * A function to generate the id for newly formed clusters.
+     */
     @NonNull
     Function<? super Iterable<? extends T>, C> clusterIdGenerator;
+    /**
+     * A backing map for old clusters. Defaults to an in-memory map if null during construction.
+     */
     @NonNull
     @Builder.Default
     Map<I, Cluster<C, T>> clusterIndex = new HashMap<>();
 
     @Override
-    public @NonNull Iterable<Cluster<C, T>> cluster(
-            @NonNull final Iterable<ClassifiedCandidate<T>> classifiedCandidates) {
-        final List<Candidate<T>> duplicates = StreamSupport.stream(classifiedCandidates.spliterator(), false)
+    public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
+        final List<Candidate<T>> duplicates = classifiedCandidates
                 .filter(classifiedCandidate -> classifiedCandidate.getClassificationResult().getClassification()
                         == Classification.DUPLICATE)
                 .map(ClassifiedCandidate::getCandidate)
                 .collect(Collectors.toList());
-        return this.clusterDuplicates(duplicates);
+        return this.clusterDuplicates(duplicates).stream();
     }
 
     public List<Cluster<C, T>> clusterDuplicates(final Iterable<? extends Candidate<T>> duplicates) {
@@ -67,8 +83,8 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
 
         // apply in-memory transitive closure
         for (final Candidate<T> candidate : duplicates) {
-            final var leftCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord1()));
-            final var rightCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord2()));
+            final Cluster<C, T> leftCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord1()));
+            final Cluster<C, T> rightCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord2()));
             if (leftCluster == null && rightCluster == null) {
                 final List<T> elements = Lists.newArrayList(candidate.getRecord1(), candidate.getRecord2());
                 final Cluster<C, T> newCluster = new Cluster<>(this.clusterIdGenerator.apply(elements), elements);

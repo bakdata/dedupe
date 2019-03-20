@@ -21,20 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.bakdata.dedupe.fusion;
 
-import java.util.function.Supplier;
-import lombok.experimental.UtilityClass;
+/**
+ * Interfaces and implementations for online candidate selections that choose promising pairs to limit search space for
+ * duplicates in a streaming dataset.
+ */
+package com.bakdata.dedupe.candidate_selection.online;
 
-@UtilityClass
-public class ConflictResolutions {
-
-    public static <T> Merge.MergeBuilder<T> merge(final Supplier<T> ctor) {
-        return Merge.builder(ctor);
-    }
-
-    public static <T> Merge.MergeBuilder<T> merge(final Class<T> clazz) {
-        return Merge.builder(clazz);
-    }
-
-}
