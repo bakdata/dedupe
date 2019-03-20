@@ -23,7 +23,7 @@
  */
 package com.bakdata.dedupe.person;
 
-import com.bakdata.dedupe.deduplication.online.FusingOnlineDuplicateDetection;
+import com.bakdata.dedupe.deduplication.online.FusingOnlineDeduplication;
 import com.bakdata.dedupe.deduplication.online.OnlineDeduplication;
 import com.bakdata.dedupe.duplicate_detection.PossibleDuplicateHandler;
 import com.bakdata.dedupe.fusion.IncompleteFusionHandler;
@@ -37,7 +37,7 @@ public class PersonDeduplication implements OnlineDeduplication<Person> {
 
     public PersonDeduplication(final PossibleDuplicateHandler<Person> possibleDuplicateHandler,
             final IncompleteFusionHandler<Person> incompleteFusionHandler) {
-        this.deduplication = FusingOnlineDuplicateDetection.<Long, Person>builder()
+        this.deduplication = FusingOnlineDeduplication.<Long, Person>builder()
                 .duplicateDetection(new PersonDuplicateDetection(possibleDuplicateHandler))
                 .fusion(new PersonFusion())
                 .incompleteFusionHandler(incompleteFusionHandler)

@@ -40,17 +40,18 @@ For other build tools or versions, refer to the [latest version in MvnRepository
 
 # Using the framework #
 
+For a reference, please refer to the [full javadoc](https://bakdata.github.io/dedupe/javadoc/). 
+
 In this section, we cover the different configuration stages. Ultimately, we want to receive a *deduplication* instance where we can feed in the records and receive the results. In this section, we configure an online, pair-based deduplication. The runnable code can be found in [examples](examples).
 
-A pair-base deduplication consists of a *candidate selection* that chooses promising pairs to limit search space, a *classifier* that labels pairs as duplicate or non-duplicate, *clustering* that consolidates all pairs into plausible clusters, and *fusion* that provides a consisted representation of the found clusters.
+A pair-base deduplication consists of a [*duplicate detection*](#Duplicate-detection) that finds duplicate clusters and a [*fusion*](#Fusion) that provides a consisted representation of the found clusters.
 ```java
 // create deduplication, parts are explained later
-OnlineDeduplication<Person> deduplication = OnlinePairBasedDeduplication.<Person>builder()
-    .candidateSelection(personCandidateSelection)
-    .classifier(personClassifier)
-    .clustering(personClustering)
-    .fusion(personFusion)
-    .build();
+OnlineDeduplication<Person> deduplication = 
+        FusingOnlineDuplicateDetection.<Long, Person>builder()
+                .duplicateDetection(new PersonDuplicateDetection())
+                .fusion(new PersonFusion())
+                .build();
 
 // apply it to a list of customers
 List<Person> customers = ...;
@@ -58,6 +59,19 @@ for(Person customer: customers) {
     final Person fusedPerson = deduplication.deduplicate(customer);    
     // store fused person
 }
+```
+
+## Duplicate detection ##
+
+The pair-base duplicate detection in turn has a [*candidate selection*](#Candidate-selection) that chooses promising pairs to limit search space, a [*classifier*](#Candidate-classification) that labels pairs as duplicate or non-duplicate, and [*clustering*](#Clustering) that consolidates all pairs into plausible clusters.
+
+```java
+OnlineDuplicateDetection<Long, Person> duplicateDetection = 
+        OnlinePairBasedDuplicateDetection.<Long, Person>builder()
+                .classifier(new PersonClassifier())
+                .candidateSelection(new PersonCandidateSelection())
+                .clustering(new PersonClustering())
+                .build();
 ```
 
 ## Candidate selection ##
@@ -89,7 +103,7 @@ The chosen sorted neighborhood uses sorting keys to sort the input and compare a
 
 The sorting keys can be of arbitrary, comparable data type. The framework provides *CompositeValue* when the sorting key consists of several parts (which is recommended to resolve ties in the first part of the key). The normalizeName function is a custom UDF specific for this domain.
 
-## Candidate classificationResult ##
+## Candidate classification ##
 
 The output of the candidate selection is a list of candidate pairs, which is fed into the candidate classificationResult.
 
@@ -119,20 +133,21 @@ The next rule performs a weighted average of 3 different feature similarities. I
 To consolidate a list of duplicate pairs into a consistent cluster, an additional clustering needs to be performed. Often times, only transitive closure is applied, which is also available in this framework. However, for high precision use cases, transitive closure is not enough.
 
 ```java
-RefineCluster<Long, Person, String> refineCluster = RefineCluster.<Long, Person, String>builder()
-    .classifier(personClassifier)
-    .clusterIdGenerator(Cluster.longGenerator())
-    .build();
+RefineCluster<Long, Person> refineCluster = RefineCluster.<Long, Person>builder()
+        .classifier(new PersonClassifier())
+        .clusterIdGenerator(ClusterIdGenerators.longGenerator())
+        .build();
 
 Clustering<Long, Person> refinedTransitiveClosure = RefinedTransitiveClosure.<Long, Person, String>builder()
-    .refineCluster(refineCluster)
-    .idExtractor(Person::getId)
-    .build();
+        .refineCluster(this.refineCluster)
+        .idExtractor(Person::getId)
+        .build();
 
-Clustering<Long, Person> personClustering = ConsistentClustering.<Long, Person, String>builder()
-    .clustering(refinedTransitiveClosure)
-    .idExtractor(Person::getId)
-    .build();
+@Delegate
+Clustering<Long, Person> clustering = ConsistentClustering.<Long, Person, String>builder()
+        .clustering(this.refinedTransitiveClosure)
+        .idExtractor(Person::getId)
+        .build();
 ```
 
 Here, we configure a *refining transitive closure* strategy that in particular checks for explicit negative classifications inside the transitive closure such that duplicate clusters are split into more plausible subclusters.
