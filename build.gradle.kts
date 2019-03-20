@@ -44,6 +44,19 @@ subprojects {
         targetCompatibility = org.gradle.api.JavaVersion.VERSION_11
     }
 
+    tasks.withType<Javadoc> {
+        options {
+            (this as StandardJavadocDocletOptions).apply {
+                addBooleanOption("html5", true)
+                stylesheetFile(File("${rootDir}/src/main/javadoc/assertj-javadoc.css"))
+                addBooleanOption("-allow-script-in-comments", true)
+                header("<script src=\"http://cdn.jsdelivr.net/highlight.js/8.6/highlight.min.js\"></script>")
+                footer("<script type=\"text/javascript\">\nhljs.initHighlightingOnLoad();\n</script>")
+                tags("apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:")
+            }
+        }
+    }
+
     dependencies {
         "testImplementation"("org.junit.jupiter:junit-jupiter-api:5.3.0")
         "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:5.3.0")

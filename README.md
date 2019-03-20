@@ -89,12 +89,12 @@ The chosen sorted neighborhood uses sorting keys to sort the input and compare a
 
 The sorting keys can be of arbitrary, comparable data type. The framework provides *CompositeValue* when the sorting key consists of several parts (which is recommended to resolve ties in the first part of the key). The normalizeName function is a custom UDF specific for this domain.
 
-## Candidate classification ##
+## Candidate classificationResult ##
 
-The output of the candidate selection is a list of candidate pairs, which is fed into the candidate classification.
+The output of the candidate selection is a list of candidate pairs, which is fed into the candidate classificationResult.
 
 ```java
-import static com.bakdata.deduplication.similarity.CommonSimilarityMeasures.*;
+import static com.bakdata.dedupe.similarity.CommonSimilarityMeasures.*;
 Classifier<Person> personClassifier = RuleBasedClassifier.<Person>builder()
     .negativeRule("Different social security number", inequality().of(Person::getSSN))
     .positiveRule("Default", CommonSimilarityMeasures.<Person>weightedAverage()
@@ -106,13 +106,13 @@ Classifier<Person> personClassifier = RuleBasedClassifier.<Person>builder()
     .build();
 ```
 
-The classification DSL heavy relies on static factory functions in *CommonSimilarityMeasures* and can be easily extended by custom base similarity measures.
+The classificationResult DSL heavy relies on static factory functions in *CommonSimilarityMeasures* and can be easily extended by custom base similarity measures.
 
-The used rule-based classification applies a list of rules until a rule triggers and thus determines the classification.
+The used rule-based classificationResult applies a list of rules until a rule triggers and thus determines the classificationResult.
 
 In this case, a negative rule first checks if the two persons of the candidate pair have a different social security number (SSN) if present. 
 
-The next rule performs a weighted average of 3 different feature similarities. If SSN is given, it is highly weighted and almost suffices for a positive or negative classification. Additionally, first and last name contribute to the classification.
+The next rule performs a weighted average of 3 different feature similarities. If SSN is given, it is highly weighted and almost suffices for a positive or negative classificationResult. Additionally, first and last name contribute to the classificationResult.
 
 ## Clustering ##
 
