@@ -4,7 +4,8 @@ plugins {
     id("com.bakdata.sonar") version "1.1.4"
     id("com.bakdata.sonatype") version "1.1.4"
     id("org.hildan.github.changelog") version "0.8.0"
-    id("de.lukaskoerfer.gradle.delombok") version "0.2" apply false
+//    id("de.lukaskoerfer.gradle.delombok") version "0.2" apply false
+    id("io.freefair.lombok") version "3.1.4" apply false
 }
 
 allprojects {
@@ -57,7 +58,8 @@ tasks.register<Javadoc>("allJavadoc") {
 
 subprojects {
     apply(plugin = "java-library")
-    apply(plugin = "de.lukaskoerfer.gradle.delombok")
+//    apply(plugin = "de.lukaskoerfer.gradle.delombok")
+    apply(plugin = "io.freefair.lombok")
 
     configure<JavaPluginConvention> {
         sourceCompatibility = org.gradle.api.JavaVersion.VERSION_11

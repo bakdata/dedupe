@@ -21,26 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.bakdata.dedupe.fusion;
-
-import java.util.Optional;
-import java.util.function.Function;
-import lombok.NonNull;
 
 /**
- * A callback that allows incomplete fusions to be treated either with direct repair algorithms or through side-channel
- * means (a.k.a ignore for now and repair asynchronously with the help of domain experts).
+ * Interfaces, data structures, and implementations for the classification of {@link
+ * com.bakdata.dedupe.candidate_selection.Candidate} pairs into duplicates and non-duplicates.
  */
-@FunctionalInterface
-public interface IncompleteFusionHandler<T> extends Function<FusedValue<T>, Optional<FusedValue<T>>> {
-    static <T> @NonNull IncompleteFusionHandler<T> dontFuse() {
-        return partiallyFusedValue -> Optional.empty();
-    }
+package com.bakdata.dedupe.classifier;
 
-    @Override
-    default @NonNull Optional<FusedValue<T>> apply(final @NonNull FusedValue<T> partiallyFusedValue) {
-        return this.handlePartiallyFusedValue(partiallyFusedValue);
-    }
-
-    @NonNull Optional<FusedValue<T>> handlePartiallyFusedValue(@NonNull FusedValue<T> partiallyFusedValue);
-}
