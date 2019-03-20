@@ -43,6 +43,7 @@ import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
 import java.util.Spliterators;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -72,6 +73,8 @@ import lombok.experimental.Wither;
 @Value
 @Builder
 public class RefineCluster<C extends Comparable<C>, T> {
+    private static final Random RANDOM = ThreadLocalRandom.current();
+
     /**
      * The maximum size (inclusive) of a cluster. This size limits the maximum amount of comparisons to {@code max *
      * (max - 1) / 2}.
@@ -130,7 +133,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
 
     private static List<WeightedEdge> getRandomEdges(final int potentialNumEdges, final int desiredNumEdges) {
         final List<WeightedEdge> weightedEdges;
-        weightedEdges = new Random().ints(0, potentialNumEdges)
+        weightedEdges = RANDOM.ints(0, potentialNumEdges)
                 .distinct()
                 .limit(desiredNumEdges)
                 .mapToObj(i -> {

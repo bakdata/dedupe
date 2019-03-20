@@ -91,6 +91,7 @@ public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
                         .filter(sim -> !SimilarityMeasure.isUnknown(sim)));
     }
 
+    @SuppressWarnings("squid:S2326")
     public static class AggregatingSimilarityMeasureBuilder<T> {
         /**
          * Fluent cast of the type parameter. Can be used to overcome the limitations of the Java type inference.

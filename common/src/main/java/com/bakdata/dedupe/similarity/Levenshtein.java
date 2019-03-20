@@ -52,7 +52,7 @@ public class Levenshtein<T extends CharSequence> implements SimilarityMeasure<T>
     @Override
     public double getNonNullSimilarity(final @NonNull CharSequence left, final @NonNull CharSequence right,
             final SimilarityContext context) {
-        if (this.threshold == 0) {
+        if (this.threshold <= 0) {
             return NoThresholdMeasure.getNonNullSimilarity(left, right, context);
         }
         final var maxLen = Math.max(left.length(), right.length());

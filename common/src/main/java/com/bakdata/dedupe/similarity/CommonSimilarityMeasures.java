@@ -122,7 +122,7 @@ public class CommonSimilarityMeasures {
 
             @Override
             public double getNonNullSimilarity(@NonNull T left, @NonNull T right, @NonNull SimilarityContext context) {
-                return ((SimilarityScore<Double>) new JaroWinklerDistance()).apply(left, right).doubleValue();
+                return new JaroWinklerDistance().apply(left, right).doubleValue();
             }
         };
     }
@@ -149,7 +149,7 @@ public class CommonSimilarityMeasures {
             final @NonNull EditDistance<R> editDistance) {
         return (left, right, context) -> {
             final double distance = editDistance.apply(left, right).doubleValue();
-            return distance == -1 ? 0 : (1 - distance / Math.max(left.length(), right.length()));
+            return distance <= -1 ? 0 : (1 - distance / Math.max(left.length(), right.length()));
         };
     }
 
@@ -397,7 +397,7 @@ public class CommonSimilarityMeasures {
      */
     @SafeVarargs
     public static <T> @NonNull SimilarityMeasure<T> min(final SimilarityMeasure<? super T>... measures) {
-        return new AggregatingSimilarityMeasure<T>(similarities -> similarities
+        return new AggregatingSimilarityMeasure<>(similarities -> similarities
                 .takeWhile(sim -> sim > 0.0d)
                 .min()
                 .orElse(unknown()), measures);
@@ -413,7 +413,7 @@ public class CommonSimilarityMeasures {
      */
     @SafeVarargs
     public static <T> @NonNull SimilarityMeasure<T> mean(final SimilarityMeasure<? super T>... measures) {
-        return new AggregatingSimilarityMeasure<T>(similarities -> similarities
+        return new AggregatingSimilarityMeasure<>(similarities -> similarities
                 .average()
                 .orElse(unknown()), measures);
     }

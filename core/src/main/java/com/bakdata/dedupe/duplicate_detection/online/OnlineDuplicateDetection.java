@@ -58,7 +58,7 @@ public interface OnlineDuplicateDetection<C extends Comparable<C>, T> extends Du
     @Override
     default @NonNull Stream<Cluster<C, T>> detectDuplicates(final @NonNull Stream<? extends T> records) {
         return records
-                .flatMap(record -> this.detectDuplicates(record))
+                .flatMap(this::detectDuplicates)
                 .collect(Collectors.toMap(Cluster::getId, Function.identity()))
                 .values()
                 .stream();

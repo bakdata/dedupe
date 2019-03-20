@@ -38,12 +38,12 @@ public class Source {
      * resolution.
      */
     @Getter
-    static @NonNull Source Calculated = new Source("calculated", 1);
+    static final @NonNull Source Calculated = new Source("calculated", 1);
     /**
      * The unknown source is used whenever source extraction in {@link Fusion} failed.
      */
     @Getter
-    static @NonNull Source Unknown = new Source("Unknown", 1);
+    static final @NonNull Source Unknown = new Source("Unknown", 1);
     /**
      * The name of the source (mostly for debugging).
      */

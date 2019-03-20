@@ -67,6 +67,7 @@ public class WeaklyStableMarriage<T> extends AbstractStableMarriage<T> {
         }
 
         @Override
+        @SuppressWarnings("squid:CommentedOutCodeLine")
         protected void match() {
             // Assign each person to be free;
             // while (some man m is free) do
@@ -77,15 +78,13 @@ public class WeaklyStableMarriage<T> extends AbstractStableMarriage<T> {
                     // w := first woman on m’s list;
                     final Integer w = highestRankedWomen.get(0);
                     // if (some man m' is engaged to w) then
-                    final Integer m_ = Iterables.getFirst(this.engagements.column(w).keySet(), null);
-                    if (m_ != null) {
-                        this.breakEngangement(m_, w);
+                    final Integer m2 = Iterables.getFirst(this.engagements.column(w).keySet(), null);
+                    if (m2 != null) {
+                        this.breakEngangement(m2, w);
                     }
                     this.propose(m, w);
                     //for each (successor m" of m on w’s list) do
-                    getSuccessors(this.womensFavoriteMen.get(w), m).forEach(m__ -> {
-                        this.delete(m__, w);
-                    });
+                    getSuccessors(this.womensFavoriteMen.get(w), m).forEach(m3 -> this.delete(m3, w));
                 }
             }
         }

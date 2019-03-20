@@ -111,9 +111,9 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
                 unmatchedMen.removeAll(matching.getEdges().stream().map(WeightedEdge::getFirst).collect(toSet()));
 
                 // find neighboring women
-                final Set<Integer> newCriticalWomen =
-                        unmatchedMen.stream().flatMap(m -> this.graph.edgesOf(m).stream().map(
-                                match -> match.getSecond())).collect(toSet());
+                final Set<Integer> newCriticalWomen = unmatchedMen.stream()
+                        .flatMap(m -> this.graph.edgesOf(m).stream().map(WeightedEdge::getSecond))
+                        .collect(toSet());
 
                 // remove both and their edges
                 for (final Integer w : newCriticalWomen) {
@@ -161,6 +161,7 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
         }
 
         @Override
+        @SuppressWarnings("squid:CommentedOutCodeLine")
         protected void match() {
             // while (some man m is free) do
             Integer m;
@@ -172,27 +173,31 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
                     this.propose(m, w);
 
                     //for each (strict successor m' of m on w’s list) do
-                    getStrictSuccessors(this.womensFavoriteMen.get(w), m).forEach(m_ -> {
-                        this.breakEngangement(m_, w);
-                        this.delete(m_, w);
+                    getStrictSuccessors(this.womensFavoriteMen.get(w), m).forEach(m2 -> {
+                        this.breakEngangement(m2, w);
+                        this.delete(m2, w);
                     });
                 }
-                //find the critical set Z of men;
-                final Set<Integer> z = new CriticalSetFinder(this.engagements).findMenInCriticalSubset();
-                // perfect matching if no critical set
-                if (!z.isEmpty()) {
-                    //for each (woman w who is engaged to a man in Z) do
-                    for (final Integer criticalMan : z) {
-                        for (final Integer w : this.engagements.row(criticalMan).keySet()) {
-                            //break all engagements involving w;
-                            this.engagements.column(w).clear();
+                breakCriticalEngagements(m);
+            }
+        }
 
-                            //for each (tail m' of m on w’s list) do
-                            getTail(this.womensFavoriteMen.get(w), m).forEach(m_ -> {
-                                this.breakEngangement(m_, w);
-                                this.delete(m_, w);
-                            });
-                        }
+        private void breakCriticalEngagements(Integer m) {
+            //find the critical set Z of men;
+            final Set<Integer> z = new CriticalSetFinder(this.engagements).findMenInCriticalSubset();
+            // perfect matching if no critical set
+            if (!z.isEmpty()) {
+                //for each (woman w who is engaged to a man in Z) do
+                for (final Integer criticalMan : z) {
+                    for (final Integer w : this.engagements.row(criticalMan).keySet()) {
+                        //break all engagements involving w;
+                        this.engagements.column(w).clear();
+
+                        //for each (tail m' of m on w’s list) do
+                        getTail(this.womensFavoriteMen.get(w), m).forEach(m2 -> {
+                            this.breakEngangement(m2, w);
+                            this.delete(m2, w);
+                        });
                     }
                 }
             }

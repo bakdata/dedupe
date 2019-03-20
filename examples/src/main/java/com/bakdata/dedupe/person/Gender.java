@@ -37,6 +37,7 @@ import lombok.Value;
  * @param <T> the type of the record. Used to allow type-safe access.
  */
 @Value
+@SuppressWarnings({"unused", "squid:S2326"})
 public class ResolutionTag<T> {
     /**
      * The name of the tag for debugging.

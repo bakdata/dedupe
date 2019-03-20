@@ -63,7 +63,7 @@ public class MatchingSimilarity<C extends Collection<? extends E>, E> implements
     }
 
     private Collection<WeightedEdge<E>> reversed(final Collection<WeightedEdge<E>> scores) {
-        return scores.stream().map(score -> score.reversed()).collect(Collectors.toList());
+        return scores.stream().map(WeightedEdge::reversed).collect(Collectors.toList());
     }
 
     private @NonNull Collection<WeightedEdge<E>> getScores(final @NonNull C leftCollection, final @NonNull C rightCollection,

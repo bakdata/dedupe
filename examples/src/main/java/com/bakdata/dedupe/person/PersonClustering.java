@@ -23,9 +23,9 @@
  */
 package com.bakdata.dedupe.person;
 
+import com.bakdata.dedupe.clustering.ClusterIdGenerators;
 import com.bakdata.dedupe.clustering.Clustering;
 import com.bakdata.dedupe.clustering.ConsistentClustering;
-import com.bakdata.dedupe.clustering.ClusterIdGenerators;
 import com.bakdata.dedupe.clustering.RefineCluster;
 import com.bakdata.dedupe.clustering.RefinedTransitiveClosure;
 import lombok.Value;

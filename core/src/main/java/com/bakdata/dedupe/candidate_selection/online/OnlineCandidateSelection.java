@@ -52,6 +52,6 @@ public interface OnlineCandidateSelection<T>
      */
     @Override
     default @NonNull Stream<Candidate<T>> selectCandidates(final @NonNull Stream<? extends T> records) {
-        return records.flatMap(record -> this.selectCandidates(record));
+        return records.flatMap(this::selectCandidates);
     }
 }

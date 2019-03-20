@@ -131,25 +131,38 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
 
         protected static List<Integer> getStrictSuccessors(final @NonNull Queue<List<Integer>> favoriteMen,
                 final Integer m) {
-            return getTailStream(favoriteMen, m).skip(1).flatMap(equallyGoodMen -> equallyGoodMen.stream())
+            return getTailStream(favoriteMen, m).skip(1).flatMap(Collection::stream)
                     .collect(toList());
         }
 
         protected static List<Integer> getSuccessors(final @NonNull Queue<List<Integer>> favoriteMen,
                 final @NonNull Integer m) {
-            return getTailStream(favoriteMen, m).flatMap(equallyGoodMen -> equallyGoodMen.stream())
-                    .dropWhile(m_ -> !m.equals(m_))
+            return getTailStream(favoriteMen, m).flatMap(Collection::stream)
+                    .dropWhile(m2 -> !m.equals(m2))
                     .skip(1)
                     .collect(toList());
         }
 
         protected static List<Integer> getTail(final @NonNull Queue<List<Integer>> favoriteMen, final Integer m) {
-            return getTailStream(favoriteMen, m).flatMap(equallyGoodMen -> equallyGoodMen.stream()).collect(toList());
+            return getTailStream(favoriteMen, m).flatMap(Collection::stream).collect(toList());
         }
 
         private static Stream<List<Integer>> getTailStream(final Collection<List<Integer>> favoriteMen,
                 final Integer m) {
             return favoriteMen.stream().dropWhile(equallyGoodMen -> !equallyGoodMen.contains(m));
+        }
+
+        private static void deleteInFav(final Iterable<List<Integer>> favs, final Integer elem) {
+            final Iterator<List<Integer>> iterator = favs.iterator();
+            while (iterator.hasNext()) {
+                final List<Integer> equallyGood = iterator.next();
+                if (equallyGood.remove(elem)) {
+                    if (equallyGood.isEmpty()) {
+                        iterator.remove();
+                    }
+                    break;
+                }
+            }
         }
 
         protected Integer getNextFreeMen() {
@@ -186,19 +199,6 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
         protected void delete(final Integer m, final Integer w) {
             AbstractMatcher.deleteInFav(this.mensFavoriteWomen.get(m), w);
             AbstractMatcher.deleteInFav(this.womensFavoriteMen.get(w), m);
-        }
-
-        private static void deleteInFav(final Iterable<List<Integer>> favs, final Integer elem) {
-            final Iterator<List<Integer>> iterator = favs.iterator();
-            while (iterator.hasNext()) {
-                final List<Integer> equallyGood = iterator.next();
-                if (equallyGood.remove(elem)) {
-                    if (equallyGood.isEmpty()) {
-                        iterator.remove();
-                    }
-                    break;
-                }
-            }
         }
 
     }
