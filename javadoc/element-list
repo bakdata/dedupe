@@ -1,0 +1,15 @@
+com.bakdata.dedupe.candidate_selection
+com.bakdata.dedupe.candidate_selection.offline
+com.bakdata.dedupe.candidate_selection.online
+com.bakdata.dedupe.classifier
+com.bakdata.dedupe.clustering
+com.bakdata.dedupe.deduplication
+com.bakdata.dedupe.deduplication.offline
+com.bakdata.dedupe.deduplication.online
+com.bakdata.dedupe.duplicate_detection
+com.bakdata.dedupe.duplicate_detection.offline
+com.bakdata.dedupe.duplicate_detection.online
+com.bakdata.dedupe.fusion
+com.bakdata.dedupe.matching
+com.bakdata.dedupe.similarity
+com.bakdata.util
