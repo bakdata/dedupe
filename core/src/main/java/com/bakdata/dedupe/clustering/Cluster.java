@@ -57,8 +57,6 @@ public class Cluster<C extends Comparable<C>, T> {
     /**
      * The list of elements. While in general there is no order constraints of the elements, a {@link Clustering}
      * implementation may order the elements for faster access.
-     *
-     * @returns a direct access to the elements.
      */
     @NonNull
     List<T> elements;

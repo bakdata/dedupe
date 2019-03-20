@@ -28,7 +28,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.DoubleStream;
-import java.util.stream.StreamSupport;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
@@ -74,9 +73,14 @@ public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
             final @NonNull Iterable<? extends SimilarityMeasure<? super T>> similarityMeasures) {
         this.similarityMeasures = Lists.newArrayList(similarityMeasures);
         this.aggregator = aggregator;
-        if (this.similarityMeasures.size() == 0) {
+        if (this.similarityMeasures.isEmpty()) {
             throw new IllegalArgumentException();
         }
+    }
+
+    @Override
+    public boolean isSymmetric() {
+        return this.similarityMeasures.stream().allMatch(SimilarityMeasure::isSymmetric);
     }
 
     @Override
@@ -95,8 +99,8 @@ public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
          * @param <T> the new type of the target.
          * @return this with casted type parameter.
          */
-        @NonNull
-        public <T> AggregatingSimilarityMeasureBuilder<T> of(final Class<T> clazz) {
+        @SuppressWarnings("unchecked")
+        public @NonNull <T> AggregatingSimilarityMeasureBuilder<T> of(final Class<T> clazz) {
             return (AggregatingSimilarityMeasureBuilder<T>) this;
         }
     }

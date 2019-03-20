@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -86,7 +87,7 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
      * @param <T> the type of the record.
      * @param <K> the type of the sorting key.
      */
-    @FieldDefaults(makeFinal = true)
+    @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
     @EqualsAndHashCode(exclude = "index")
     public static class Pass<T, K extends Comparable<K>> {
         /**
@@ -164,8 +165,8 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
          * @param sortingKeys the sorting keys to use in these passes.
          * @return this
          */
-        @NonNull
-        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(final @NonNull Iterable<SortingKey<T, ?>> sortingKeys) {
+        public @NonNull OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(
+                final @NonNull Iterable<SortingKey<T, ?>> sortingKeys) {
             return this.sortingKeys(sortingKeys, this.defaultWindowSize);
         }
 
@@ -176,8 +177,8 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
          * @param windowSize the window size {@code >= 2}.
          * @return this
          */
-        @NonNull
-        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(final @NonNull Iterable<SortingKey<T, ?>> sortingKeys,
+        public @NonNull OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(
+                final @NonNull Iterable<SortingKey<T, ?>> sortingKeys,
                 final int windowSize) {
             for (final var sortingKey : sortingKeys) {
                 this.sortingKey(sortingKey, windowSize);

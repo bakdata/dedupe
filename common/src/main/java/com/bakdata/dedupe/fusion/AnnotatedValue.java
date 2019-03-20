@@ -66,9 +66,8 @@ public class AnnotatedValue<T> {
      * @param <S> the potentially new type.
      * @return a new instance with the given value.
      */
-    @NonNull
     @SuppressWarnings("unchecked")
-    public <S> AnnotatedValue<S> withValue(final S value) {
+    public @NonNull <S> AnnotatedValue<S> withValue(final S value) {
         return this.value == value ? (AnnotatedValue<S>) this : new AnnotatedValue<>(value, this.source, this.dateTime);
     }
 }

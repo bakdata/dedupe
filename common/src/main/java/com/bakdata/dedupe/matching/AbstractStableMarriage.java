@@ -46,7 +46,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
     @Override
-    public Iterable<? extends WeightedEdge<T>> match(final @NonNull Collection<WeightedEdge<T>> leftToRightWeights,
+    public Iterable<WeightedEdge<T>> match(final @NonNull Collection<WeightedEdge<T>> leftToRightWeights,
             final @NonNull Collection<WeightedEdge<T>> rightToLeftWeights) {
         final List<T> men = leftToRightWeights.stream().map(WeightedEdge::getFirst).distinct().collect(toList());
         final List<T> women = rightToLeftWeights.stream().map(WeightedEdge::getFirst).distinct().collect(toList());
@@ -71,8 +71,7 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
                 .orElseThrow().getWeight();
     }
 
-    @NonNull
-    protected abstract Matcher createMatcher(List<? extends Queue<List<Integer>>> mensFavoriteWomen,
+    protected abstract @NonNull Matcher createMatcher(List<? extends Queue<List<Integer>>> mensFavoriteWomen,
             List<? extends Queue<List<Integer>>> womensFavoriteMen);
 
     /**
@@ -83,32 +82,31 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
      * <li>Inner list groups all equally ranked targets.</li>
      * </ul>
      */
-    private List<Queue<List<Integer>>> getRanking(final Collection<WeightedEdge<T>> weightedEdges,
-            final @NonNull List<T> source,
-            final @NonNull List<T> target) {
+    private List<Queue<List<Integer>>> getRanking(final Iterable<WeightedEdge<T>> weightedEdges,
+            final @NonNull List<T> sources,
+            final @NonNull List<T> targets) {
         final Table<T, T, Double> scores = HashBasedTable.create();
         for (final WeightedEdge<T> weightedEdge : weightedEdges) {
             scores.put(weightedEdge.getFirst(), weightedEdge.getSecond(), weightedEdge.getWeight());
         }
 
-        return IntStream.range(0, source.size()).mapToObj(sourceIndex -> {
-                    final Map<Double, List<Integer>> scoreGroup = IntStream.range(0, target.size()).boxed()
-                            // get the score for a given target
-                            .map(targetIndex -> Pair.of(targetIndex,
-                                    scores.get(source.get(sourceIndex), target.get(targetIndex))))
-                            // filter unranked targets
-                            .filter(targetScore -> targetScore.getRight() != null)
-                            // group by score
-                            .collect(groupingBy(Pair::getRight, mapping(Pair::getLeft, toList())));
-                    // sort groups by highest score
-                    return scoreGroup
-                            .entrySet()
-                            .stream()
-                            .sorted(comparingDouble(group -> -group.getKey()))
-                            .map(Entry::getValue)
-                            .collect(toCollection(LinkedList::new));
-                }
-        ).collect(toList());
+        return sources.stream().map(source -> {
+            final Map<Double, List<Integer>> scoreGroup = IntStream.range(0, targets.size()).boxed()
+                    // get the score for a given target
+                    .map(targetIndex -> Pair.of(targetIndex,
+                            scores.get(source, targets.get(targetIndex))))
+                    // filter unranked targets
+                    .filter(targetScore -> targetScore.getRight() != null)
+                    // group by score
+                    .collect(groupingBy(Pair::getRight, mapping(Pair::getLeft, toList())));
+            // sort groups by highest score
+            return scoreGroup
+                    .entrySet()
+                    .stream()
+                    .sorted(comparingDouble(group -> -group.getKey()))
+                    .map(Entry::getValue)
+                    .collect(toCollection(LinkedList::new));
+        }).collect(toList());
     }
 
     @FunctionalInterface
@@ -122,8 +120,7 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
         protected final List<? extends Queue<List<Integer>>> womensFavoriteMen;
 
         // engagements row = man, col = woman
-        @NonNull
-        protected final Table<Integer, Integer, Boolean> engagements;
+        protected final @NonNull Table<Integer, Integer, Boolean> engagements;
 
         protected AbstractMatcher(final List<? extends Queue<List<Integer>>> mensFavoriteWomen,
                 final List<? extends Queue<List<Integer>>> womensFavoriteMen) {
@@ -150,7 +147,8 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
             return getTailStream(favoriteMen, m).flatMap(equallyGoodMen -> equallyGoodMen.stream()).collect(toList());
         }
 
-        private static Stream<List<Integer>> getTailStream(final Queue<List<Integer>> favoriteMen, final Integer m) {
+        private static Stream<List<Integer>> getTailStream(final Collection<List<Integer>> favoriteMen,
+                final Integer m) {
             return favoriteMen.stream().dropWhile(equallyGoodMen -> !equallyGoodMen.contains(m));
         }
 
@@ -186,11 +184,11 @@ public abstract class AbstractStableMarriage<T> implements BipartiteMatcher<T> {
         }
 
         protected void delete(final Integer m, final Integer w) {
-            this.deleteInFav(this.mensFavoriteWomen.get(m), w);
-            this.deleteInFav(this.womensFavoriteMen.get(w), m);
+            AbstractMatcher.deleteInFav(this.mensFavoriteWomen.get(m), w);
+            AbstractMatcher.deleteInFav(this.womensFavoriteMen.get(w), m);
         }
 
-        private void deleteInFav(final Collection<List<Integer>> favs, final Integer elem) {
+        private static void deleteInFav(final Iterable<List<Integer>> favs, final Integer elem) {
             final Iterator<List<Integer>> iterator = favs.iterator();
             while (iterator.hasNext()) {
                 final List<Integer> equallyGood = iterator.next();

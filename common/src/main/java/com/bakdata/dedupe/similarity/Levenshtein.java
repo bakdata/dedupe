@@ -32,7 +32,7 @@ import org.apache.commons.text.similarity.LevenshteinDistance;
 
 
 /**
- * Provides the Levensthein similarity calculation, which calculates the number of insertions, deletions, and
+ * Provides the Levenshtein similarity calculation, which calculates the number of insertions, deletions, and
  * replacements needed to transform one string into another.
  * <p>The similarity is calculated by normalizing the number of edits over the maximum input length.</p>
  * <p>Note that Levenshtein distance is really slow, but can be tremulously sped up by using {@link #cutoff(double)}
@@ -41,7 +41,7 @@ import org.apache.commons.text.similarity.LevenshteinDistance;
  * @param <T> the type of the input.
  */
 @Value
-public class Levensthein<T extends CharSequence> implements SimilarityMeasure<T> {
+public class Levenshtein<T extends CharSequence> implements SimilarityMeasure<T> {
     private static final SimilarityMeasure<CharSequence> NoThresholdMeasure =
             toSimilarity(new LevenshteinDistance());
     /**
@@ -61,12 +61,16 @@ public class Levensthein<T extends CharSequence> implements SimilarityMeasure<T>
         return measure.getNonNullSimilarity(left, right, context);
     }
 
-    @NonNull
     @Override
-    public SimilarityMeasure<T> cutoff(final double threshold) {
+    public boolean isSymmetric() {
+        return true;
+    }
+
+    @Override
+    public @NonNull SimilarityMeasure<T> cutoff(final double threshold) {
         if (threshold < this.threshold) {
             return this;
         }
-        return new Levensthein<>(threshold);
+        return new Levenshtein<>(threshold);
     }
 }

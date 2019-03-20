@@ -49,8 +49,7 @@ public class Person {
     private String originalId;
     private LocalDateTime lastModified;
     // fusion information
-    @NonNull
     @Builder.Default
-    private Set<String> fusedIds = new HashSet<>();
+    private @NonNull Set<String> fusedIds = new HashSet<>();
 }
 

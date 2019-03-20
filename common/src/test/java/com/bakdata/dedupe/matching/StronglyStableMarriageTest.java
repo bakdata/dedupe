@@ -29,6 +29,7 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bakdata.dedupe.matching.StronglyStableMarriage.CriticalSetFinder;
+import com.bakdata.dedupe.matching.StronglyStableMarriage.StrongMatcher;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
@@ -60,7 +61,7 @@ class StronglyStableMarriageTest {
                     this.createRanking(2, 1, 0, 3));
 
             final Stream<WeightedEdge<Integer>> matches =
-                    new StronglyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
+                    new StrongMatcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
             assertThat(matches.collect(Collectors.toList()))
                     .containsExactlyInAnyOrder(new WeightedEdge(0, 0, DUMMY_WEIGHT),
@@ -84,7 +85,7 @@ class StronglyStableMarriageTest {
                     this.createRanking(3, 0, 2, 1));
 
             final Stream<WeightedEdge<Integer>> matches =
-                    new StronglyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
+                    new StrongMatcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
             assertThat(matches.collect(Collectors.toList()))
                     .containsExactlyInAnyOrder(new WeightedEdge(0, 3, DUMMY_WEIGHT),
@@ -108,7 +109,7 @@ class StronglyStableMarriageTest {
                     this.createRanking(0, 3, 2, 1));
 
             final Stream<WeightedEdge<Integer>> matches =
-                    new StronglyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
+                    new StrongMatcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
             assertThat(matches.collect(Collectors.toList()))
                     .containsExactlyInAnyOrder(new WeightedEdge(0, 3, DUMMY_WEIGHT),
@@ -131,7 +132,7 @@ class StronglyStableMarriageTest {
                     this.createRanking(3, 0, 2, 1));
 
             final Stream<WeightedEdge<Integer>> matches =
-                    new StronglyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
+                    new StrongMatcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
             // new Match(1, 2), new Match(2, 1) is only weakly stable
             assertThat(matches.collect(Collectors.toList()))

@@ -69,6 +69,7 @@ public class CachingSimilarity<T, I> implements SimilarityMeasure<T> {
         return new CachingSimilarity<>(measure, Function.identity());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public double getNonNullSimilarity(final @NonNull T left, final @NonNull T right, final @NonNull SimilarityContext context) {
         I leftId = this.idExtractor.apply(left);

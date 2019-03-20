@@ -124,8 +124,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     /**
      * Creates an exception with the first caught exception as root and all other exceptions as suppressed.
      */
-    @NonNull
-    private ClassificationException createException(final Candidate<T> candidate, final SimilarityContext context) {
+    private @NonNull ClassificationException createException(final Candidate<T> candidate, final SimilarityContext context) {
         final ClassificationException
                 fusionException = new ClassificationException("Could not classify candidate " + candidate,
                 context.getExceptions().get(0));
@@ -149,7 +148,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
      * <p>A positive rule returns a positive score [0; 1] and results in a DUPLICATE.</p>
      */
     private ClassificationResult mapScoreToResult(final @NonNull Rule<? super T> rule, final double score) {
-        if (this.didNotApply(score)) {
+        if (RuleBasedClassifier.didNotApply(score)) {
             return UNKNOWN;
         }
         if (score <= -0.0d) {
@@ -171,7 +170,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
     /**
      * Checks if score is equivalent to {@link #DOES_NOT_APPLY}.
      */
-    private boolean didNotApply(final double score) {
+    private static boolean didNotApply(final double score) {
         return SimilarityMeasure.isUnknown(score);
     }
 
@@ -277,7 +276,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * Wraps a similarity measure, such that it is only applied when precondition hold.
          */
         private SimilarityMeasure<T> conditional(final @NonNull SimilarityMeasure<? super T> similarityMeasure,
-                final @NonNull BiPredicate<T, T> condition) {
+                final @NonNull BiPredicate<T, ? super T> condition) {
             return (left, right, context) -> condition.test(left, right) ?
                     similarityMeasure.getSimilarity(left, right, context) :
                     DOES_NOT_APPLY;
@@ -324,8 +323,8 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
          * @param <T> the new type of the target.
          * @return this with casted type parameter.
          */
-        @NonNull
-        public <T> RuleBasedClassifierBuilder<T> of(final Class<T> clazz) {
+        @SuppressWarnings("unchecked")
+        public @NonNull <T> RuleBasedClassifierBuilder<T> of(final Class<T> clazz) {
             return (RuleBasedClassifierBuilder<T>) this;
         }
     }

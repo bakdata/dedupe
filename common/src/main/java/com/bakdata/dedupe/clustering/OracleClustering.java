@@ -87,6 +87,9 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
 
     @Override
     public Function<? super Iterable<? extends T>, C> getClusterIdGenerator() {
-        return this.goldClusters.stream().collect(Collectors.toMap((Cluster e) -> e.getElements(), e -> e.getId()))::get;
+        final Map<@NonNull ? super Iterable<? extends T>, C> elementsToClusterId =
+                this.goldClusters.stream()
+                        .collect(Collectors.toMap((Cluster<C, T> e) -> e.getElements(), e -> e.getId()));
+        return elementsToClusterId::get;
     }
 }

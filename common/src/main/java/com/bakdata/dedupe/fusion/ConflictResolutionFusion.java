@@ -86,8 +86,7 @@ public class ConflictResolutionFusion<R> implements Fusion<R> {
         return new FusedValue<>(resolvedValue, cluster, context.getExceptions());
     }
 
-    @NonNull
-    private FusionException createException(final List<AnnotatedValue<R>> conflictingValues,
+    private @NonNull FusionException createException(final List<AnnotatedValue<R>> conflictingValues,
             final FusionContext context) {
         final FusionException fusionException =
                 new FusionException("Could not resolve conflict in " + conflictingValues,

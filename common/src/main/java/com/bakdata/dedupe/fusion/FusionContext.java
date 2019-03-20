@@ -52,9 +52,8 @@ public class FusionContext {
         return value != null && !"".equals(value);
     }
 
-    @NonNull
     @SuppressWarnings("unchecked")
-    public <T> List<AnnotatedValue<T>> retrieveValues(final ResolutionTag<T> resolutionTag) {
+    public @NonNull <T> List<AnnotatedValue<T>> retrieveValues(final ResolutionTag<T> resolutionTag) {
         return (List<AnnotatedValue<T>>) this.storedValues.computeIfAbsent(resolutionTag,
                 k -> {
                     throw new FusionException("Tried to retrieve " + resolutionTag + " without being stored");

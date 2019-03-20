@@ -41,6 +41,7 @@ import lombok.NonNull;
  *
  * @param <T> the type of the record
  */
+@FunctionalInterface
 public interface Deduplication<T> {
     /**
      * Deduplicates the dataset.

@@ -58,7 +58,7 @@ public class MatchingSimilarity<C extends Collection<? extends E>, E> implements
                 .match(leftScoreOfRight, rightScoreOfLeft);
         return StreamUtil.stream(matches)
                        .map(WeightedEdge::getWeight)
-                       .reduce(0d, Double::sum) /
+                       .reduce(0.0d, Double::sum) /
                Math.max(leftCollection.size(), rightCollection.size());
     }
 
@@ -66,8 +66,7 @@ public class MatchingSimilarity<C extends Collection<? extends E>, E> implements
         return scores.stream().map(score -> score.reversed()).collect(Collectors.toList());
     }
 
-    @NonNull
-    private Collection<WeightedEdge<E>> getScores(final @NonNull C leftCollection, final @NonNull C rightCollection,
+    private @NonNull Collection<WeightedEdge<E>> getScores(final @NonNull C leftCollection, final @NonNull C rightCollection,
             final @NonNull SimilarityContext context) {
         final Collection<WeightedEdge<E>> leftScoreOfRight = new ArrayList<>();
         for (final E left : leftCollection) {

@@ -38,6 +38,7 @@ import lombok.NonNull;
  */
 @FunctionalInterface
 public interface SetSimilarityMeasure<C extends Collection<? extends E>, E> extends CollectionSimilarityMeasure<C, E> {
+    @SuppressWarnings("unchecked")
     @Override
     default double calculateNonEmptyCollectionSimilarity(final @NonNull C leftCollection, final @NonNull C rightCollection,
             final @NonNull SimilarityContext context) {

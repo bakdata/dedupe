@@ -408,14 +408,11 @@ public class CommonConflictResolutions {
      * @return all values.
      */
     public static <E, C extends Collection<E>, R extends Collection<E>> TerminalConflictResolution<C, R> unionAll(
-            final @NonNull Supplier<? extends R> ctor) {
-        return (annotatedValues, context) -> {
-            final R collection = ctor.get();
-            for (final AnnotatedValue<C> annotatedValue : annotatedValues) {
-                collection.addAll(annotatedValue.getValue());
-            }
-            return Optional.of(AnnotatedValue.calculated(collection));
-        };
+            final @NonNull Supplier<? extends R> factory) {
+        return (annotatedValues, context) -> Optional.of(AnnotatedValue.calculated(
+                annotatedValues.stream()
+                        .flatMap(value -> value.getValue().stream())
+                        .collect(Collectors.toCollection(factory))));
     }
 
     /**

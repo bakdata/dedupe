@@ -46,7 +46,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class StreamUtil {
     public static <T> @NonNull Stream<T> takeWhileInclusive(final @NonNull Stream<T> stream,
-            final @NonNull Predicate<T> predicate) {
+            final @NonNull Predicate<? super T> predicate) {
         final AtomicBoolean test = new AtomicBoolean(true);
         return stream.takeWhile(e -> test.get()).peek(e -> test.set(predicate.test(e)));
     }

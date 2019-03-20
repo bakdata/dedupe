@@ -108,7 +108,7 @@ public interface SimilarityMeasure<T> {
 
     /**
      * Applies a {@link ValueTransformation} to the left and right value of a similarity comparison before applying this
-     * {@link SimilarityMeasure}.
+     * .
      * <p>For example, to compare {@link java.time.LocalDate} with the edit distance, we need to transform it into a
      * formatted string: {@code levenshtein.of(ISO_FORMAT::format)}</p>
      *
@@ -122,7 +122,7 @@ public interface SimilarityMeasure<T> {
 
     /**
      * Applies a {@link ValueTransformation} to the left and right value of a similarity comparison before applying this
-     * {@link SimilarityMeasure}.
+     * .
      * <p>For example, to compare {@link java.time.LocalDate} with the edit distance, we need to transform it into a
      * formatted string: {@code levenshtein.of(ISO_FORMAT::format)}</p>
      *

@@ -50,11 +50,10 @@ public interface ValueTransformation<T, R> {
      * Composes this and the other transformation, such that this transformation is first applied to values and the
      * given transformation is applied afterwards.
      *
-     * @param after the {@link ValueTransformation} to chain to this transformation.
-     * @return the chained {@link ValueTransformation}.
+     * @param after the  to chain to this transformation.
+     * @return the chained .
      */
-    @NonNull
-    default <V> ValueTransformation<T, V> andThen(final @NonNull ValueTransformation<? super R, ? extends V> after) {
+    default @NonNull <V> ValueTransformation<T, V> andThen(final @NonNull ValueTransformation<? super R, ? extends V> after) {
         Objects.requireNonNull(after);
         return (t, context) -> after.transform(this.transform(t, context), context);
     }

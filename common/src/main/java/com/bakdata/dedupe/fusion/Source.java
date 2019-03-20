@@ -37,15 +37,13 @@ public class Source {
      * A tag to indicate that the respective value has no real source as it has been created during conflict
      * resolution.
      */
-    @NonNull
     @Getter
-    static Source Calculated = new Source("calculated", 1);
+    static @NonNull Source Calculated = new Source("calculated", 1);
     /**
      * The unknown source is used whenever source extraction in {@link Fusion} failed.
      */
-    @NonNull
     @Getter
-    static Source Unknown = new Source("Unknown", 1);
+    static @NonNull Source Unknown = new Source("Unknown", 1);
     /**
      * The name of the source (mostly for debugging).
      */

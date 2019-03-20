@@ -103,7 +103,7 @@ public class CommonSimilarityMeasures {
      * @return the Levenshtein distance.
      */
     public static @NonNull <T extends CharSequence> SimilarityMeasure<T> levenshtein() {
-        return new Levensthein<>(0);
+        return new Levenshtein<>(0);
     }
 
     /**
@@ -114,7 +114,17 @@ public class CommonSimilarityMeasures {
      * @return the Jaro-Winkler similarity.
      */
     public static @NonNull <T extends CharSequence> SimilarityMeasure<T> jaroWinkler() {
-        return similarityScore(new JaroWinklerDistance());
+        return new SimilarityMeasure<>() {
+            @Override
+            public boolean isSymmetric() {
+                return true;
+            }
+
+            @Override
+            public double getNonNullSimilarity(@NonNull T left, @NonNull T right, @NonNull SimilarityContext context) {
+                return ((SimilarityScore<Double>) new JaroWinklerDistance()).apply(left, right).doubleValue();
+            }
+        };
     }
 
     /**
@@ -278,7 +288,7 @@ public class CommonSimilarityMeasures {
     @SafeVarargs
     public static <T> @NonNull SimilarityMeasure<T> max(final SimilarityMeasure<? super T>... measures) {
         return new AggregatingSimilarityMeasure<>(similarities ->
-                takeWhileInclusive(similarities, sim -> sim < 1d)
+                takeWhileInclusive(similarities, sim -> sim < 1.0d)
                 .max()
                 .orElse(unknown()), measures);
     }
@@ -388,7 +398,7 @@ public class CommonSimilarityMeasures {
     @SafeVarargs
     public static <T> @NonNull SimilarityMeasure<T> min(final SimilarityMeasure<? super T>... measures) {
         return new AggregatingSimilarityMeasure<T>(similarities -> similarities
-                .takeWhile(sim -> sim > 0d)
+                .takeWhile(sim -> sim > 0.0d)
                 .min()
                 .orElse(unknown()), measures);
     }

@@ -81,7 +81,8 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
      * <p>Note that we need to be stricter (=higher threshold) than {@link #namesCorrectlySplitSimilarity} to avoid too
      * many false positives.</p>
      */
-    SimilarityMeasure<Person> namesIncorrectlySplitSimilarity = levenshtein().cutoff(.9d).of(this.concatNames());
+    SimilarityMeasure<Person> namesIncorrectlySplitSimilarity = levenshtein().cutoff(0.9d).of(
+            PersonClassifierWithMultipleNames.concatNames());
 
     /**
      * Case 4: Swapped first and last name.
@@ -107,7 +108,7 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
      * <p>Example: John Johnson and John Smith will match 1) John -> John = 1.0; 2) Johnson -> John = 0.91</p>
      */
     SimilarityMeasure<Person> namesScrambledSimilarity = stableMatching(this.nameSimilarity)
-            .of(this.concatNames().andThen(words()));
+            .of(PersonClassifierWithMultipleNames.concatNames().andThen(words()));
 
     SimilarityMeasure<Person> overallNameSimilarity = max(this.namesCorrectlySplitSimilarity,
             this.namesIncorrectlySplitSimilarity,
@@ -125,7 +126,7 @@ public class PersonClassifierWithMultipleNames implements Classifier<Person> {
                     .scaleWithThreshold(0.9d))
             .build();
 
-    private ValueTransformation<Person, CharSequence> concatNames() {
+    private static ValueTransformation<Person, CharSequence> concatNames() {
         return (person, context) -> Stream.of(person.getFirstName(), person.getLastName())
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining(" "));

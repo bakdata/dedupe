@@ -48,9 +48,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
+import lombok.experimental.FieldDefaults;
 import lombok.experimental.Wither;
 
 
@@ -141,7 +143,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
         return weightedEdges;
     }
 
-    private List<ClassifiedCandidate<T>> getRelevantClassifications(final Cluster<C, T> cluster,
+    private List<ClassifiedCandidate<T>> getRelevantClassifications(final Cluster<C, ? super T> cluster,
             final @NonNull Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex) {
         return cluster.getElements().stream()
                 .flatMap(record -> relevantClassificationIndex.getOrDefault(record, List.of()).stream()
@@ -165,7 +167,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
     }
 
     private byte[] refineBigCluster(final @NonNull Cluster<C, T> cluster,
-            final @NonNull List<ClassifiedCandidate<T>> knownClassifications) {
+            final @NonNull Collection<ClassifiedCandidate<T>> knownClassifications) {
         final List<WeightedEdge> duplicates = this.toWeightedEdges(knownClassifications, cluster);
         final int desiredNumEdges = getNumEdges(this.maxSmallClusterSize);
 
@@ -181,7 +183,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
      * @return the best clustering
      */
     private byte[] refineSmallCluster(final @NonNull Cluster<C, T> cluster,
-            final @NonNull List<ClassifiedCandidate<T>> knownClassifications) {
+            final @NonNull Iterable<ClassifiedCandidate<T>> knownClassifications) {
         final double[][] weightMatrix = this.getKnownWeightMatrix(cluster, knownClassifications);
 
         final int n = cluster.size();
@@ -234,8 +236,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
         return this.getSubClusters(bestClustering, cluster);
     }
 
-    @NonNull
-    private double[][] getKnownWeightMatrix(final Cluster<C, T> cluster,
+    private @NonNull double[][] getKnownWeightMatrix(final Cluster<C, T> cluster,
             final @NonNull Iterable<ClassifiedCandidate<T>> knownClassifications) {
         final var n = cluster.size();
         final var weightMatrix = new double[n][n];
@@ -315,7 +316,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
     }
 
     private List<WeightedEdge> getWeightedEdges(final @NonNull Cluster<C, ? extends T> cluster,
-            final List<WeightedEdge> duplicates,
+            final List<? extends WeightedEdge> duplicates,
             final int desiredNumEdges) {
         final List<WeightedEdge> weightedEdges;
         if (duplicates.isEmpty()) {
@@ -326,22 +327,26 @@ public class RefineCluster<C extends Comparable<C>, T> {
             weightedEdges = this.addRandomEdges(duplicates, desiredNumEdges);
         }
 
-        return weightedEdges.stream().map(weightedEdge -> {
-            double weight = weightedEdge.getWeight();
-            if (Double.isNaN(weight)) {
-                // calculate weight for dummy entry
-                T left = cluster.get(weightedEdge.getLeft());
-                T right = cluster.get(weightedEdge.getRight());
-                return weightedEdge.withWeight(getWeight(this.classifier.classify(new OnlineCandidate<>(left, right))));
-            }
-            return weightedEdge;
-        }).collect(Collectors.toList());
+        return weightedEdges.stream()
+                .map(weightedEdge -> calculateWeightIfNeeded(cluster, weightedEdge))
+                .collect(Collectors.toList());
     }
 
+    private WeightedEdge calculateWeightIfNeeded(@NonNull Cluster<C, ? extends T> cluster, WeightedEdge weightedEdge) {
+        double weight = weightedEdge.getWeight();
+        if (Double.isNaN(weight)) {
+            // calculate weight for dummy entry
+            T left = cluster.get(weightedEdge.getLeft());
+            T right = cluster.get(weightedEdge.getRight());
+            return weightedEdge.withWeight(getWeight(this.classifier.classify(new OnlineCandidate<>(left, right))));
+        }
+        return weightedEdge;
+    }
+
+    @FieldDefaults(level = AccessLevel.PRIVATE)
     private static final class ClusteringGenerator implements Iterator<byte[]> {
         final byte n;
-        @NonNull
-        final byte[] clustering;
+        final @NonNull byte[] clustering;
         boolean hasNext = true;
 
         ClusteringGenerator(final byte n) {
@@ -365,9 +370,8 @@ public class RefineCluster<C extends Comparable<C>, T> {
             return false;
         }
 
-        @NonNull
         @Override
-        public byte[] next() {
+        public @NonNull byte[] next() {
             if (!this.hasNext()) {
                 throw new NoSuchElementException();
             }
@@ -403,11 +407,11 @@ public class RefineCluster<C extends Comparable<C>, T> {
             } else if (this.left == e.left) {
                 return new WeightedEdge(Math.min(this.right, e.right), Math.max(this.right, e.right), Double.NaN);
             }
-            return new WeightedEdge(e.left, this.left + this.right - e.right, Double.NaN);
+            return new WeightedEdge(e.left, this.left + this.getRight() - e.getRight(), Double.NaN);
         }
 
         boolean overlaps(final @NonNull WeightedEdge e) {
-            return e.left == this.getLeft() || e.getLeft() == this.right || e.getRight() == this.getLeft()
+            return e.getLeft() == this.getLeft() || e.getLeft() == this.getRight() || e.getRight() == this.getLeft()
                    || e.getRight() == this
                     .getRight();
         }

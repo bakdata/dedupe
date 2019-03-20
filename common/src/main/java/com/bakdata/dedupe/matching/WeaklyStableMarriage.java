@@ -52,7 +52,7 @@ public class WeaklyStableMarriage<T> extends AbstractStableMarriage<T> {
     @Override
     protected AbstractStableMarriage.Matcher createMatcher(final List<? extends Queue<List<Integer>>> mensFavoriteWomen,
             final List<? extends Queue<List<Integer>>> womensFavoriteMen) {
-        return new Matcher(mensFavoriteWomen, womensFavoriteMen);
+        return new WeakMatcher(mensFavoriteWomen, womensFavoriteMen);
     }
 
     /**
@@ -60,8 +60,8 @@ public class WeaklyStableMarriage<T> extends AbstractStableMarriage<T> {
      * pruning.
      */
     @VisibleForTesting
-    static class Matcher extends AbstractStableMarriage.AbstractMatcher {
-        Matcher(final List<? extends Queue<List<Integer>>> mensFavoriteWomen,
+    static class WeakMatcher extends AbstractStableMarriage.AbstractMatcher {
+        WeakMatcher(final List<? extends Queue<List<Integer>>> mensFavoriteWomen,
                 final List<? extends Queue<List<Integer>>> womensFavoriteMen) {
             super(mensFavoriteWomen, womensFavoriteMen);
         }

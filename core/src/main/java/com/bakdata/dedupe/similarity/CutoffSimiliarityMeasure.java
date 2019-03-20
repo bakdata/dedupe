@@ -66,9 +66,8 @@ public class CutoffSimiliarityMeasure<T> implements SimilarityMeasure<T> {
         return cutoff(this.inner.getSimilarity(left, right, context), this.threshold);
     }
 
-    @NonNull
     @Override
-    public SimilarityMeasure<T> cutoff(final double threshold) {
+    public @NonNull SimilarityMeasure<T> cutoff(final double threshold) {
         if (threshold < this.threshold) {
             return this;
         }

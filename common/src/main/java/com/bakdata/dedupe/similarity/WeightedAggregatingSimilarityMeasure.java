@@ -49,6 +49,11 @@ public class WeightedAggregatingSimilarityMeasure<R> implements SimilarityMeasur
                 .filter(wv -> !SimilarityMeasure.isUnknown(wv.getValue())));
     }
 
+    @Override
+    public boolean isSymmetric() {
+        return this.weightedSimilarities.stream().allMatch(ws -> ws.getMeasure().isSymmetric());
+    }
+
     @Value
     public static class WeightedSimilarity<T> {
         double weight;
@@ -84,8 +89,8 @@ public class WeightedAggregatingSimilarityMeasure<R> implements SimilarityMeasur
          * @param <T> the new type of the target.
          * @return this with casted type parameter.
          */
-        @NonNull
-        public <T> WeightedAggregatingSimilarityMeasureBuilder<T> of(final Class<T> clazz) {
+        @SuppressWarnings("unchecked")
+        public @NonNull <T> WeightedAggregatingSimilarityMeasureBuilder<T> of(final Class<T> clazz) {
             return (WeightedAggregatingSimilarityMeasureBuilder<T>) this;
         }
     }

@@ -56,10 +56,8 @@ import lombok.experimental.Wither;
 @Value
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Merge<R> implements ConflictResolution<R, R> {
-    @NonNull
-    private final Supplier<R> ctor;
-    @NonNull
-    private final List<FieldMerge<?, R>> fieldMerges;
+    private final @NonNull Supplier<R> ctor;
+    private final @NonNull List<FieldMerge<?, R>> fieldMerges;
 
     @SuppressWarnings("unchecked")
     static <R> MergeBuilder<R> builder(final @NonNull Supplier<R> ctor) {
@@ -108,20 +106,17 @@ public class Merge<R> implements ConflictResolution<R, R> {
         @NonNull FunctionalClass<R> clazz;
         List<FieldMerge<?, R>> fieldMerges = new ArrayList<>();
 
-        @NonNull
-        public <F> FieldMergeBuilder<F, R> field(final Function<R, F> getter, final BiConsumer<R, F> setter) {
+        public @NonNull <F> FieldMergeBuilder<F, R> field(final Function<R, F> getter, final BiConsumer<R, F> setter) {
             return new FieldMergeBuilder<>(this, getter, setter);
         }
 
-        @NonNull
-        public <F> FieldMergeBuilder<F, R> field(final @NonNull FunctionalProperty<R, F> field) {
+        public @NonNull <F> FieldMergeBuilder<F, R> field(final @NonNull FunctionalProperty<R, F> field) {
             final Function<R, F> getter = field.getGetter();
             final BiConsumer<R, F> setter = field.getSetter();
             return this.field(getter, setter);
         }
 
-        @NonNull
-        public <F> FieldMergeBuilder<F, R> field(final @NonNull String name) {
+        public @NonNull <F> FieldMergeBuilder<F, R> field(final @NonNull String name) {
             final FunctionalProperty<R, F> field = this.clazz.field(name);
             return this.field(field);
         }
@@ -138,8 +133,7 @@ public class Merge<R> implements ConflictResolution<R, R> {
             return this.fieldMerges.get(this.fieldMerges.size() - 1);
         }
 
-        @NonNull
-        public ConflictResolution<R, R> build() {
+        public @NonNull ConflictResolution<R, R> build() {
             return new Merge<>(this.ctor, this.fieldMerges);
         }
 
@@ -154,31 +148,27 @@ public class Merge<R> implements ConflictResolution<R, R> {
         @NonNull Function<R, F> getter;
         @NonNull BiConsumer<R, F> setter;
 
-        @NonNull
-        public AdditionalFieldMergeBuilder<F, R> with(final ConflictResolution<F, F> resolution) {
+        public @NonNull AdditionalFieldMergeBuilder<F, R> with(final ConflictResolution<F, F> resolution) {
             return new AdditionalFieldMergeBuilder<>(this.convertingWith(resolution));
         }
 
-        @NonNull
         @SafeVarargs
-        public final AdditionalFieldMergeBuilder<F, R> with(final ConflictResolution<F, F> resolution,
+        public final @NonNull AdditionalFieldMergeBuilder<F, R> with(final ConflictResolution<F, F> resolution,
                 final @NonNull ConflictResolution<F, F>... resolutions) {
             return this.with(Arrays.stream(resolutions).reduce(resolution, ConflictResolution::andThen));
         }
 
-        @NonNull
-        public <I> IllTypedFieldMergeBuilder<I, F, R> convertingWith(final ConflictResolution<F, I> resolution) {
+        public @NonNull <I> IllTypedFieldMergeBuilder<I, F, R> convertingWith(
+                final ConflictResolution<F, I> resolution) {
             return new IllTypedFieldMergeBuilder<>(this, resolution);
         }
 
-        @NonNull
-        public AdditionalFieldMergeBuilder<F, R> corresponding(final ResolutionTag<?> tag) {
+        public @NonNull AdditionalFieldMergeBuilder<F, R> corresponding(final ResolutionTag<?> tag) {
             return this.with(CommonConflictResolutions.corresponding(tag));
         }
 
-        @NonNull
         @SuppressWarnings("unchecked")
-        public AdditionalFieldMergeBuilder<F, R> correspondingToPrevious() {
+        public @NonNull AdditionalFieldMergeBuilder<F, R> correspondingToPrevious() {
             final var last = this.mergeBuilder.getLast();
             final ResolutionTag tag;
             // auto tag previous merge if it is not tagged already
@@ -186,7 +176,7 @@ public class Merge<R> implements ConflictResolution<R, R> {
                 tag = ((TaggedResolution<?, ?>) last.getResolution()).getResolutionTag();
             } else {
                 final var fieldMerges = this.mergeBuilder.getFieldMerges();
-                tag = new ResolutionTag<>("tag-" + System.identityHashCode(fieldMerges) + "-" + fieldMerges.size());
+                tag = new ResolutionTag<>("tag-" + fieldMerges.size() + "-" + System.identityHashCode(fieldMerges));
                 this.mergeBuilder.replaceLast(last.withResolution(
                         CommonConflictResolutions.saveAs(last.getResolution(), tag)));
             }
@@ -203,13 +193,11 @@ public class Merge<R> implements ConflictResolution<R, R> {
         @NonNull FieldMergeBuilder<F, R> fieldMergeBuilder;
         @NonNull ConflictResolution<F, I> resolution;
 
-        @NonNull
-        public <J> IllTypedFieldMergeBuilder<J, F, R> then(final ConflictResolution<I, J> resolution) {
+        public @NonNull <J> IllTypedFieldMergeBuilder<J, F, R> then(final ConflictResolution<I, J> resolution) {
             return new IllTypedFieldMergeBuilder<>(this.fieldMergeBuilder, this.resolution.andThen(resolution));
         }
 
-        @NonNull
-        public AdditionalFieldMergeBuilder<F, R> convertingBack(final ConflictResolution<I, F> resolution) {
+        public @NonNull AdditionalFieldMergeBuilder<F, R> convertingBack(final ConflictResolution<I, F> resolution) {
             return new AdditionalFieldMergeBuilder<>(this.then(resolution));
         }
 
@@ -222,38 +210,34 @@ public class Merge<R> implements ConflictResolution<R, R> {
     public static class AdditionalFieldMergeBuilder<F, R> {
         @NonNull IllTypedFieldMergeBuilder<F, F, R> inner;
 
-        @NonNull
-        public <F2> FieldMergeBuilder<F2, R> field(final Function<R, F2> getter, final BiConsumer<R, F2> setter) {
+        public @NonNull <F2> FieldMergeBuilder<F2, R> field(final Function<R, F2> getter,
+                final BiConsumer<R, F2> setter) {
             this.inner.getFieldMergeBuilder().finish(this.inner.getResolution());
             return new FieldMergeBuilder<>(this.inner.getMergeBuilder(), getter, setter);
         }
 
-        @NonNull
-        public <F2> FieldMergeBuilder<F2, R> field(final @NonNull FunctionalProperty<R, F2> field) {
+        public @NonNull <F2> FieldMergeBuilder<F2, R> field(final @NonNull FunctionalProperty<R, F2> field) {
             final Function<R, F2> getter = field.getGetter();
             final BiConsumer<R, F2> setter = field.getSetter();
             return this.field(getter, setter);
         }
 
-        @NonNull
-        public <F2> FieldMergeBuilder<F2, R> field(final @NonNull String name) {
+        public @NonNull <F2> FieldMergeBuilder<F2, R> field(final @NonNull String name) {
             final FunctionalClass<R> clazz = this.inner.getMergeBuilder().getClazz();
             final FunctionalProperty<R, F2> field = clazz.field(name);
             return this.field(field);
         }
 
-        @NonNull
-        public <I> IllTypedFieldMergeBuilder<I, F, R> convertingWith(final ConflictResolution<F, I> resolution) {
+        public @NonNull <I> IllTypedFieldMergeBuilder<I, F, R> convertingWith(
+                final ConflictResolution<F, I> resolution) {
             return this.inner.then(resolution);
         }
 
-        @NonNull
-        public AdditionalFieldMergeBuilder<F, R> then(final ConflictResolution<F, F> resolution) {
+        public @NonNull AdditionalFieldMergeBuilder<F, R> then(final ConflictResolution<F, F> resolution) {
             return new AdditionalFieldMergeBuilder<>(this.inner.then(resolution));
         }
 
-        @NonNull
-        public ConflictResolution<R, R> build() {
+        public @NonNull ConflictResolution<R, R> build() {
             this.inner.getFieldMergeBuilder().finish(this.inner.getResolution());
             return this.inner.getMergeBuilder().build();
         }

@@ -47,7 +47,7 @@ import lombok.Value;
  * <p>
  * This clustering is similar to {@link TransitiveClosure} but allows the wrapped clustering to split temporary
  * (=not-returned) clusters. Thus, in the example above, we have the following two situations: - If A1-B and A2-B would
- * be passed in the same invocation of {@link #cluster(Iterable)}}, only cluster [A2, B] would be returned. - If A-B is
+ * be passed in the same invocation of {@link #cluster(Stream)}, only cluster [A2, B] would be returned. - If A-B is
  * passed in a first invocation, this invocation returns [A1, B]. The following invocation with A2-B would then return
  * [A1, A2, B].
  * </p>
@@ -108,7 +108,7 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
         return this.clustering.getClusterIdGenerator();
     }
 
-    private boolean noRecordInIndex(final Collection<Cluster<C, T>> clusters) {
+    private boolean noRecordInIndex(final Collection<? extends Cluster<C, T>> clusters) {
         final Map<I, Cluster<C, T>> clusterIndex = this.getInternalClosure().getClusterIndex();
         return clusters.stream().flatMap(cluster -> cluster.getElements().stream())
                 .allMatch(record -> clusterIndex.get(this.idExtractor.apply(record)) == null);

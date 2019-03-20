@@ -28,6 +28,7 @@ import static com.bakdata.dedupe.matching.AbstractStableMarriage.AbstractMatcher
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.bakdata.dedupe.matching.WeaklyStableMarriage.WeakMatcher;
 import com.google.common.collect.Lists;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,7 +58,7 @@ class WeaklyStableMarriageTest {
                     this.createRanking(2, 1, 0, 3));
 
             final Stream<WeightedEdge<Integer>> matches =
-                    new WeaklyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
+                    new WeakMatcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
             assertThat(matches.collect(Collectors.toList()))
                     .containsExactlyInAnyOrder(new WeightedEdge(0, 0, DUMMY_WEIGHT),
@@ -81,7 +82,7 @@ class WeaklyStableMarriageTest {
                     this.createRanking(3, 0, 2, 1));
 
             final Stream<WeightedEdge<Integer>> matches =
-                    new WeaklyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
+                    new WeakMatcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
             assertThat(matches.collect(Collectors.toList()))
                     .containsExactlyInAnyOrder(new WeightedEdge(0, 3, DUMMY_WEIGHT),
@@ -105,7 +106,7 @@ class WeaklyStableMarriageTest {
                     this.createRanking(0, 3, 2, 1));
 
             final Stream<WeightedEdge<Integer>> matches =
-                    new WeaklyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
+                    new WeakMatcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
             assertThat(matches.collect(Collectors.toList()))
                     .containsExactlyInAnyOrder(new WeightedEdge(0, 3, DUMMY_WEIGHT),
@@ -128,7 +129,7 @@ class WeaklyStableMarriageTest {
                     this.createRanking(3, 0, 2, 1));
 
             final Stream<WeightedEdge<Integer>> matches =
-                    new WeaklyStableMarriage.Matcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
+                    new WeakMatcher(mensFavoriteWomen, womensRankingForMen).getStableMatches();
 
             assertThat(matches.collect(Collectors.toList()))
                     .containsExactlyInAnyOrder(new WeightedEdge(0, 3, DUMMY_WEIGHT),

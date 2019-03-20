@@ -57,7 +57,7 @@ public interface Assigner<T> {
      * @apiNote The interface may use Iterables as the parameters in the future to facilitate an online applications.
      * Use {@link #assignMaterialized(Collection)} if you need an explicit {@link Set}.
      */
-    @NonNull Iterable<@NonNull ? extends WeightedEdge<T>> assign(@NonNull Collection<@NonNull WeightedEdge<T>> weightedEdges);
+    @NonNull Iterable<WeightedEdge<T>> assign(@NonNull Collection<@NonNull WeightedEdge<T>> weightedEdges);
 
     /**
      * Finds the set of edges forming a matching that maximizes the sum of the edge weights.
@@ -67,7 +67,7 @@ public interface Assigner<T> {
      * @param weightedEdges the set of possible edges and their respective weights.
      * @return the set of edges.
      */
-    default @NonNull Set<@NonNull ? extends WeightedEdge<T>> assignMaterialized(
+    default @NonNull Set<WeightedEdge<T>> assignMaterialized(
             final @NonNull Collection<@NonNull WeightedEdge<T>> weightedEdges) {
         return Sets.newHashSet(this.assign(weightedEdges));
     }

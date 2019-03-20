@@ -30,6 +30,7 @@ import static java.util.stream.Collectors.toSet;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
@@ -60,7 +61,7 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
     @Override
     protected AbstractStableMarriage.Matcher createMatcher(final List<? extends Queue<List<Integer>>> mensFavoriteWomen,
             final List<? extends Queue<List<Integer>>> womensFavoriteMen) {
-        return new Matcher(mensFavoriteWomen, womensFavoriteMen);
+        return new StrongMatcher(mensFavoriteWomen, womensFavoriteMen);
     }
 
     /**
@@ -85,7 +86,7 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
         private final Set<Integer> manVertexes = new HashSet<>();
         private final Set<Integer> womanVertexes = new HashSet<>();
 
-        public CriticalSetFinder(final Table<Integer, Integer, Boolean> engagements) {
+        CriticalSetFinder(final Table<Integer, Integer, Boolean> engagements) {
             this.engagements = engagements;
             this.createGraph();
         }
@@ -97,7 +98,7 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
 
             while (true) {
                 final Matching<Integer, WeightedEdge<Integer>> matching =
-                        new HopcroftKarpMaximumCardinalityBipartiteMatching(this.graph,
+                        new HopcroftKarpMaximumCardinalityBipartiteMatching<>(this.graph,
                                 this.manVertexes, this.womanVertexes).getMatching();
 
                 // check if "perfect" matching; that is, all remaining men are matched.
@@ -106,7 +107,7 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
                 }
 
                 // else at least one man did not get matched.
-                final Set<Integer> unmatchedMen = new HashSet<>(this.manVertexes);
+                final Collection<Integer> unmatchedMen = new HashSet<>(this.manVertexes);
                 unmatchedMen.removeAll(matching.getEdges().stream().map(WeightedEdge::getFirst).collect(toSet()));
 
                 // find neighboring women
@@ -153,8 +154,8 @@ public class StronglyStableMarriage<T> extends AbstractStableMarriage<T> {
      * Implements the strong stable matching of [1].
      */
     @VisibleForTesting
-    static class Matcher extends AbstractStableMarriage.AbstractMatcher {
-        Matcher(final List<? extends Queue<List<Integer>>> mensFavoriteWomen,
+    static class StrongMatcher extends AbstractStableMarriage.AbstractMatcher {
+        StrongMatcher(final List<? extends Queue<List<Integer>>> mensFavoriteWomen,
                 final List<? extends Queue<List<Integer>>> womensFavoriteMen) {
             super(mensFavoriteWomen, womensFavoriteMen);
         }
