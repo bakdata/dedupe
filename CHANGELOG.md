@@ -1,5 +1,25 @@
 # Change Log
 
+## [2.0.0](https://github.com/bakdata/dedupe/tree/2.0.0) (2019-03-21)
+[Full Changelog](https://github.com/bakdata/dedupe/compare/1.1.0...2.0.0)
+
+**Closed issues:**
+
+- Add javadoc as gh\-page [\#15](https://github.com/bakdata/dedupe/issues/15)
+- Revise common and add javadoc [\#13](https://github.com/bakdata/dedupe/issues/13)
+- Revise API and add javadoc [\#9](https://github.com/bakdata/dedupe/issues/9)
+
+**Implemented enhancements:**
+
+- Refactored API and added javadocs [\#10](https://github.com/bakdata/dedupe/pull/10) ([@AHeise](https://github.com/AHeise))
+- Classification example on multi token field [\#11](https://github.com/bakdata/dedupe/issues/11)
+
+**Merged pull requests:**
+
+- Refactor common [\#16](https://github.com/bakdata/dedupe/pull/16) ([@AHeise](https://github.com/AHeise))
+- Moving from Travis to Azure pipelines [\#8](https://github.com/bakdata/dedupe/pull/8) ([@AHeise](https://github.com/AHeise))
+- General cleanup [\#7](https://github.com/bakdata/dedupe/pull/7) ([@AHeise](https://github.com/AHeise))
+
 ## [1.1.0](https://github.com/bakdata/dedupe/tree/1.1.0) (2019-02-12)
 [Full Changelog](https://github.com/bakdata/dedupe/compare/1.0.1...1.1.0)
 
