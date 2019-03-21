@@ -1,5 +1,6 @@
 plugins {
     // release
+    jacoco
     id("net.researchgate.release") version "2.6.0"
     id("com.bakdata.sonar") version "1.1.4"
     id("com.bakdata.sonatype") version "1.1.4"
@@ -52,7 +53,7 @@ tasks.register<Javadoc>("javadoc") {
     val exportedProjects = listOf(project(":core"), project(":common"))
     setSource(exportedProjects.map { it.tasks.named("delombok") })
     classpath = files(exportedProjects.map { it.the<SourceSetContainer>()["main"].compileClasspath })
-    setDestinationDir(file("${buildDir}/docs/javadoc"))
+    setDestinationDir(file("$buildDir/docs/javadoc"))
 }
 
 subprojects {
@@ -89,3 +90,33 @@ subprojects {
         "testAnnotationProcessor"("org.projectlombok:lombok:1.18.6")
     }
 }
+
+val jacocoMerge by tasks.registering(JacocoMerge::class) {
+    subprojects {
+        dependsOn(tasks.withType<JacocoReport>())
+        executionData(tasks.withType<JacocoReport>().map { it.executionData })
+    }
+    destinationFile = file("$buildDir/jacoco")
+}
+tasks.register<JacocoReport>("jacocoRootReport") {
+    dependsOn(jacocoMerge)
+    sourceDirectories.from(files(subprojects.map { it.the<SourceSetContainer>()["main"].allSource.srcDirs }))
+    classDirectories.from(files(subprojects.map { it.the<SourceSetContainer>()["main"].output }))
+    executionData(jacocoMerge.get().destinationFile)
+    reports {
+        html.isEnabled = true
+        xml.isEnabled = true
+        csv.isEnabled = false
+    }
+}
+allprojects {
+    // using a newer feature of sonarqube to use the xml reports which also makes it language-agnostic
+    configure<org.sonarqube.gradle.SonarQubeExtension> {
+        properties {
+            property("sonar.coverage.jacoco.xmlReportPaths",
+                    rootProject.tasks.withType<JacocoReport>().map { it.reports.xml.destination })
+        }
+    }
+}
+
+rootProject.tasks.named("sonarqube") { dependsOn(tasks.withType<JacocoReport>()) }
