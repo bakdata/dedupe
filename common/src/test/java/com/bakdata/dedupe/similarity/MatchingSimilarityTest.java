@@ -90,4 +90,38 @@ class MatchingSimilarityTest {
                         / 5, offset(1e-4d)
         );
     }
+
+    @Test
+    void shouldHandleLeftNullValue() {
+        final List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc");
+
+        final SimilarityMeasure<List<String>> stableMatching =
+                new MatchingSimilarity<>(new WeaklyStableMarriage<>(), levenshtein());
+
+        final double sim =
+                stableMatching.getSimilarity(null, men, SimilarityContext.builder().build());
+        assertThat(sim).isEqualTo(SimilarityMeasure.unknown());
+    }
+
+    @Test
+    void shouldHandleRightNullValue() {
+        final List<String> men = Arrays.asList("aaa", "ddd", "bbb", "ccc");
+
+        final SimilarityMeasure<List<String>> stableMatching =
+                new MatchingSimilarity<>(new WeaklyStableMarriage<>(), levenshtein());
+
+        final double sim =
+                stableMatching.getSimilarity(men, null, SimilarityContext.builder().build());
+        assertThat(sim).isEqualTo(SimilarityMeasure.unknown());
+    }
+
+    @Test
+    void shouldHandleTwoNullValue() {
+        final SimilarityMeasure<List<String>> stableMatching =
+                new MatchingSimilarity<>(new WeaklyStableMarriage<>(), levenshtein());
+
+        final double sim =
+                stableMatching.getSimilarity(null, null, SimilarityContext.builder().build());
+        assertThat(sim).isEqualTo(SimilarityMeasure.unknown());
+    }
 }

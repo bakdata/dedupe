@@ -46,7 +46,7 @@ public class SimilarityContext {
      */
     @Builder.Default
     @NonNull
-    SimilarityMeasure<Object> similarityMeasureForNull = (left, right, context) -> SimilarityMeasure.unknown();
+    SimilarityMeasure<Object> similarityMeasureForNull = new UnknownSimilarityMeasure<>();
 
     /**
      * Calculates the similarity when any of the two values under comparison is null.
