@@ -1,5 +1,17 @@
 # Change Log
 
+## [2.0.1](https://github.com/bakdata/dedupe/tree/2.0.1) (2019-09-11)
+[Full Changelog](https://github.com/bakdata/dedupe/compare/2.0.0...2.0.1)
+
+**Closed issues:**
+
+- SimilarityMeasure\#getSimilarity recurses infinitely if one parameter is null [\#18](https://github.com/bakdata/dedupe/issues/18)
+
+**Merged pull requests:**
+
+- Fix infinite recursion in SimilarityMeasure [\#19](https://github.com/bakdata/dedupe/pull/19) ([@SvenLehmann](https://github.com/SvenLehmann))
+- Feature multi token example [\#12](https://github.com/bakdata/dedupe/pull/12) ([@AHeise](https://github.com/AHeise))
+
 ## [2.0.0](https://github.com/bakdata/dedupe/tree/2.0.0) (2019-03-21)
 [Full Changelog](https://github.com/bakdata/dedupe/compare/1.1.0...2.0.0)
 
