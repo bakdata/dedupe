@@ -55,6 +55,7 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.Wither;
+import org.apache.commons.lang3.tuple.Pair;
 
 
 /**
@@ -131,19 +132,25 @@ public class RefineCluster<C extends Comparable<C>, T> {
         return score;
     }
 
-    private static List<WeightedEdge> getRandomEdges(final int potentialNumEdges, final int desiredNumEdges) {
-        final List<WeightedEdge> weightedEdges;
-        weightedEdges = RANDOM.ints(0, potentialNumEdges)
-                .distinct()
-                .limit(desiredNumEdges)
-                .mapToObj(i -> {
-                    // reverse of Gaussian
-                    int leftIndex = (int) (Math.sqrt(i + 0.25) - 0.5);
-                    int rightIndex = i - getNumEdges(leftIndex) + leftIndex;
-                    return WeightedEdge.of(leftIndex, rightIndex, Double.NaN);
-                })
-                .collect(Collectors.toList());
-        return weightedEdges;
+    static List<WeightedEdge> getRandomEdges(final int potentialNumEdges, final int desiredNumEdges) {
+        return RANDOM.ints(0, potentialNumEdges)
+            .distinct()
+            .mapToObj(RefineCluster::createGaussPair)
+            .filter(RefineCluster::isNotSelfPair)
+            .map(p -> WeightedEdge.of(p.getLeft(), p.getRight(), Double.NaN))
+            .limit(desiredNumEdges)
+            .collect(Collectors.toList());
+    }
+
+    private static <T> boolean isNotSelfPair(final Pair<T, T> pair) {
+        return !pair.getLeft().equals(pair.getRight());
+    }
+
+    static Pair<Integer, Integer> createGaussPair(final int i) {
+        // reverse of Gaussian
+        final int leftIndex = (int) (Math.sqrt(2 * i + 0.25) - 0.5);
+        final int rightIndex = i - getNumEdges(leftIndex + 1);
+        return Pair.of(leftIndex, rightIndex);
     }
 
     private List<ClassifiedCandidate<T>> getRelevantClassifications(final Cluster<C, ? super T> cluster,
