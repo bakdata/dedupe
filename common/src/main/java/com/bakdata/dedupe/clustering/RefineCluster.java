@@ -138,8 +138,8 @@ public class RefineCluster<C extends Comparable<C>, T> {
                 .limit(desiredNumEdges)
                 .mapToObj(i -> {
                     // reverse of Gaussian
-                    int leftIndex = (int) (Math.sqrt(i + 0.25) - 0.5);
-                    int rightIndex = (int) (0.5 * (i - getNumEdges(leftIndex) + leftIndex));
+                    int leftIndex = (int) (Math.sqrt(2 * i + 0.25) - 0.5);
+                    int rightIndex = i - getNumEdges(leftIndex);
                     return WeightedEdge.of(leftIndex, rightIndex, Double.NaN);
                 })
                 .collect(Collectors.toList());
