@@ -151,7 +151,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
         return Pair.of(leftIndex, rightIndex);
     }
 
-    private static int gaussianSum(final int n) {
+    static int gaussianSum(final int n) {
         return (n + 1) * (n) / 2;
     }
 

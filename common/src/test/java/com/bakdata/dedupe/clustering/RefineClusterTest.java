@@ -1,6 +1,7 @@
 package com.bakdata.dedupe.clustering;
 
 import static com.bakdata.dedupe.clustering.RefineCluster.createGaussPair;
+import static com.bakdata.dedupe.clustering.RefineCluster.gaussianSum;
 import static com.bakdata.dedupe.clustering.RefineCluster.getRandomEdges;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +29,23 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class RefineClusterTest {
+
+    static Stream<Arguments> generateGaussianSums() {
+        return Stream.of(
+                Arguments.of(1, 1),
+                Arguments.of(2, 3),
+                Arguments.of(5, 15),
+                Arguments.of(100, 5050)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("generateGaussianSums")
+    void shouldCreateCorrectGaussPair(final int i, final int expected) {
+        assertThat(gaussianSum(i))
+                .as("%d should return", i, expected)
+                .isEqualTo(expected);
+    }
 
     static Stream<Arguments> generateGaussPairs() {
         final int n = 7;
