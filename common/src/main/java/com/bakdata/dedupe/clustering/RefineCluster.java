@@ -321,7 +321,6 @@ public class RefineCluster<C extends Comparable<C>, T> {
 
         Collections.shuffle(duplicates);
         return this.addRandomEdges(duplicates, desiredNumEdges);
-
     }
 
     private WeightedEdge calculateWeightIfNeeded(final @NonNull Cluster<C, ? extends T> cluster,

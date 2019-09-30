@@ -30,7 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class RefineClusterTest {
 
-    static Stream<Arguments> generateGaussianSums() {
+    static Stream<Arguments> generateTriangularNumbers() {
         return Stream.of(
                 Arguments.of(1, 1),
                 Arguments.of(2, 3),
@@ -40,8 +40,8 @@ class RefineClusterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("generateGaussianSums")
-    void shouldCreateCorrectGaussPair(final int i, final int expected) {
+    @MethodSource("generateTriangularNumbers")
+    void shouldCalculateTriangularNumber(final int i, final int expected) {
         assertThat(triangularNumber(i))
                 .as("%d should return", i, expected)
                 .isEqualTo(expected);
