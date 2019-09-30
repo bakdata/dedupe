@@ -157,7 +157,7 @@ public class RuleBasedClassifier<T> implements Classifier<T> {
      * <p>A positive rule returns a positive score [0; 1] and results in a DUPLICATE.</p>
      */
     private ClassificationResult mapScoreToResult(final @NonNull Rule<? super T> rule, final double score) {
-        if (RuleBasedClassifier.didNotApply(score)) {
+        if (didNotApply(score)) {
             return UNKNOWN;
         }
         if (score <= -0.0d) {
