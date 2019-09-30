@@ -118,12 +118,12 @@ public class RefineCluster<C extends Comparable<C>, T> {
         double score = 0;
         for (int rowIndex = 0; rowIndex < n; rowIndex++) {
             for (int colIndex = rowIndex + 1; colIndex < n; colIndex++) {
-                final double weightForCell = weightMatrix[rowIndex][colIndex];
+                final double weightForEdge = weightMatrix[rowIndex][colIndex];
                 if (partitions[rowIndex] == partitions[colIndex]) {
-                    score += weightForCell / partitionSizes[partitions[rowIndex]];
+                    score += weightForEdge / partitionSizes[partitions[rowIndex]];
                 } else {
-                    score -= weightForCell / (n - partitionSizes[partitions[rowIndex]]) +
-                            weightForCell / (n - partitionSizes[partitions[colIndex]]);
+                    score -= weightForEdge / (n - partitionSizes[partitions[rowIndex]]) +
+                            weightForEdge / (n - partitionSizes[partitions[colIndex]]);
                 }
             }
         }
@@ -181,7 +181,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
     private byte[] refineBigCluster(final @NonNull Cluster<C, T> cluster,
             final @NonNull Collection<ClassifiedCandidate<T>> knownClassifications) {
         final List<WeightedEdge> duplicates = this.toWeightedEdges(knownClassifications, cluster);
-        final int desiredNumEdges = gaussianSum(this.maxSmallClusterSize - 1);
+        final int desiredNumEdges = gaussianSum(this.maxSmallClusterSize);
 
         final GreedyClustering<C, T> greedyClustering = new GreedyClustering<>();
         return greedyClustering.greedyCluster(cluster, this.getWeightedEdges(cluster, duplicates, desiredNumEdges));
