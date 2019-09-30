@@ -1,7 +1,7 @@
 package com.bakdata.dedupe.clustering;
 
 import static com.bakdata.dedupe.clustering.RefineCluster.createGaussPair;
-import static com.bakdata.dedupe.clustering.RefineCluster.gaussianSum;
+import static com.bakdata.dedupe.clustering.RefineCluster.triangularNumber;
 import static com.bakdata.dedupe.clustering.RefineCluster.getRandomEdges;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +42,7 @@ class RefineClusterTest {
     @ParameterizedTest
     @MethodSource("generateGaussianSums")
     void shouldCreateCorrectGaussPair(final int i, final int expected) {
-        assertThat(gaussianSum(i))
+        assertThat(triangularNumber(i))
                 .as("%d should return", i, expected)
                 .isEqualTo(expected);
     }

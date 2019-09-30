@@ -147,11 +147,11 @@ public class RefineCluster<C extends Comparable<C>, T> {
     static Pair<Integer, Integer> createGaussPair(final int i) {
         // reverse of Gaussian
         final int leftIndex = (int) (Math.sqrt(2 * i + 0.25) - 0.5);
-        final int rightIndex = i - gaussianSum(leftIndex);
+        final int rightIndex = i - triangularNumber(leftIndex);
         return Pair.of(leftIndex, rightIndex);
     }
 
-    static int gaussianSum(final int n) {
+    static int triangularNumber(final int n) {
         return (n + 1) * (n) / 2;
     }
 
@@ -181,7 +181,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
     private byte[] refineBigCluster(final @NonNull Cluster<C, T> cluster,
             final @NonNull Collection<ClassifiedCandidate<T>> knownClassifications) {
         final List<WeightedEdge> duplicates = this.toWeightedEdges(knownClassifications, cluster);
-        final int desiredNumEdges = gaussianSum(this.maxSmallClusterSize);
+        final int desiredNumEdges = triangularNumber(this.maxSmallClusterSize);
 
         final GreedyClustering<C, T> greedyClustering = new GreedyClustering<>();
         return greedyClustering.greedyCluster(cluster, this.getWeightedEdges(cluster, duplicates, desiredNumEdges));
@@ -316,7 +316,7 @@ public class RefineCluster<C extends Comparable<C>, T> {
             final List<? extends WeightedEdge> duplicates, final int desiredNumEdges) {
         if (duplicates.isEmpty()) {
             final int n = cluster.size();
-            return getRandomEdges(gaussianSum(n), desiredNumEdges);
+            return getRandomEdges(triangularNumber(n), desiredNumEdges);
         }
 
         Collections.shuffle(duplicates);
