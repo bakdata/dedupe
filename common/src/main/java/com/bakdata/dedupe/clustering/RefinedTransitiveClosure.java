@@ -37,7 +37,7 @@ import lombok.NonNull;
 import lombok.Value;
 
 /**
- * Executes {@link TransitiveClosure} and successively {@link RefineClusterImpl}. This algorithm boosts both recall and
+ * Executes {@link TransitiveClosure} and successively {@link RefineCluster}. This algorithm boosts both recall and
  * precision, but is rather compute-heavy.
  *
  * @param <C> the type of the cluster id.
@@ -52,7 +52,7 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
      * The configured refineCluster.
      */
     @NonNull
-    RefineClusterImpl<C, T> refineCluster;
+    RefineCluster<C, T> refineCluster;
 
     /**
      * A backing map for old clusters. Defaults to an in-memory map if null during construction.
