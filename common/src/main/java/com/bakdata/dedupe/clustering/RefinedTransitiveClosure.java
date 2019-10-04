@@ -37,7 +37,7 @@ import lombok.NonNull;
 import lombok.Value;
 
 /**
- * Executes {@link TransitiveClosure} and successively {@link RefineCluster}. This algorithm boosts both recall and
+ * Executes {@link TransitiveClosure} and successively {@link RefineClusterImpl}. This algorithm boosts both recall and
  * precision, but is rather compute-heavy.
  *
  * @param <C> the type of the cluster id.
@@ -52,7 +52,7 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
      * The configured refineCluster.
      */
     @NonNull
-    RefineCluster<C, T> refineCluster;
+    RefineClusterImpl<C, T> refineCluster;
 
     /**
      * A backing map for old clusters. Defaults to an in-memory map if null during construction.
@@ -79,7 +79,7 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
     ClusterSplitHandler splitHandler;
 
     @java.beans.ConstructorProperties({"refineCluster", "oldClusterIndex", "closure", "idExtractor", "splitHandler"})
-    RefinedTransitiveClosure(final @NonNull RefineCluster<C, T> refineCluster,
+    RefinedTransitiveClosure(final @NonNull RefineClusterImpl<C, T> refineCluster,
             final Map<I, Cluster<C, T>> oldClusterIndex, final TransitiveClosure<C, T, I> closure,
             final @NonNull Function<? super T, ? extends I> idExtractor, final ClusterSplitHandler splitHandler) {
         this.refineCluster = refineCluster;
