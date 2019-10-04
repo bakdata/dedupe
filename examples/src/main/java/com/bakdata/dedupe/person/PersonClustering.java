@@ -26,14 +26,14 @@ package com.bakdata.dedupe.person;
 import com.bakdata.dedupe.clustering.ClusterIdGenerators;
 import com.bakdata.dedupe.clustering.Clustering;
 import com.bakdata.dedupe.clustering.ConsistentClustering;
-import com.bakdata.dedupe.clustering.RefineClusterImpl;
+import com.bakdata.dedupe.clustering.RefineCluster;
 import com.bakdata.dedupe.clustering.RefinedTransitiveClosure;
 import lombok.Value;
 import lombok.experimental.Delegate;
 
 @Value
 public class PersonClustering implements Clustering<Long, Person> {
-    RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+    RefineCluster<Long, Person> refineCluster = RefineCluster.<Long, Person>builder()
             .classifier(new PersonClassifier())
             .clusterIdGenerator(ClusterIdGenerators.longGenerator())
             .build();
