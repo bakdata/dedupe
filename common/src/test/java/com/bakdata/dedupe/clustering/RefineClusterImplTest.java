@@ -1,8 +1,8 @@
 package com.bakdata.dedupe.clustering;
 
-import static com.bakdata.dedupe.clustering.RefineCluster.createGaussPair;
-import static com.bakdata.dedupe.clustering.RefineCluster.triangularNumber;
-import static com.bakdata.dedupe.clustering.RefineCluster.getRandomEdges;
+import static com.bakdata.dedupe.clustering.RefineClusterImpl.createGaussPair;
+import static com.bakdata.dedupe.clustering.RefineClusterImpl.triangularNumber;
+import static com.bakdata.dedupe.clustering.RefineClusterImpl.getRandomEdges;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bakdata.dedupe.candidate_selection.Candidate;
@@ -11,7 +11,7 @@ import com.bakdata.dedupe.classifier.ClassificationResult;
 import com.bakdata.dedupe.classifier.ClassificationResult.ClassificationResultBuilder;
 import com.bakdata.dedupe.classifier.ClassifiedCandidate;
 import com.bakdata.dedupe.classifier.Classifier;
-import com.bakdata.dedupe.clustering.RefineCluster.WeightedEdge;
+import com.bakdata.dedupe.clustering.RefineClusterImpl.WeightedEdge;
 import com.google.common.primitives.Bytes;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,7 +28,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class RefineClusterTest {
+class RefineClusterImplTest {
 
     static Stream<Arguments> generateTriangularNumbers() {
         return Stream.of(
@@ -78,7 +78,7 @@ class RefineClusterTest {
     @Test
     void shouldCusterHeuristically() {
         final AtomicLong atomicLong = new AtomicLong();
-        final RefineCluster<Long, Person> refineCluster = RefineCluster.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(personList -> atomicLong.getAndIncrement())
                 .maxSmallClusterSize(4)
@@ -100,7 +100,7 @@ class RefineClusterTest {
     @Test
     void shouldCluster() {
         final AtomicLong atomicLong = new AtomicLong();
-        final RefineCluster<Long, Person> refineCluster = RefineCluster.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(personList -> atomicLong.getAndIncrement())
                 .maxSmallClusterSize(10)
@@ -122,7 +122,7 @@ class RefineClusterTest {
     @Test
     void shouldRefineCluster() {
         final AtomicLong atomicLong = new AtomicLong();
-        final RefineCluster<Long, Person> refineCluster = RefineCluster.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(personList -> atomicLong.getAndIncrement())
                 .maxSmallClusterSize(10)
@@ -151,7 +151,7 @@ class RefineClusterTest {
     @Test
     void shouldRefineClusterHeuristically() {
         final AtomicLong atomicLong = new AtomicLong();
-        final RefineCluster<Long, Person> refineCluster = RefineCluster.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(personList -> atomicLong.getAndIncrement())
                 .maxSmallClusterSize(4)
@@ -180,7 +180,7 @@ class RefineClusterTest {
     @Test
     void shouldDoGreedyClustering() {
 
-        final RefineCluster.GreedyClustering<Long, Integer> greedyClustering = new RefineCluster.GreedyClustering<>();
+        final RefineClusterImpl.GreedyClustering<Long, Integer> greedyClustering = new RefineClusterImpl.GreedyClustering<>();
 
         final Cluster<Long, Integer> cluster = new Cluster<>(1L, List.of(1, 2, 3, 4, 5));
         // Note: Greedy clustering is sensitive to the order, in which edges are added.
@@ -201,7 +201,7 @@ class RefineClusterTest {
     @Test
     void shouldSplitInGreedyClustering() {
 
-        final RefineCluster.GreedyClustering<Long, Integer> greedyClustering = new RefineCluster.GreedyClustering<>();
+        final RefineClusterImpl.GreedyClustering<Long, Integer> greedyClustering = new RefineClusterImpl.GreedyClustering<>();
 
         final Cluster<Long, Integer> cluster = new Cluster<>(1L, List.of(1, 2, 3, 4, 5));
         final byte[] bytes = greedyClustering.greedyCluster(cluster, List.of(
