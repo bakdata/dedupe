@@ -38,6 +38,9 @@ public interface RefineCluster<C extends Comparable<C>, T> {
     Stream<Cluster<C, T>> refine(final Stream<? extends Cluster<C, T>> clusters,
             final @NonNull Stream<ClassifiedCandidate<T>> knownClassifications);
 
+    /**
+     * A function to generate the id for newly split clusters.
+     */
     @NonNull
     Function<? super Iterable<? extends T>, C> getClusterIdGenerator();
 }
