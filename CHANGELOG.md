@@ -1,5 +1,14 @@
 # Change Log
 
+## [2.0.2](https://github.com/bakdata/dedupe/tree/2.0.2) (2019-10-07)
+[Full Changelog](https://github.com/bakdata/dedupe/compare/2.0.1...2.0.2)
+
+**Merged pull requests:**
+
+- Add RefineCluster interface [\#22](https://github.com/bakdata/dedupe/pull/22) ([@SvenLehmann](https://github.com/SvenLehmann))
+- Fix heuristic cluster refinement [\#21](https://github.com/bakdata/dedupe/pull/21) ([@SvenLehmann](https://github.com/SvenLehmann))
+- Fix right candidate selection for large cluster refinement [\#20](https://github.com/bakdata/dedupe/pull/20) ([@fapaul](https://github.com/fapaul))
+
 ## [2.0.1](https://github.com/bakdata/dedupe/tree/2.0.1) (2019-09-11)
 [Full Changelog](https://github.com/bakdata/dedupe/compare/2.0.0...2.0.1)
 
