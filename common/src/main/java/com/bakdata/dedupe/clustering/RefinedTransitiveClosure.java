@@ -79,7 +79,7 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
     ClusterSplitHandler splitHandler;
 
     @java.beans.ConstructorProperties({"refineCluster", "oldClusterIndex", "closure", "idExtractor", "splitHandler"})
-    RefinedTransitiveClosure(final @NonNull RefineClusterImpl<C, T> refineCluster,
+    RefinedTransitiveClosure(final @NonNull RefineCluster<C, T> refineCluster,
             final Map<I, Cluster<C, T>> oldClusterIndex, final TransitiveClosure<C, T, I> closure,
             final @NonNull Function<? super T, ? extends I> idExtractor, final ClusterSplitHandler splitHandler) {
         this.refineCluster = refineCluster;

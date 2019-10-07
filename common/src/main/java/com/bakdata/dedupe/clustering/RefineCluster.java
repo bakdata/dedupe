@@ -24,6 +24,7 @@
 package com.bakdata.dedupe.clustering;
 
 import com.bakdata.dedupe.classifier.ClassifiedCandidate;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.NonNull;
 
@@ -33,8 +34,10 @@ import lombok.NonNull;
  * @param <C> the type of the cluster id.
  * @param <T> the type of the record.
  */
-@FunctionalInterface
 public interface RefineCluster<C extends Comparable<C>, T> {
     Stream<Cluster<C, T>> refine(final Stream<? extends Cluster<C, T>> clusters,
             final @NonNull Stream<ClassifiedCandidate<T>> knownClassifications);
+
+    @NonNull
+    Function<? super Iterable<? extends T>, C> getClusterIdGenerator();
 }
