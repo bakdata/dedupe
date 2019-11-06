@@ -28,7 +28,6 @@ import com.bakdata.dedupe.classifier.ClassificationResult;
 import com.bakdata.dedupe.classifier.ClassifiedCandidate;
 import com.bakdata.dedupe.classifier.Classifier;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.primitives.Bytes;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,10 +108,10 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
         }
     }
 
-    private static double scoreClustering(final byte[] partitions, final double[][] weightMatrix) {
+    private static double scoreClustering(final int[] partitions, final double[][] weightMatrix) {
         final int n = partitions.length;
         final int[] partitionSizes = new int[n];
-        for (final byte clustering : partitions) {
+        for (final int clustering : partitions) {
             partitionSizes[clustering]++;
         }
 
@@ -181,7 +180,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
                 .collect(Collectors.groupingBy(classification -> classification.getCandidate().getRecord1()));
     }
 
-    private byte[] refineBigCluster(final @NonNull Cluster<C, T> cluster,
+    private int[] refineBigCluster(final @NonNull Cluster<C, T> cluster,
             final @NonNull Collection<ClassifiedCandidate<T>> knownClassifications) {
         final List<WeightedEdge> duplicates = this.toWeightedEdges(knownClassifications, cluster);
         final int desiredNumEdges = triangularNumber(this.maxSmallClusterSize);
@@ -198,7 +197,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
      *
      * @return the best clustering
      */
-    private byte[] refineSmallCluster(final @NonNull Cluster<C, T> cluster,
+    private int[] refineSmallCluster(final @NonNull Cluster<C, T> cluster,
             final @NonNull Iterable<ClassifiedCandidate<T>> knownClassifications) {
         final double[][] weightMatrix = this.getKnownWeightMatrix(cluster, knownClassifications);
 
@@ -213,7 +212,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
             }
         }
 
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new ClusteringGenerator((byte) n), 0), false)
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new ClusteringGenerator(n), 0), false)
                 .map(clustering -> new AbstractMap.SimpleEntry<>(clustering.clone(),
                         scoreClustering(clustering, weightMatrix)))
                 .max(Comparator.comparingDouble(Map.Entry::getValue))
@@ -240,11 +239,11 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
             return Stream.of(cluster);
         }
 
-        final byte[] bestClustering = this.getBestClustering(cluster, knownClassifications);
+        final int[] bestClustering = this.getBestClustering(cluster, knownClassifications);
         return this.getSubClusters(bestClustering, cluster);
     }
 
-    private byte[] getBestClustering(final Cluster<C, T> cluster,
+    private int[] getBestClustering(final Cluster<C, T> cluster,
             final @NonNull Collection<ClassifiedCandidate<T>> knownClassifications) {
         if (cluster.size() > this.maxSmallClusterSize) {
             // large cluster with high probability of error
@@ -275,9 +274,9 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
         return weightMatrix;
     }
 
-    private Stream<Cluster<C, T>> getSubClusters(final byte[] bestClustering,
+    private Stream<Cluster<C, T>> getSubClusters(final int[] bestClustering,
             final @NonNull Cluster<C, ? extends T> cluster) {
-        final Map<Byte, List<T>> subClusters = IntStream.range(0, bestClustering.length)
+        final Map<Integer, List<T>> subClusters = IntStream.range(0, bestClustering.length)
                 .mapToObj(index -> new AbstractMap.SimpleEntry<>(bestClustering[index], cluster.get(index)))
                 .collect(Collectors
                         .groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
@@ -339,14 +338,14 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
     }
 
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    private static final class ClusteringGenerator implements Iterator<byte[]> {
-        final byte n;
-        final @NonNull byte[] clustering;
+    private static final class ClusteringGenerator implements Iterator<int[]> {
+        final int n;
+        final @NonNull int[] clustering;
         boolean hasNext = true;
 
-        private ClusteringGenerator(final byte n) {
+        private ClusteringGenerator(final int n) {
             this.n = n;
-            this.clustering = new byte[n];
+            this.clustering = new int[n];
         }
 
         @Override
@@ -366,7 +365,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
         }
 
         @Override
-        public @NonNull byte[] next() {
+        public @NonNull int[] next() {
             if (!this.hasNext()) {
                 throw new NoSuchElementException();
             }
@@ -374,8 +373,8 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
             return this.clustering;
         }
 
-        private boolean incrementWouldResultInSkippedInteger(final byte i) {
-            for (byte j = (byte) (i - 1); j >= 0; j--) {
+        private boolean incrementWouldResultInSkippedInteger(final int i) {
+            for (int j = i - 1; j >= 0; j--) {
                 if (this.clustering[i] <= this.clustering[j]) {
                     return false;
                 }
@@ -415,7 +414,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
 
     static class GreedyClustering<C extends Comparable<C>, T> {
 
-        byte[] greedyCluster(final Cluster<C, T> cluster, final @NonNull Collection<? extends WeightedEdge> edges) {
+        int[] greedyCluster(final Cluster<C, T> cluster, final @NonNull Collection<? extends WeightedEdge> edges) {
 
             final Collection<WeightedEdge> queue = new PriorityQueue<>(Comparator.comparing(WeightedEdge::getWeight));
             queue.addAll(edges);
@@ -426,12 +425,12 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
             }
 
             // start with each publication in its own cluster
-            byte[] clustering = Bytes.toArray(IntStream.range(0, cluster.size()).boxed().collect(Collectors.toList()));
+            int[] clustering = IntStream.range(0, cluster.size()).toArray();
             double score = scoreClustering(clustering, weightMatrix);
             for (final WeightedEdge edge : queue) {
-                final byte[] newClustering = clustering.clone();
-                final byte newClusterId = newClustering[edge.getLeft()];
-                final byte oldClusterId = newClustering[edge.getRight()];
+                final int[] newClustering = clustering.clone();
+                final int newClusterId = newClustering[edge.getLeft()];
+                final int oldClusterId = newClustering[edge.getRight()];
                 for (int i = 0; i < newClustering.length; i++) {
                     if (newClustering[i] == oldClusterId) {
                         newClustering[i] = newClusterId;

@@ -13,6 +13,7 @@ import com.bakdata.dedupe.classifier.ClassifiedCandidate;
 import com.bakdata.dedupe.classifier.Classifier;
 import com.bakdata.dedupe.clustering.RefineClusterImpl.WeightedEdge;
 import com.google.common.primitives.Bytes;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -185,16 +186,14 @@ class RefineClusterImplTest {
         final Cluster<Long, Integer> cluster = new Cluster<>(1L, List.of(1, 2, 3, 4, 5));
         // Note: Greedy clustering is sensitive to the order, in which edges are added.
         // Changing the order may lead to different results.
-        final byte[] bytes = greedyClustering.greedyCluster(cluster, List.of(
+        final int[] bytes = greedyClustering.greedyCluster(cluster, List.of(
                 WeightedEdge.of(0, 1, 1.0),
                 WeightedEdge.of(2, 3, 1.0),
                 WeightedEdge.of(3, 4, 1.0),
                 WeightedEdge.of(1, 3, 1.0)
         ));
 
-        final List<Integer> actual = Bytes.asList(bytes).stream()
-                .map(Byte::intValue)
-                .collect(Collectors.toList());
+        final List<Integer> actual = Arrays.stream(bytes).boxed().collect(Collectors.toList());
         assertThat(actual).isEqualTo(List.of(0, 0, 0, 0, 0));
     }
 
@@ -204,16 +203,33 @@ class RefineClusterImplTest {
         final RefineClusterImpl.GreedyClustering<Long, Integer> greedyClustering = new RefineClusterImpl.GreedyClustering<>();
 
         final Cluster<Long, Integer> cluster = new Cluster<>(1L, List.of(1, 2, 3, 4, 5));
-        final byte[] bytes = greedyClustering.greedyCluster(cluster, List.of(
+        final int[] bytes = greedyClustering.greedyCluster(cluster, List.of(
                 WeightedEdge.of(0, 1, 1.0),
                 WeightedEdge.of(2, 4, 1.0),
                 WeightedEdge.of(1, 3, 1.0)
         ));
 
-        final List<Integer> actual = Bytes.asList(bytes).stream()
-                .map(Byte::intValue)
-                .collect(Collectors.toList());
+        final List<Integer> actual = Arrays.stream(bytes).boxed().collect(Collectors.toList());
         assertThat(actual).isEqualTo(List.of(0, 0, 2, 0, 2));
+    }
+
+    @Test
+    void shouldRefineClusterWithMoreThan128Elements() {
+        final List<Person> firstCluster = IntStream.range(0, 130)
+                .boxed()
+                .map(i -> new Person(i.toString(), "Joanna"))
+                .collect(Collectors.toList());
+
+        final Cluster<Long, Person> cluster = new Cluster<>(1L, firstCluster);
+
+        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+                .classifier(new CustomClassifier())
+                .clusterIdGenerator(list -> 0L)
+                .maxSmallClusterSize(120)
+                .build();
+
+        final Stream<Cluster<Long, Person>> stream = refineCluster.refine(Stream.of(cluster), Stream.of());
+        assertThat(stream).hasSize(1);
     }
 
     @RequiredArgsConstructor
