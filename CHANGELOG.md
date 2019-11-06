@@ -1,5 +1,12 @@
 # Change Log
 
+## [2.0.3](https://github.com/bakdata/dedupe/tree/2.0.3) (2019-11-06)
+[Full Changelog](https://github.com/bakdata/dedupe/compare/2.0.2...2.0.3)
+
+**Merged pull requests:**
+
+- Handle clusters with more than 128 elements [\#23](https://github.com/bakdata/dedupe/pull/23) ([@SvenLehmann](https://github.com/SvenLehmann))
+
 ## [2.0.2](https://github.com/bakdata/dedupe/tree/2.0.2) (2019-10-07)
 [Full Changelog](https://github.com/bakdata/dedupe/compare/2.0.1...2.0.2)
 
