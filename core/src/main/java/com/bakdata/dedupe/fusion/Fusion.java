@@ -44,7 +44,7 @@ public interface Fusion<T> {
      * @param cluster a cluster of duplicates.
      * @return a fused value.
      */
-    @NonNull FusedValue<T> fuse(@NonNull Cluster<?, T> cluster);
+    @NonNull FusedValue<T> fuse(@NonNull Cluster<?, T, ?> cluster);
 
     /**
      * Returns the fused value for a cluster of duplicates. If fusion is not successful, a second try with the {@link
@@ -54,7 +54,7 @@ public interface Fusion<T> {
      * @param incompleteFusionHandler tries to complete an incomplete fusion.
      * @return a complete fusion value or {@link Optional#empty()}.
      */
-    default @NonNull Optional<T> fusedValue(final @NonNull Cluster<?, T> cluster,
+    default @NonNull Optional<T> fusedValue(final @NonNull Cluster<?, T, ?> cluster,
             final @NonNull IncompleteFusionHandler<T> incompleteFusionHandler) {
         return incompleteFusionHandler.handlePartiallyFusedValue(this.fuse(cluster))
                 .map(FusedValue::getValue);

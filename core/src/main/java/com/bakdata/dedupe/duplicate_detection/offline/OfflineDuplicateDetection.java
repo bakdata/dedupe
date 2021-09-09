@@ -33,6 +33,6 @@ package com.bakdata.dedupe.duplicate_detection.offline;
  * documented.
  */
 @FunctionalInterface
-public interface OfflineDuplicateDetection<C extends Comparable<C>, T>
-        extends com.bakdata.dedupe.duplicate_detection.DuplicateDetection<C, T> {
+public interface OfflineDuplicateDetection<C extends Comparable<C>, T, I>
+        extends com.bakdata.dedupe.duplicate_detection.DuplicateDetection<C, T, I> {
 }

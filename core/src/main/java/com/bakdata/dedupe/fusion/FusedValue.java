@@ -49,7 +49,7 @@ public class FusedValue<T> {
      * The original values.
      */
     @NonNull
-    Cluster<?, T> originalValues;
+    Cluster<?, T, ?> originalValues;
     /**
      * All exceptions that occurred during fusion.
      */

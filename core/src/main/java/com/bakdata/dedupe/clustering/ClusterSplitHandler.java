@@ -34,11 +34,11 @@ import lombok.NonNull;
  * deduplication.
  */
 @FunctionalInterface
-public interface ClusterSplitHandler<C extends Comparable<C>, T> {
+public interface ClusterSplitHandler<C extends Comparable<C>, T, I> {
     /**
      * Do nothing.
      */
-    static <C extends Comparable<C>, T> @NonNull ClusterSplitHandler<C, T> ignore() {
+    static <C extends Comparable<C>, T, I> @NonNull ClusterSplitHandler<C, T, I> ignore() {
         return (mainCluster, splitParts) -> true;
     }
 
@@ -48,7 +48,7 @@ public interface ClusterSplitHandler<C extends Comparable<C>, T> {
      *
      * @return false if this handler would like to leave the cluster in-place.
      */
-    boolean clusterSplit(@NonNull Cluster<C, T> mainCluster, @NonNull List<Cluster<C, T>> splitParts);
+    boolean clusterSplit(@NonNull Cluster<C, T, I> mainCluster, @NonNull List<Cluster<C, T, I>> splitParts);
 
     /**
      * Checks if the given set of clusters contains more than element and invokes {@link #clusterSplit(Cluster, List)}.
@@ -57,11 +57,11 @@ public interface ClusterSplitHandler<C extends Comparable<C>, T> {
      * @param newRecord the new record triggering the clustering.
      * @return false if this handler would like to leave the cluster in-place.
      */
-    default boolean checkSplit(final @NonNull Collection<? extends Cluster<C, T>> clusters,
+    default boolean checkSplit(final @NonNull Collection<? extends Cluster<C, T, I>> clusters,
             final @NonNull T newRecord) {
         if (clusters.size() > 1) {
-            final Cluster<C, T> mainCluster = Clusters.getContainingCluster(clusters.iterator(), newRecord);
-            final List<Cluster<C, T>> splitParts = clusters.stream().filter(c -> c != mainCluster).collect(
+            final Cluster<C, T, I> mainCluster = Clusters.getContainingCluster(clusters.iterator(), newRecord);
+            final List<Cluster<C, T, I>> splitParts = clusters.stream().filter(c -> c != mainCluster).collect(
                     Collectors.toList());
             return this.clusterSplit(mainCluster, splitParts);
         }

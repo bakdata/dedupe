@@ -37,19 +37,19 @@ import lombok.NonNull;
  * @implSpec A clustering which also splits previously outputted clusters should give users a chance to react to the
  * changes with a {@link ClusterSplitHandler}. Implementations may decide to adhere to the non-splitting wish or not.
  */
-public interface Clustering<C extends Comparable<C>, T> {
+public interface Clustering<C extends Comparable<C>, T, I> {
     /**
      * Creates a coherent {@link Cluster} from a list of {@link ClassifiedCandidate}s.
      *
      * @param classifiedCandidates the list of classified candidates.
      * @return a coherent cluster over the classified candidates.
      */
-    @NonNull Stream<Cluster<C, T>> cluster(@NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates);
+    @NonNull Stream<Cluster<C, T, I>> cluster(@NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates);
 
     /**
      * The cluster id generator that is used to create an id for a new cluster.
      *
      * @return the cluster id generator.
      */
-    @NonNull Function<? super Iterable<? extends T>, C> getClusterIdGenerator();
+    @NonNull Function<? super Iterable<? extends I>, C> getClusterIdGenerator();
 }

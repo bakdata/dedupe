@@ -26,6 +26,7 @@ package com.bakdata.dedupe.clustering;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -48,7 +49,7 @@ import lombok.NonNull;
 @Data
 @AllArgsConstructor
 @Builder
-public class Cluster<C extends Comparable<C>, T> {
+public class Cluster<C extends Comparable<C>, T, I> {
     /**
      * The identifier of the cluster. Typically, it is a short string or an integral type.
      */
@@ -88,13 +89,16 @@ public class Cluster<C extends Comparable<C>, T> {
      * @param other the other cluster.
      * @return the newly created merged cluster or this iff {@code other == this}.
      */
-    public @NonNull Cluster<C, T> merge(final @NonNull Function<? super Iterable<? extends T>, ? extends C> idGenerator,
-            final @NonNull Cluster<C, ? extends T> other) {
+    public @NonNull Cluster<C, T, I> merge(final @NonNull Function<? super Iterable<? extends I>, ? extends C> idGenerator,
+            final @NonNull Cluster<C, ? extends T, I> other, final @NonNull Function<? super T, ? extends I> idExtractor) {
         if (other == this) {
             return this;
         }
         final List<T> concatElements = new ArrayList<>(this.elements);
         concatElements.addAll(other.getElements());
-        return new Cluster<>(idGenerator.apply(concatElements), concatElements);
+        final List<I> ids = concatElements.stream()
+                .map(idExtractor)
+                .collect(Collectors.toList());
+        return new Cluster<>(idGenerator.apply(ids), concatElements);
     }
 }

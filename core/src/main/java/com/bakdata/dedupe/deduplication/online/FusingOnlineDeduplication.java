@@ -45,12 +45,12 @@ import lombok.Value;
  */
 @Value
 @Builder
-public class FusingOnlineDeduplication<C extends Comparable<C>, T> implements OnlineDeduplication<T> {
+public class FusingOnlineDeduplication<C extends Comparable<C>, T, I> implements OnlineDeduplication<T> {
     /**
      * The duplicate detection returning duplicate clusters.
      */
     @NonNull
-    OnlineDuplicateDetection<C, T> duplicateDetection;
+    OnlineDuplicateDetection<C, T, I> duplicateDetection;
     /**
      * The fusion implementation that reconciles the clusters into new records.
      */
@@ -65,8 +65,8 @@ public class FusingOnlineDeduplication<C extends Comparable<C>, T> implements On
 
     @Override
     public @NonNull T deduplicate(final @NonNull T newRecord) {
-        final Stream<Cluster<C, T>> clusters = this.duplicateDetection.detectDuplicates(newRecord);
-        final Iterator<Cluster<C, T>> clusterIterator = clusters.iterator();
+        final Stream<Cluster<C, T, I>> clusters = this.duplicateDetection.detectDuplicates(newRecord);
+        final Iterator<Cluster<C, T, I>> clusterIterator = clusters.iterator();
 
         if (!clusterIterator.hasNext()) {
             return newRecord;

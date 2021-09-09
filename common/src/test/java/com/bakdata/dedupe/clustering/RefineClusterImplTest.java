@@ -78,20 +78,21 @@ class RefineClusterImplTest {
     @Test
     void shouldCusterHeuristically() {
         final AtomicLong atomicLong = new AtomicLong();
-        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person, String> refineCluster = RefineClusterImpl.<Long, Person, String>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(personList -> atomicLong.getAndIncrement())
                 .maxSmallClusterSize(4)
+                .idExtractor(Person::getId)
                 .build();
 
-        final Cluster<Long, Person> personCluster = new Cluster<>(0L, List.of(
+        final Cluster<Long, Person, String> personCluster = new Cluster<>(0L, List.of(
                 new Person("1", "Joanna"),
                 new Person("2", "Joanna"),
                 new Person("3", "Joanna"),
                 new Person("4", "Joanna"),
                 new Person("5", "Joanna")
         ));
-        final Stream<Cluster<Long, Person>> actual = refineCluster.refine(Stream.of(personCluster), Stream.empty());
+        final Stream<Cluster<Long, Person, String>> actual = refineCluster.refine(Stream.of(personCluster), Stream.empty());
         assertThat(actual)
                 .hasSize(1)
                 .allSatisfy(cluster -> assertThat(cluster).isEqualTo(personCluster));
@@ -100,20 +101,21 @@ class RefineClusterImplTest {
     @Test
     void shouldCluster() {
         final AtomicLong atomicLong = new AtomicLong();
-        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person, String> refineCluster = RefineClusterImpl.<Long, Person, String>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(personList -> atomicLong.getAndIncrement())
                 .maxSmallClusterSize(10)
+                .idExtractor(Person::getId)
                 .build();
 
-        final Cluster<Long, Person> personCluster = new Cluster<>(0L, List.of(
+        final Cluster<Long, Person, String> personCluster = new Cluster<>(0L, List.of(
                 new Person("1", "Joanna"),
                 new Person("2", "Joanna"),
                 new Person("3", "Joanna"),
                 new Person("4", "Joanna"),
                 new Person("5", "Joanna")
         ));
-        final Stream<Cluster<Long, Person>> actual = refineCluster.refine(Stream.of(personCluster), Stream.empty());
+        final Stream<Cluster<Long, Person, String>> actual = refineCluster.refine(Stream.of(personCluster), Stream.empty());
         assertThat(actual)
                 .hasSize(1)
                 .allSatisfy(cluster -> assertThat(cluster).isEqualTo(personCluster));
@@ -122,20 +124,21 @@ class RefineClusterImplTest {
     @Test
     void shouldRefineCluster() {
         final AtomicLong atomicLong = new AtomicLong();
-        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person, String> refineCluster = RefineClusterImpl.<Long, Person, String>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(personList -> atomicLong.getAndIncrement())
                 .maxSmallClusterSize(10)
+                .idExtractor(Person::getId)
                 .build();
 
-        final Cluster<Long, Person> personCluster = new Cluster<>(0L, List.of(
+        final Cluster<Long, Person, String> personCluster = new Cluster<>(0L, List.of(
                 new Person("1", "Joanna"),
                 new Person("2", "Joanna"),
                 new Person("3", "Johanna"),
                 new Person("4", "Johanna"),
                 new Person("5", "Johanna")
         ));
-        final Stream<Cluster<Long, Person>> actual = refineCluster.refine(Stream.of(personCluster), Stream.empty());
+        final Stream<Cluster<Long, Person, String>> actual = refineCluster.refine(Stream.of(personCluster), Stream.empty());
         assertThat(actual)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(
@@ -151,20 +154,21 @@ class RefineClusterImplTest {
     @Test
     void shouldRefineClusterHeuristically() {
         final AtomicLong atomicLong = new AtomicLong();
-        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person, String> refineCluster = RefineClusterImpl.<Long, Person, String>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(personList -> atomicLong.getAndIncrement())
                 .maxSmallClusterSize(4)
+                .idExtractor(Person::getId)
                 .build();
 
-        final Cluster<Long, Person> personCluster = new Cluster<>(0L, List.of(
+        final Cluster<Long, Person, String> personCluster = new Cluster<>(0L, List.of(
                 new Person("1", "Joanna"),
                 new Person("2", "Joanna"),
                 new Person("3", "Johanna"),
                 new Person("4", "Johanna"),
                 new Person("5", "Johanna")
         ));
-        final Stream<Cluster<Long, Person>> actual = refineCluster.refine(Stream.of(personCluster), Stream.empty());
+        final Stream<Cluster<Long, Person, String>> actual = refineCluster.refine(Stream.of(personCluster), Stream.empty());
         assertThat(actual)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(
@@ -180,9 +184,9 @@ class RefineClusterImplTest {
     @Test
     void shouldDoGreedyClustering() {
 
-        final RefineClusterImpl.GreedyClustering<Long, Integer> greedyClustering = new RefineClusterImpl.GreedyClustering<>();
+        final RefineClusterImpl.GreedyClustering<Long, Integer, String> greedyClustering = new RefineClusterImpl.GreedyClustering<>();
 
-        final Cluster<Long, Integer> cluster = new Cluster<>(1L, List.of(1, 2, 3, 4, 5));
+        final Cluster<Long, Integer, String> cluster = new Cluster<>(1L, List.of(1, 2, 3, 4, 5));
         // Note: Greedy clustering is sensitive to the order, in which edges are added.
         // Changing the order may lead to different results.
         final int[] ints = greedyClustering.greedyCluster(cluster, List.of(
@@ -199,9 +203,9 @@ class RefineClusterImplTest {
     @Test
     void shouldSplitInGreedyClustering() {
 
-        final RefineClusterImpl.GreedyClustering<Long, Integer> greedyClustering = new RefineClusterImpl.GreedyClustering<>();
+        final RefineClusterImpl.GreedyClustering<Long, Integer, String> greedyClustering = new RefineClusterImpl.GreedyClustering<>();
 
-        final Cluster<Long, Integer> cluster = new Cluster<>(1L, List.of(1, 2, 3, 4, 5));
+        final Cluster<Long, Integer, String> cluster = new Cluster<>(1L, List.of(1, 2, 3, 4, 5));
         final int[] ints = greedyClustering.greedyCluster(cluster, List.of(
                 WeightedEdge.of(0, 1, 1.0),
                 WeightedEdge.of(2, 4, 1.0),
@@ -219,15 +223,16 @@ class RefineClusterImplTest {
                 .map(i -> new Person(i.toString(), "Joanna"))
                 .collect(Collectors.toList());
 
-        final Cluster<Long, Person> cluster = new Cluster<>(1L, firstCluster);
+        final Cluster<Long, Person, String> cluster = new Cluster<>(1L, firstCluster);
 
-        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person, String> refineCluster = RefineClusterImpl.<Long, Person, String>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(list -> 0L)
                 .maxSmallClusterSize(120)
+                .idExtractor(Person::getId)
                 .build();
 
-        final Stream<Cluster<Long, Person>> stream = refineCluster.refine(Stream.of(cluster), Stream.of());
+        final Stream<Cluster<Long, Person, String>> stream = refineCluster.refine(Stream.of(cluster), Stream.of());
         assertThat(stream).hasSize(1);
     }
 

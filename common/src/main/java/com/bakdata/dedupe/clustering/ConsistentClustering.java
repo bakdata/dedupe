@@ -58,11 +58,11 @@ import lombok.Value;
 @Value
 @Builder
 public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparable<? super I>>
-        implements Clustering<C, T> {
+        implements Clustering<C, T, I> {
     /**
      * The wrapped clustering.
      */
-    @NonNull Clustering<C, T> clustering;
+    @NonNull Clustering<C, T, I> clustering;
     /**
      * A function to extract the id of a record for efficient, internal data structures.
      */
@@ -77,8 +77,8 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
             .build();
 
     @Override
-    public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
-        final @NonNull List<Cluster<C, T>> clusters =
+    public @NonNull Stream<Cluster<C, T, I>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
+        final @NonNull List<Cluster<C, T, I>> clusters =
                 this.clustering.cluster(classifiedCandidates).collect(Collectors.toList());
         if (clusters.isEmpty()) {
             return clusters.stream();
@@ -92,7 +92,7 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
                 .flatMap(cluster -> cluster.getElements().stream()
                         .map(record -> new OnlineCandidate<>(firstElement, record)))
                 .collect(Collectors.toList());
-        final List<Cluster<C, T>> transitiveClusters = this.getInternalClosure().clusterDuplicates(candidates);
+        final List<Cluster<C, T, I>> transitiveClusters = this.getInternalClosure().clusterDuplicates(candidates);
         if (transitiveClusters.size() != 1) {
             throw new IllegalStateException("Expected exactly one transitive cluster");
         }
@@ -104,12 +104,12 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
     }
 
     @Override
-    public @NonNull Function<? super Iterable<? extends T>, C> getClusterIdGenerator() {
+    public @NonNull Function<? super Iterable<? extends I>, C> getClusterIdGenerator() {
         return this.clustering.getClusterIdGenerator();
     }
 
-    private boolean noRecordInIndex(final Collection<? extends Cluster<C, T>> clusters) {
-        final Map<I, Cluster<C, T>> clusterIndex = this.getInternalClosure().getClusterIndex();
+    private boolean noRecordInIndex(final Collection<? extends Cluster<C, T, I>> clusters) {
+        final Map<I, Cluster<C, T, I>> clusterIndex = this.getInternalClosure().getClusterIndex();
         return clusters.stream().flatMap(cluster -> cluster.getElements().stream())
                 .allMatch(record -> clusterIndex.get(this.idExtractor.apply(record)) == null);
     }

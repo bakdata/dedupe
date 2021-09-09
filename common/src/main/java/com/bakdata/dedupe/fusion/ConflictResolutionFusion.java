@@ -72,7 +72,7 @@ public class ConflictResolutionFusion<R> implements Fusion<R> {
             this.sources.stream().collect(Collectors.toMap(Source::getName, s -> s));
 
     @Override
-    public FusedValue<R> fuse(final Cluster<?, R> cluster) {
+    public FusedValue<R> fuse(final Cluster<?, R, ?> cluster) {
         if (cluster.size() < 2) {
             return new FusedValue<>(cluster.get(0), cluster, List.of());
         }

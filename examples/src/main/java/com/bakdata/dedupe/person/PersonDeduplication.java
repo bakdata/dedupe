@@ -37,7 +37,7 @@ public class PersonDeduplication implements OnlineDeduplication<Person> {
 
     public PersonDeduplication(final PossibleDuplicateHandler<Person> possibleDuplicateHandler,
             final IncompleteFusionHandler<Person> incompleteFusionHandler) {
-        this.deduplication = FusingOnlineDeduplication.<Long, Person>builder()
+        this.deduplication = FusingOnlineDeduplication.<Long, Person, String>builder()
                 .duplicateDetection(new PersonDuplicateDetection(possibleDuplicateHandler))
                 .fusion(new PersonFusion())
                 .incompleteFusionHandler(incompleteFusionHandler)

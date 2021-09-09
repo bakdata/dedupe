@@ -30,12 +30,12 @@ import lombok.Value;
 import lombok.experimental.Delegate;
 
 @Value
-public class PersonDuplicateDetection implements OnlineDuplicateDetection<Long, Person> {
+public class PersonDuplicateDetection implements OnlineDuplicateDetection<Long, Person, String> {
     @Delegate
-    OnlineDuplicateDetection<Long, Person> duplicateDetection;
+    OnlineDuplicateDetection<Long, Person, String> duplicateDetection;
 
     public PersonDuplicateDetection(final PossibleDuplicateHandler<Person> possibleDuplicateHandler) {
-        this.duplicateDetection = OnlinePairBasedDuplicateDetection.<Long, Person>builder()
+        this.duplicateDetection = OnlinePairBasedDuplicateDetection.<Long, Person, String>builder()
                 .classifier(new PersonClassifier())
                 .candidateSelection(new PersonCandidateSelection())
                 .clustering(new PersonClustering())

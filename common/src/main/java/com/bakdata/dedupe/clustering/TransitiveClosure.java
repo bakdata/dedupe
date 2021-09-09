@@ -50,7 +50,7 @@ import lombok.Value;
 @Value
 @Builder
 public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>>
-        implements Clustering<C, T> {
+        implements Clustering<C, T, I> {
     /**
      * Extracts the id of the record. Used for {@link #clusterIndex}.
      */
@@ -60,16 +60,16 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
      * A function to generate the id for newly formed clusters.
      */
     @NonNull
-    Function<? super Iterable<? extends T>, C> clusterIdGenerator;
+    Function<? super Iterable<? extends I>, C> clusterIdGenerator;
     /**
      * A backing map for old clusters. Defaults to an in-memory map if null during construction.
      */
     @NonNull
     @Builder.Default
-    Map<I, Cluster<C, T>> clusterIndex = new HashMap<>();
+    Map<I, Cluster<C, T, I>> clusterIndex = new HashMap<>();
 
     @Override
-    public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
+    public @NonNull Stream<Cluster<C, T, I>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
         final List<Candidate<T>> duplicates = classifiedCandidates
                 .filter(classifiedCandidate -> classifiedCandidate.getClassificationResult().getClassification()
                         == Classification.DUPLICATE)
@@ -78,16 +78,19 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
         return this.clusterDuplicates(duplicates).stream();
     }
 
-    public List<Cluster<C, T>> clusterDuplicates(final Iterable<? extends Candidate<T>> duplicates) {
-        final Collection<Cluster<C, T>> changedClusters = new ArrayList<>();
+    public List<Cluster<C, T, I>> clusterDuplicates(final Iterable<? extends Candidate<T>> duplicates) {
+        final Collection<Cluster<C, T, I>> changedClusters = new ArrayList<>();
 
         // apply in-memory transitive closure
         for (final Candidate<T> candidate : duplicates) {
-            final Cluster<C, T> leftCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord1()));
-            final Cluster<C, T> rightCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord2()));
+            final Cluster<C, T, I> leftCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord1()));
+            final Cluster<C, T, I> rightCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord2()));
             if (leftCluster == null && rightCluster == null) {
                 final List<T> elements = Lists.newArrayList(candidate.getRecord1(), candidate.getRecord2());
-                final Cluster<C, T> newCluster = new Cluster<>(this.clusterIdGenerator.apply(elements), elements);
+                final List<? extends I> ids = elements.stream()
+                        .map(this.idExtractor)
+                        .collect(Collectors.toList());
+                final Cluster<C, T, I> newCluster = new Cluster<>(this.clusterIdGenerator.apply(ids), elements);
                 this.clusterIndex.put(this.idExtractor.apply(candidate.getRecord1()), newCluster);
                 this.clusterIndex.put(this.idExtractor.apply(candidate.getRecord2()), newCluster);
                 changedClusters.add(newCluster);
@@ -104,7 +107,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
                 this.clusterIndex.put(this.idExtractor.apply(candidate.getRecord2()), leftCluster);
                 changedClusters.add(leftCluster);
             } else { // merge
-                final Cluster<C, T> merged = leftCluster.merge(this.clusterIdGenerator, rightCluster);
+                final Cluster<C, T, I> merged = leftCluster.merge(this.clusterIdGenerator, rightCluster, idExtractor);
                 for (final T person : merged.getElements()) {
                     this.clusterIndex.put(this.idExtractor.apply(person), merged);
                 }
@@ -121,11 +124,11 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
                 .collect(Collectors.toList());
     }
 
-    public void removeCluster(final Cluster<C, ? extends T> cluster) {
+    public void removeCluster(final Cluster<C, ? extends T, I> cluster) {
         final List<I> recordIds = cluster.getElements().stream()
                 .map(this.idExtractor)
                 .collect(Collectors.toList());
-        final Map<C, List<Cluster<C, T>>> referredCluster = recordIds.stream()
+        final Map<C, List<Cluster<C, T, I>>> referredCluster = recordIds.stream()
                 .map(this.clusterIndex::get)
                 .collect(Collectors.groupingBy(Cluster::getId));
         if (referredCluster.size() != 1 || !referredCluster.values().iterator().next().get(0).equals(cluster)) {

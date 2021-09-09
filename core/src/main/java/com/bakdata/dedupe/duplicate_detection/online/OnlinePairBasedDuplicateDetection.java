@@ -53,7 +53,7 @@ import lombok.Value;
  */
 @Value
 @Builder
-public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> implements OnlineDuplicateDetection<C, T> {
+public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T, I> implements OnlineDuplicateDetection<C, T, I> {
     /**
      * The candidate selection which returns a list of candidates for each new record.
      */
@@ -68,7 +68,7 @@ public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> imple
      * Clustering algorithm to form coherent clusters of labeled duplicates.
      */
     @NonNull
-    Clustering<C, T> clustering;
+    Clustering<C, T, I> clustering;
     /**
      * A callback for {@link Classification#POSSIBLE_DUPLICATE}s.
      */
@@ -76,7 +76,7 @@ public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> imple
     PossibleDuplicateHandler<T> possibleDuplicateHandler = PossibleDuplicateHandler.keep();
 
     @Override
-    public @NonNull Stream<Cluster<C, T>> detectDuplicates(final @NonNull T newRecord) {
+    public @NonNull Stream<Cluster<C, T, I>> detectDuplicates(final @NonNull T newRecord) {
         final Stream<Candidate<T>> candidates = this.candidateSelection.selectCandidates(newRecord);
         final List<ClassifiedCandidate<T>> classified = candidates
                 .map(candidate -> new ClassifiedCandidate<>(candidate, this.classifier.classify(candidate)))

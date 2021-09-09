@@ -30,6 +30,7 @@ import com.bakdata.dedupe.classifier.ClassifiedCandidate;
 import com.bakdata.dedupe.classifier.Classifier;
 import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -52,7 +53,7 @@ import lombok.Value;
  * @param <I> the type of the record id.
  */
 @Value
-public class OracleClustering<C extends Comparable<C>, T, I> implements Clustering<C, T> {
+public class OracleClustering<C extends Comparable<C>, T, I> implements Clustering<C, T, I> {
     private static final ClassificationResult DUPLICATE =
             ClassificationResult.builder().classification(Classification.DUPLICATE).confidence(1).build();
     private static final ClassificationResult NON_DUPLICATE =
@@ -61,7 +62,7 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
      * The gold clustering. Every record pair inside a cluster is deemed duplicate and every record pair across clusters
      * is a non-duplicate.
      */
-    @NonNull Collection<Cluster<C, T>> goldClusters;
+    @NonNull Collection<Cluster<C, T, I>> goldClusters;
     /**
      * A function to extract the id of a record for efficient, internal data structures.
      */
@@ -71,13 +72,13 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
      * Lookup from record id to gold cluster.
      */
     @Getter(value = AccessLevel.PRIVATE, lazy = true)
-    Map<I, Cluster<C, T>> idToCluster = this.goldClusters.stream()
+    Map<I, Cluster<C, T, I>> idToCluster = this.goldClusters.stream()
             .flatMap(cluster -> cluster.getElements().stream()
                     .map(e -> new AbstractMap.SimpleEntry<>(this.idExtractor.apply(e), cluster)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     @Override
-    public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
+    public @NonNull Stream<Cluster<C, T, I>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
         return classifiedCandidates
                 .map(candidate -> this.getIdToCluster()
                         .get(this.idExtractor.apply(candidate.getCandidate().getRecord2())))
@@ -86,10 +87,16 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
     }
 
     @Override
-    public @NonNull Function<Iterable<? extends T>, C> getClusterIdGenerator() {
-        final Map<@NonNull Iterable<? extends T>, C> elementsToClusterId =
+    public @NonNull Function<Iterable<? extends I>, C> getClusterIdGenerator() {
+        final Map<@NonNull Iterable<? extends I>, C> elementsToClusterId =
                 this.goldClusters.stream()
-                        .collect(Collectors.toMap(Cluster::getElements, Cluster::getId));
+                        .collect(Collectors.toMap(this::getElementIds, Cluster::getId));
         return elementsToClusterId::get;
+    }
+
+    private List<I> getElementIds(final Cluster<C, ? extends T, I> ctiCluster) {
+        return ctiCluster.getElements().stream()
+                .map(this.idExtractor)
+                .collect(Collectors.toList());
     }
 }
