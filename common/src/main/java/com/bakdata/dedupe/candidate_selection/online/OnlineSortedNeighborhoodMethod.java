@@ -77,9 +77,6 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
     @Builder.Default
     int defaultWindowSize = 10;
 
-    @Singular
-    List<SortingKey<T, ?>> sortingKeys;
-
     public @NonNull Stream<Candidate<T>> selectCandidates(final @NonNull T newRecord) {
         return this.passes.stream().flatMap(pass -> pass.getCandidates(newRecord).stream()).distinct();
     }
@@ -135,6 +132,58 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
                     .collect(Collectors.toList());
             this.index.computeIfAbsent(newKey, key -> new LinkedList<>()).add(newRecord);
             return candidates;
+        }
+    }
+
+    @SuppressWarnings({"WeakerAccess", "unused"})
+    public static class OnlineSortedNeighborhoodMethodBuilder<T> {
+        /**
+         * Adds a new pass with the given sorting key.
+         *
+         * @param sortingKey the sorting key to use in this pass.
+         * @param windowSize the window size {@code >= 2}.
+         * @return this
+         */
+        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKey(final SortingKey<T, ?> sortingKey,
+                final int windowSize) {
+            return this.pass(new Pass<>(sortingKey, windowSize));
+        }
+
+        /**
+         * Adds a new pass with the given sorting key and the {@link #defaultWindowSize(int)}.
+         *
+         * @param sortingKey the sorting key to use in this pass.
+         * @return this
+         */
+        public OnlineSortedNeighborhoodMethodBuilder<T> sortingKey(final SortingKey<T, ?> sortingKey) {
+            return this.sortingKey(sortingKey, this.defaultWindowSize$value);
+        }
+
+        /**
+         * Adds new passes with the given list of sorting keys and the {@link #defaultWindowSize(int)}.
+         *
+         * @param sortingKeys the sorting keys to use in these passes.
+         * @return this
+         */
+        public @NonNull OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(
+                final @NonNull Iterable<SortingKey<T, ?>> sortingKeys) {
+            return this.sortingKeys(sortingKeys, this.defaultWindowSize$value);
+        }
+
+        /**
+         * Adds new passes with the given list of sorting keys and the given window size.
+         *
+         * @param sortingKeys the sorting keys to use in these passes.
+         * @param windowSize the window size {@code >= 2}.
+         * @return this
+         */
+        public @NonNull OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(
+                final @NonNull Iterable<SortingKey<T, ?>> sortingKeys,
+                final int windowSize) {
+            for (final SortingKey<T, ?> sortingKey : sortingKeys) {
+                this.sortingKey(sortingKey, windowSize);
+            }
+            return this;
         }
     }
 }
