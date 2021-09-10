@@ -37,6 +37,14 @@ configure<org.hildan.github.changelog.plugin.GitHubChangelogExtension> {
     sinceTag = findProperty("changelog.sinceTag")?.toString()
 }
 
+tasks.register<Javadoc>("javadoc") {
+    options {
+        (this as StandardJavadocDocletOptions).apply {
+            tags("apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:", "sneaky:a:Sneaky Throws:")
+        }
+    }
+}
+
 subprojects {
     apply(plugin = "java-library")
     apply(plugin = "io.freefair.lombok")
@@ -44,6 +52,14 @@ subprojects {
     configure<JavaPluginConvention> {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    tasks.withType<Javadoc> {
+        options {
+            (this as StandardJavadocDocletOptions).apply {
+                tags("apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:", "sneaky:a:Sneaky Throws:")
+            }
+        }
     }
 
     dependencies {
