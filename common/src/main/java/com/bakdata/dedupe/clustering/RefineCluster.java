@@ -36,7 +36,7 @@ import lombok.NonNull;
  * @param <I> the type of the record id.
  */
 public interface RefineCluster<C extends Comparable<C>, T, I> {
-    Stream<Cluster<C, T, I>> refine(final Stream<? extends Cluster<C, T, I>> clusters,
+    Stream<Cluster<C, T>> refine(final Stream<? extends Cluster<C, T>> clusters,
             final @NonNull Stream<ClassifiedCandidate<T>> knownClassifications);
 
     /**

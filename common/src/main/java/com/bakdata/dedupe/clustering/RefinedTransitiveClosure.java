@@ -58,7 +58,7 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
      * A backing map for old clusters. Defaults to an in-memory map if null during construction.
      */
     @NonNull
-    Map<I, Cluster<C, T, I>> oldClusterIndex;
+    Map<I, Cluster<C, T>> oldClusterIndex;
 
     /**
      * The underlying transitive closure implementation.
@@ -80,7 +80,7 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
 
     @java.beans.ConstructorProperties({"refineCluster", "oldClusterIndex", "closure", "idExtractor", "splitHandler"})
     RefinedTransitiveClosure(final @NonNull RefineCluster<C, T, I> refineCluster,
-            final Map<I, Cluster<C, T, I>> oldClusterIndex, final TransitiveClosure<C, T, I> closure,
+            final Map<I, Cluster<C, T>> oldClusterIndex, final TransitiveClosure<C, T, I> closure,
             final @NonNull Function<? super T, ? extends I> idExtractor, final ClusterSplitHandler splitHandler) {
         this.refineCluster = refineCluster;
         this.oldClusterIndex = oldClusterIndex != null ? oldClusterIndex : new HashMap<>();
@@ -91,17 +91,17 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
     }
 
     @Override
-    public @NonNull Stream<Cluster<C, T, I>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
+    public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
         final List<ClassifiedCandidate<T>> materializedCandidates = classifiedCandidates.collect(Collectors.toList());
-        final @NonNull Stream<Cluster<C, T, I>> transitiveClosure = this.closure.cluster(materializedCandidates.stream());
-        final Stream<Cluster<C, T, I>> refinedClusters =
+        final @NonNull Stream<Cluster<C, T>> transitiveClosure = this.closure.cluster(materializedCandidates.stream());
+        final Stream<Cluster<C, T>> refinedClusters =
                 this.refineCluster.refine(transitiveClosure, materializedCandidates.stream());
 
-        final Collection<Cluster<C, T, I>> changedClusters = new ArrayList<>();
+        final Collection<Cluster<C, T>> changedClusters = new ArrayList<>();
         refinedClusters.forEach(refinedCluster -> {
             for (final T element : refinedCluster.getElements()) {
                 final I id = this.idExtractor.apply(element);
-                final Cluster<C, T, I> oldCluster = this.oldClusterIndex.put(id, refinedCluster);
+                final Cluster<C, T> oldCluster = this.oldClusterIndex.put(id, refinedCluster);
                 if (oldCluster == null || !this.getClusterId(oldCluster).equals(this.getClusterId(refinedCluster))) {
                     changedClusters.add(refinedCluster);
                 }
@@ -116,7 +116,7 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
                 .map(clusters -> clusters.get(0));
     }
 
-    private I getClusterId(final Cluster<C, ? extends T, I> cluster) {
+    private I getClusterId(final Cluster<C, ? extends T> cluster) {
         return this.idExtractor.apply(cluster.get(0));
     }
 

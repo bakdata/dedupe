@@ -45,12 +45,11 @@ import lombok.NonNull;
  *
  * @param <C> the type of the cluster id.
  * @param <T> the type of the records.
- * @param <I> the type of the record id.
  */
 @Data
 @AllArgsConstructor
 @Builder
-public class Cluster<C extends Comparable<C>, T, I> {
+public class Cluster<C extends Comparable<C>, T> {
     /**
      * The identifier of the cluster. Typically, it is a short string or an integral type.
      */
@@ -91,10 +90,10 @@ public class Cluster<C extends Comparable<C>, T, I> {
      * @param other the other cluster.
      * @return the newly created merged cluster or this iff {@code other == this}.
      */
-    public @NonNull Cluster<C, T, I> merge(
+    public @NonNull <I> Cluster<C, T> merge(
             final @NonNull Function<? super Iterable<? extends I>, ? extends C> idGenerator,
             final @NonNull Function<? super T, ? extends I> idExtractor,
-            final @NonNull Cluster<C, ? extends T, I> other) {
+            final @NonNull Cluster<C, ? extends T> other) {
         if (other == this) {
             return this;
         }

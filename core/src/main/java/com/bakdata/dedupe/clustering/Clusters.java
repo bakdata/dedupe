@@ -47,11 +47,11 @@ public class Clusters {
      *
      * @throws IllegalArgumentException when there is not exactly one cluster
      */
-    public static <C extends Comparable<C>, T, I> @NonNull Cluster<C, T, I> getContainingCluster(
-            final @NonNull Iterator<? extends Cluster<C, T, I>> clusterIterator, final @NonNull T record) {
-        final Spliterator<Cluster<C, T, I>> spliterator =
+    public static <C extends Comparable<C>, T> @NonNull Cluster<C, T> getContainingCluster(
+            final @NonNull Iterator<? extends Cluster<C, T>> clusterIterator, final @NonNull T record) {
+        final Spliterator<Cluster<C, T>> spliterator =
                 Spliterators.spliteratorUnknownSize(clusterIterator, ORDERED | NONNULL);
-        final List<? extends Cluster<C, T, I>> mainClusters = StreamSupport.stream(spliterator, false)
+        final List<? extends Cluster<C, T>> mainClusters = StreamSupport.stream(spliterator, false)
                 .filter(c -> c.contains(record))
                 .collect(Collectors.toList());
         if (mainClusters.size() != 1) {

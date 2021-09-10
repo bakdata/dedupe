@@ -44,7 +44,7 @@ public interface Clustering<C extends Comparable<C>, T, I> {
      * @param classifiedCandidates the list of classified candidates.
      * @return a coherent cluster over the classified candidates.
      */
-    @NonNull Stream<Cluster<C, T, I>> cluster(@NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates);
+    @NonNull Stream<Cluster<C, T>> cluster(@NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates);
 
     /**
      * The cluster id generator that is used to create an id for a new cluster.

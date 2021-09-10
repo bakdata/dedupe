@@ -62,7 +62,7 @@ public interface DuplicateDetection<C extends Comparable<C>, T, I> {
      * @param records the records of which the duplicates should be detected.
      * @return the duplicates with the above mentioned limitation for online algorithms.
      */
-    @NonNull Stream<Cluster<C, T, I>> detectDuplicates(@NonNull Stream<? extends T> records);
+    @NonNull Stream<Cluster<C, T>> detectDuplicates(@NonNull Stream<? extends T> records);
 
     /**
      * Finds all duplicates in the dataset.
@@ -72,7 +72,7 @@ public interface DuplicateDetection<C extends Comparable<C>, T, I> {
      * @param records the records of which the duplicates should be detected.
      * @return all duplicates of the dataset.
      */
-    default @NonNull Collection<Cluster<C, T, I>> materializeDuplicates(final @NonNull Iterable<? extends T> records) {
+    default @NonNull Collection<Cluster<C, T>> materializeDuplicates(final @NonNull Iterable<? extends T> records) {
         return this.detectDuplicates(StreamUtil.stream(records))
                 .collect(Collectors.toMap(Cluster::getId, Function.identity()))
                 .values();

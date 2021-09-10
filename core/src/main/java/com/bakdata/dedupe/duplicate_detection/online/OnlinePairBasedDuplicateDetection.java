@@ -78,7 +78,7 @@ public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T, I> im
     PossibleDuplicateHandler<T> possibleDuplicateHandler = PossibleDuplicateHandler.keep();
 
     @Override
-    public @NonNull Stream<Cluster<C, T, I>> detectDuplicates(final @NonNull T newRecord) {
+    public @NonNull Stream<Cluster<C, T>> detectDuplicates(final @NonNull T newRecord) {
         final Stream<Candidate<T>> candidates = this.candidateSelection.selectCandidates(newRecord);
         final List<ClassifiedCandidate<T>> classified = candidates
                 .map(candidate -> new ClassifiedCandidate<>(candidate, this.classifier.classify(candidate)))

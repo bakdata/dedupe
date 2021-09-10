@@ -53,10 +53,10 @@ public interface OnlineDuplicateDetection<C extends Comparable<C>, T, I> extends
      * @implSpec It is assumed that the cluster containing the new record will be the first element of the cluster
      * list.
      */
-    @NonNull Stream<Cluster<C, T, I>> detectDuplicates(@NonNull T newRecord);
+    @NonNull Stream<Cluster<C, T>> detectDuplicates(@NonNull T newRecord);
 
     @Override
-    default @NonNull Stream<Cluster<C, T, I>> detectDuplicates(final @NonNull Stream<? extends T> records) {
+    default @NonNull Stream<Cluster<C, T>> detectDuplicates(final @NonNull Stream<? extends T> records) {
         return records
                 .flatMap(this::detectDuplicates)
                 .collect(Collectors.toMap(Cluster::getId, Function.identity()))

@@ -65,8 +65,8 @@ public class FusingOnlineDeduplication<C extends Comparable<C>, T, I> implements
 
     @Override
     public @NonNull T deduplicate(final @NonNull T newRecord) {
-        final Stream<Cluster<C, T, I>> clusters = this.duplicateDetection.detectDuplicates(newRecord);
-        final Iterator<Cluster<C, T, I>> clusterIterator = clusters.iterator();
+        final Stream<Cluster<C, T>> clusters = this.duplicateDetection.detectDuplicates(newRecord);
+        final Iterator<Cluster<C, T>> clusterIterator = clusters.iterator();
 
         if (!clusterIterator.hasNext()) {
             return newRecord;

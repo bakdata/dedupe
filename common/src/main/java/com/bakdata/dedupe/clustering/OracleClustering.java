@@ -62,7 +62,7 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
      * The gold clustering. Every record pair inside a cluster is deemed duplicate and every record pair across clusters
      * is a non-duplicate.
      */
-    @NonNull Collection<Cluster<C, T, I>> goldClusters;
+    @NonNull Collection<Cluster<C, T>> goldClusters;
     /**
      * A function to extract the id of a record for efficient, internal data structures.
      */
@@ -72,13 +72,13 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
      * Lookup from record id to gold cluster.
      */
     @Getter(value = AccessLevel.PRIVATE, lazy = true)
-    Map<I, Cluster<C, T, I>> idToCluster = this.goldClusters.stream()
+    Map<I, Cluster<C, T>> idToCluster = this.goldClusters.stream()
             .flatMap(cluster -> cluster.getElements().stream()
                     .map(e -> new AbstractMap.SimpleEntry<>(this.idExtractor.apply(e), cluster)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     @Override
-    public @NonNull Stream<Cluster<C, T, I>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
+    public @NonNull Stream<Cluster<C, T>> cluster(final @NonNull Stream<ClassifiedCandidate<T>> classifiedCandidates) {
         return classifiedCandidates
                 .map(candidate -> this.getIdToCluster()
                         .get(this.idExtractor.apply(candidate.getCandidate().getRecord2())))
@@ -94,7 +94,7 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
         return elementsToClusterId::get;
     }
 
-    private List<I> getElementIds(final Cluster<C, ? extends T, I> ctiCluster) {
+    private List<I> getElementIds(final Cluster<C, ? extends T> ctiCluster) {
         return ctiCluster.getElements().stream()
                 .map(this.idExtractor)
                 .collect(Collectors.toList());
