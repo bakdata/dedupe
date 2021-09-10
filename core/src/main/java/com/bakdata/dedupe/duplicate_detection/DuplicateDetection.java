@@ -47,6 +47,7 @@ import lombok.NonNull;
  *
  * @param <C> the type of the cluster id
  * @param <T> the type of the record
+ * @param <I> the type of the record id
  * @implSpec It is assumed that the cluster containing the new record will be the first element of the cluster list.
  */
 @FunctionalInterface

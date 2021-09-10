@@ -72,6 +72,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @param <C> the type of the cluster id.
  * @param <T> the type of the record.
+ * @param <I> the type of the record id.
  */
 @Value
 @Builder
@@ -96,7 +97,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
     @NonNull
     Function<? super Iterable<? extends I>, C> clusterIdGenerator;
     /**
-     * A function to extract an id from an element.
+     * A function to extract the id of a record.
      */
     @NonNull
     Function<? super T, I> idExtractor;

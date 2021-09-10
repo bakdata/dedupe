@@ -107,7 +107,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
                 this.clusterIndex.put(this.idExtractor.apply(candidate.getRecord2()), leftCluster);
                 changedClusters.add(leftCluster);
             } else { // merge
-                final Cluster<C, T, I> merged = leftCluster.merge(this.clusterIdGenerator, rightCluster, idExtractor);
+                final Cluster<C, T, I> merged = leftCluster.merge(this.clusterIdGenerator, this.idExtractor, rightCluster);
                 for (final T person : merged.getElements()) {
                     this.clusterIndex.put(this.idExtractor.apply(person), merged);
                 }

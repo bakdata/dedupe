@@ -33,6 +33,7 @@ import lombok.NonNull;
  *
  * @param <C> the type of the cluster id.
  * @param <T> the type of the record.
+ * @param <I> the type of the record id.
  */
 public interface RefineCluster<C extends Comparable<C>, T, I> {
     Stream<Cluster<C, T, I>> refine(final Stream<? extends Cluster<C, T, I>> clusters,
@@ -43,4 +44,10 @@ public interface RefineCluster<C extends Comparable<C>, T, I> {
      */
     @NonNull
     Function<? super Iterable<? extends I>, C> getClusterIdGenerator();
+
+    /**
+     * A function to extract the id of a record.
+     */
+    @NonNull
+    Function<? super T, I> getIdExtractor();
 }

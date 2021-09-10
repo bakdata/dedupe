@@ -100,7 +100,7 @@ class MatchingSimilarityTest {
 
         final double sim =
                 stableMatching.getSimilarity(null, men, SimilarityContext.builder().build());
-        assertThat(sim).isEqualTo(SimilarityMeasure.unknown());
+        assertThat(sim).isNaN();
     }
 
     @Test
@@ -112,7 +112,7 @@ class MatchingSimilarityTest {
 
         final double sim =
                 stableMatching.getSimilarity(men, null, SimilarityContext.builder().build());
-        assertThat(sim).isEqualTo(SimilarityMeasure.unknown());
+        assertThat(sim).isNaN();
     }
 
     @Test
@@ -122,6 +122,6 @@ class MatchingSimilarityTest {
 
         final double sim =
                 stableMatching.getSimilarity(null, null, SimilarityContext.builder().build());
-        assertThat(sim).isEqualTo(SimilarityMeasure.unknown());
+        assertThat(sim).isNaN();
     }
 }
