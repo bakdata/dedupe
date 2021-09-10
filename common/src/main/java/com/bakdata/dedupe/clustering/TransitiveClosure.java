@@ -87,9 +87,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
             final Cluster<C, T> rightCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord2()));
             if (leftCluster == null && rightCluster == null) {
                 final List<T> elements = Lists.newArrayList(candidate.getRecord1(), candidate.getRecord2());
-                final List<? extends I> ids = elements.stream()
-                        .map(this.idExtractor)
-                        .collect(Collectors.toList());
+                final List<I> ids = this.getElementIds(elements);
                 final Cluster<C, T> newCluster = new Cluster<>(this.clusterIdGenerator.apply(ids), elements);
                 this.clusterIndex.put(this.idExtractor.apply(candidate.getRecord1()), newCluster);
                 this.clusterIndex.put(this.idExtractor.apply(candidate.getRecord2()), newCluster);
@@ -124,10 +122,14 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
                 .collect(Collectors.toList());
     }
 
-    public void removeCluster(final Cluster<C, ? extends T> cluster) {
-        final List<I> recordIds = cluster.getElements().stream()
+    private List<I> getElementIds(final Collection<? extends T> elements) {
+        return elements.stream()
                 .map(this.idExtractor)
                 .collect(Collectors.toList());
+    }
+
+    public void removeCluster(final Cluster<C, ? extends T> cluster) {
+        final List<I> recordIds = this.getElementIds(cluster.getElements());
         final Map<C, List<Cluster<C, T>>> referredCluster = recordIds.stream()
                 .map(this.clusterIndex::get)
                 .collect(Collectors.groupingBy(Cluster::getId));
