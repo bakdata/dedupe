@@ -55,7 +55,7 @@ import lombok.Value;
  */
 @Value
 @Builder
-public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T, I> implements OnlineDuplicateDetection<C, T, I> {
+public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T, I> implements OnlineDuplicateDetection<C, T> {
     /**
      * The candidate selection which returns a list of candidates for each new record.
      */

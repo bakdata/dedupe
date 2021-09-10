@@ -34,11 +34,11 @@ import lombok.NonNull;
  * deduplication.
  */
 @FunctionalInterface
-public interface ClusterSplitHandler<C extends Comparable<C>, T, I> {
+public interface ClusterSplitHandler<C extends Comparable<C>, T> {
     /**
      * Do nothing.
      */
-    static <C extends Comparable<C>, T, I> @NonNull ClusterSplitHandler<C, T, I> ignore() {
+    static <C extends Comparable<C>, T> @NonNull ClusterSplitHandler<C, T> ignore() {
         return (mainCluster, splitParts) -> true;
     }
 

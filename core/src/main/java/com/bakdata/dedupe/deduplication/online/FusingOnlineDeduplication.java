@@ -45,12 +45,12 @@ import lombok.Value;
  */
 @Value
 @Builder
-public class FusingOnlineDeduplication<C extends Comparable<C>, T, I> implements OnlineDeduplication<T> {
+public class FusingOnlineDeduplication<C extends Comparable<C>, T> implements OnlineDeduplication<T> {
     /**
      * The duplicate detection returning duplicate clusters.
      */
     @NonNull
-    OnlineDuplicateDetection<C, T, I> duplicateDetection;
+    OnlineDuplicateDetection<C, T> duplicateDetection;
     /**
      * The fusion implementation that reconciles the clusters into new records.
      */

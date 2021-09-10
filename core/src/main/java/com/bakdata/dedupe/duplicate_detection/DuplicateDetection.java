@@ -47,11 +47,10 @@ import lombok.NonNull;
  *
  * @param <C> the type of the cluster id
  * @param <T> the type of the record
- * @param <I> the type of the record id
  * @implSpec It is assumed that the cluster containing the new record will be the first element of the cluster list.
  */
 @FunctionalInterface
-public interface DuplicateDetection<C extends Comparable<C>, T, I> {
+public interface DuplicateDetection<C extends Comparable<C>, T> {
     /**
      * Finds all duplicates in the dataset.
      * <p>Note that for online algorithms, duplicates will be repeatedly emitted with updated

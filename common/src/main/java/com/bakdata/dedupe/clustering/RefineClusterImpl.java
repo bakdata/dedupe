@@ -192,7 +192,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
         final List<WeightedEdge> duplicates = this.toWeightedEdges(knownClassifications, cluster);
         final int desiredNumEdges = triangularNumber(this.maxSmallClusterSize);
 
-        final GreedyClustering<C, T, I> greedyClustering = new GreedyClustering<>();
+        final GreedyClustering<C, T> greedyClustering = new GreedyClustering<>();
         return greedyClustering.greedyCluster(cluster, this.getWeightedEdges(cluster, duplicates, desiredNumEdges));
     }
 
@@ -425,7 +425,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
         }
     }
 
-    static class GreedyClustering<C extends Comparable<C>, T, I> {
+    static class GreedyClustering<C extends Comparable<C>, T> {
 
         int[] greedyCluster(final Cluster<C, T> cluster, final @NonNull Collection<? extends WeightedEdge> edges) {
 

@@ -184,7 +184,7 @@ class RefineClusterImplTest {
     @Test
     void shouldDoGreedyClustering() {
 
-        final RefineClusterImpl.GreedyClustering<Long, Integer, String> greedyClustering = new RefineClusterImpl.GreedyClustering<>();
+        final RefineClusterImpl.GreedyClustering<Long, Integer> greedyClustering = new RefineClusterImpl.GreedyClustering<>();
 
         final Cluster<Long, Integer> cluster = new Cluster<>(1L, List.of(1, 2, 3, 4, 5));
         // Note: Greedy clustering is sensitive to the order, in which edges are added.
@@ -203,7 +203,7 @@ class RefineClusterImplTest {
     @Test
     void shouldSplitInGreedyClustering() {
 
-        final RefineClusterImpl.GreedyClustering<Long, Integer, String> greedyClustering = new RefineClusterImpl.GreedyClustering<>();
+        final RefineClusterImpl.GreedyClustering<Long, Integer> greedyClustering = new RefineClusterImpl.GreedyClustering<>();
 
         final Cluster<Long, Integer> cluster = new Cluster<>(1L, List.of(1, 2, 3, 4, 5));
         final int[] ints = greedyClustering.greedyCluster(cluster, List.of(

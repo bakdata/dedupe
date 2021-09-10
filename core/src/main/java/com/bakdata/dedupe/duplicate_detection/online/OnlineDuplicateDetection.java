@@ -44,7 +44,7 @@ import lombok.NonNull;
  * @implSpec It is assumed that the cluster containing the new record will be the first element of the cluster list.
  */
 @FunctionalInterface
-public interface OnlineDuplicateDetection<C extends Comparable<C>, T, I> extends DuplicateDetection<C, T, I> {
+public interface OnlineDuplicateDetection<C extends Comparable<C>, T> extends DuplicateDetection<C, T> {
     /**
      * Returns all clusters that have been affected by the new record.
      *
