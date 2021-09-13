@@ -40,6 +40,9 @@ configure<org.hildan.github.changelog.plugin.GitHubChangelogExtension> {
 tasks.register<Javadoc>("javadoc") {
     options {
         (this as StandardJavadocDocletOptions).apply {
+            addBooleanOption("html5", true)
+            stylesheetFile(File("${rootDir}/src/main/javadoc/assertj-javadoc.css"))
+            addBooleanOption("-allow-script-in-comments", true)
             tags("apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:", "sneaky:a:Sneaky Throws:")
         }
     }
@@ -57,6 +60,9 @@ subprojects {
     tasks.withType<Javadoc> {
         options {
             (this as StandardJavadocDocletOptions).apply {
+                addBooleanOption("html5", true)
+                stylesheetFile(File("${rootDir}/src/main/javadoc/assertj-javadoc.css"))
+                addBooleanOption("-allow-script-in-comments", true)
                 tags("apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:", "sneaky:a:Sneaky Throws:")
             }
         }
