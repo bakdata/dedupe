@@ -74,9 +74,10 @@ subprojects {
     }
 
     dependencies {
-        "testImplementation"("org.junit.jupiter:junit-jupiter-api:5.7.2")
-        "testImplementation"("org.junit.jupiter:junit-jupiter-params:5.7.2")
-        "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+        val junitVersion = "5.7.2"
+        "testImplementation"("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+        "testImplementation"("org.junit.jupiter:junit-jupiter-params:$junitVersion")
+        "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
         "testImplementation"(group = "org.assertj", name = "assertj-core", version = "3.20.2")
     }
 }
