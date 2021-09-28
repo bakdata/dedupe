@@ -30,6 +30,7 @@ import com.bakdata.dedupe.classifier.ClassifiedCandidate;
 import com.bakdata.dedupe.classifier.Classifier;
 import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -52,7 +53,7 @@ import lombok.Value;
  * @param <I> the type of the record id.
  */
 @Value
-public class OracleClustering<C extends Comparable<C>, T, I> implements Clustering<C, T> {
+public class OracleClustering<C extends Comparable<C>, T, I> implements Clustering<C, T, I> {
     private static final ClassificationResult DUPLICATE =
             ClassificationResult.builder().classification(Classification.DUPLICATE).confidence(1).build();
     private static final ClassificationResult NON_DUPLICATE =
@@ -86,10 +87,16 @@ public class OracleClustering<C extends Comparable<C>, T, I> implements Clusteri
     }
 
     @Override
-    public @NonNull Function<Iterable<? extends T>, C> getClusterIdGenerator() {
-        final Map<@NonNull Iterable<? extends T>, C> elementsToClusterId =
+    public @NonNull Function<Iterable<? extends I>, C> getClusterIdGenerator() {
+        final Map<@NonNull Iterable<? extends I>, C> elementsToClusterId =
                 this.goldClusters.stream()
-                        .collect(Collectors.toMap(Cluster::getElements, Cluster::getId));
+                        .collect(Collectors.toMap(this::getElementIds, Cluster::getId));
         return elementsToClusterId::get;
+    }
+
+    private List<I> getElementIds(final Cluster<C, ? extends T> ctiCluster) {
+        return ctiCluster.getElements().stream()
+                .map(this.idExtractor)
+                .collect(Collectors.toList());
     }
 }

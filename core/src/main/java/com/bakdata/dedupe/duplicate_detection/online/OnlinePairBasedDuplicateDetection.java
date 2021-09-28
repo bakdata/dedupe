@@ -49,11 +49,13 @@ import lombok.Value;
  * com.bakdata.dedupe.clustering.Clusters}s</li>
  * </ul>
  *
+ * @param <C> the type of the cluster id
  * @param <T> the type of the record
+ * @param <I> the type of the record id
  */
 @Value
 @Builder
-public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> implements OnlineDuplicateDetection<C, T> {
+public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T, I> implements OnlineDuplicateDetection<C, T> {
     /**
      * The candidate selection which returns a list of candidates for each new record.
      */
@@ -68,7 +70,7 @@ public class OnlinePairBasedDuplicateDetection<C extends Comparable<C>, T> imple
      * Clustering algorithm to form coherent clusters of labeled duplicates.
      */
     @NonNull
-    Clustering<C, T> clustering;
+    Clustering<C, T, I> clustering;
     /**
      * A callback for {@link Classification#POSSIBLE_DUPLICATE}s.
      */

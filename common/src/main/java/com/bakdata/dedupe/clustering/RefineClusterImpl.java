@@ -54,6 +54,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
+import lombok.With;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.Wither;
 import org.apache.commons.lang3.tuple.Pair;
@@ -71,10 +72,11 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @param <C> the type of the cluster id.
  * @param <T> the type of the record.
+ * @param <I> the type of the record id.
  */
 @Value
 @Builder
-public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineCluster<C, T> {
+public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineCluster<C, T, I> {
     private static final Random RANDOM = ThreadLocalRandom.current();
 
     /**
@@ -93,7 +95,12 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
      * A function to generate the id for newly split clusters.
      */
     @NonNull
-    Function<? super Iterable<? extends T>, C> clusterIdGenerator;
+    Function<? super Iterable<? extends I>, C> clusterIdGenerator;
+    /**
+     * A function to extract the id of a record.
+     */
+    @NonNull
+    Function<? super T, I> idExtractor;
 
     private static double getWeight(final ClassificationResult classificationResult) {
         switch (classificationResult.getClassification()) {
@@ -281,7 +288,13 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
                 .collect(Collectors
                         .groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
         return subClusters.values().stream()
-                .map(records -> new Cluster<>(this.clusterIdGenerator.apply(records), records));
+                .map(records -> new Cluster<>(this.clusterIdGenerator.apply(this.getElementIds(records)), records));
+    }
+
+    private List<I> getElementIds(final Collection<? extends T> records) {
+        return records.stream()
+                .map(this.idExtractor)
+                .collect(Collectors.toList());
     }
 
     private List<WeightedEdge> addRandomEdges(final @NonNull List<? extends WeightedEdge> edges,
@@ -389,7 +402,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T> implements RefineClus
         int left;
         @Getter
         int right;
-        @Wither
+        @With
         double weight;
 
         static WeightedEdge of(final int leftIndex, final int rightIndex, final double weight) {

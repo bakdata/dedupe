@@ -35,7 +35,7 @@ public class PersonDuplicateDetection implements OnlineDuplicateDetection<Long, 
     OnlineDuplicateDetection<Long, Person> duplicateDetection;
 
     public PersonDuplicateDetection(final PossibleDuplicateHandler<Person> possibleDuplicateHandler) {
-        this.duplicateDetection = OnlinePairBasedDuplicateDetection.<Long, Person>builder()
+        this.duplicateDetection = OnlinePairBasedDuplicateDetection.<Long, Person, String>builder()
                 .classifier(new PersonClassifier())
                 .candidateSelection(new PersonCandidateSelection())
                 .clustering(new PersonClustering())

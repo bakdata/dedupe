@@ -32,19 +32,20 @@ import lombok.Value;
 import lombok.experimental.Delegate;
 
 @Value
-public class PersonClustering implements Clustering<Long, Person> {
-    RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+public class PersonClustering implements Clustering<Long, Person, String> {
+    RefineClusterImpl<Long, Person, String> refineCluster = RefineClusterImpl.<Long, Person, String>builder()
             .classifier(new PersonClassifier())
             .clusterIdGenerator(ClusterIdGenerators.longGenerator())
+            .idExtractor(Person::getId)
             .build();
 
-    Clustering<Long, Person> refinedTransitiveClosure = RefinedTransitiveClosure.<Long, Person, String>builder()
+    Clustering<Long, Person, String> refinedTransitiveClosure = RefinedTransitiveClosure.<Long, Person, String>builder()
             .refineCluster(this.refineCluster)
             .idExtractor(Person::getId)
             .build();
 
     @Delegate
-    Clustering<Long, Person> clustering = ConsistentClustering.<Long, Person, String>builder()
+    Clustering<Long, Person, String> clustering = ConsistentClustering.<Long, Person, String>builder()
             .clustering(this.refinedTransitiveClosure)
             .idExtractor(Person::getId)
             .build();

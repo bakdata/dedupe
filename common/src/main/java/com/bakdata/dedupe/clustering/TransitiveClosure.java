@@ -50,7 +50,7 @@ import lombok.Value;
 @Value
 @Builder
 public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>>
-        implements Clustering<C, T> {
+        implements Clustering<C, T, I> {
     /**
      * Extracts the id of the record. Used for {@link #clusterIndex}.
      */
@@ -60,7 +60,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
      * A function to generate the id for newly formed clusters.
      */
     @NonNull
-    Function<? super Iterable<? extends T>, C> clusterIdGenerator;
+    Function<? super Iterable<? extends I>, C> clusterIdGenerator;
     /**
      * A backing map for old clusters. Defaults to an in-memory map if null during construction.
      */
@@ -87,7 +87,8 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
             final Cluster<C, T> rightCluster = this.clusterIndex.get(this.idExtractor.apply(candidate.getRecord2()));
             if (leftCluster == null && rightCluster == null) {
                 final List<T> elements = Lists.newArrayList(candidate.getRecord1(), candidate.getRecord2());
-                final Cluster<C, T> newCluster = new Cluster<>(this.clusterIdGenerator.apply(elements), elements);
+                final List<I> ids = this.getElementIds(elements);
+                final Cluster<C, T> newCluster = new Cluster<>(this.clusterIdGenerator.apply(ids), elements);
                 this.clusterIndex.put(this.idExtractor.apply(candidate.getRecord1()), newCluster);
                 this.clusterIndex.put(this.idExtractor.apply(candidate.getRecord2()), newCluster);
                 changedClusters.add(newCluster);
@@ -104,7 +105,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
                 this.clusterIndex.put(this.idExtractor.apply(candidate.getRecord2()), leftCluster);
                 changedClusters.add(leftCluster);
             } else { // merge
-                final Cluster<C, T> merged = leftCluster.merge(this.clusterIdGenerator, rightCluster);
+                final Cluster<C, T> merged = leftCluster.merge(this.clusterIdGenerator, this.idExtractor, rightCluster);
                 for (final T person : merged.getElements()) {
                     this.clusterIndex.put(this.idExtractor.apply(person), merged);
                 }
@@ -121,10 +122,14 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
                 .collect(Collectors.toList());
     }
 
-    public void removeCluster(final Cluster<C, ? extends T> cluster) {
-        final List<I> recordIds = cluster.getElements().stream()
+    private List<I> getElementIds(final Collection<? extends T> elements) {
+        return elements.stream()
                 .map(this.idExtractor)
                 .collect(Collectors.toList());
+    }
+
+    public void removeCluster(final Cluster<C, ? extends T> cluster) {
+        final List<I> recordIds = this.getElementIds(cluster.getElements());
         final Map<C, List<Cluster<C, T>>> referredCluster = recordIds.stream()
                 .map(this.clusterIndex::get)
                 .collect(Collectors.groupingBy(Cluster::getId));

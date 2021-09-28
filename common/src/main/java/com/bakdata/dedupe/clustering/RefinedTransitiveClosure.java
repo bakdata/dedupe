@@ -47,12 +47,12 @@ import lombok.Value;
 @Value
 @Builder
 public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comparable<? super I>>
-        implements Clustering<C, T> {
+        implements Clustering<C, T, I> {
     /**
      * The configured refineCluster.
      */
     @NonNull
-    RefineCluster<C, T> refineCluster;
+    RefineCluster<C, T, I> refineCluster;
 
     /**
      * A backing map for old clusters. Defaults to an in-memory map if null during construction.
@@ -79,7 +79,7 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
     ClusterSplitHandler splitHandler;
 
     @java.beans.ConstructorProperties({"refineCluster", "oldClusterIndex", "closure", "idExtractor", "splitHandler"})
-    RefinedTransitiveClosure(final @NonNull RefineCluster<C, T> refineCluster,
+    RefinedTransitiveClosure(final @NonNull RefineCluster<C, T, I> refineCluster,
             final Map<I, Cluster<C, T>> oldClusterIndex, final TransitiveClosure<C, T, I> closure,
             final @NonNull Function<? super T, ? extends I> idExtractor, final ClusterSplitHandler splitHandler) {
         this.refineCluster = refineCluster;
@@ -121,7 +121,7 @@ public class RefinedTransitiveClosure<C extends Comparable<C>, T, I extends Comp
     }
 
     @Override
-    public @NonNull Function<? super Iterable<? extends T>, C> getClusterIdGenerator() {
+    public @NonNull Function<? super Iterable<? extends I>, C> getClusterIdGenerator() {
         return this.closure.getClusterIdGenerator();
     }
 

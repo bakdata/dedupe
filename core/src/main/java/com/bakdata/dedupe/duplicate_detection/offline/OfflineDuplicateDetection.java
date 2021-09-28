@@ -23,6 +23,8 @@
  */
 package com.bakdata.dedupe.duplicate_detection.offline;
 
+import com.bakdata.dedupe.duplicate_detection.DuplicateDetection;
+
 /**
  * The offline duplicate detection returns all duplicate records within a dataset.
  * <p>Consider a dataset of records A, B, A' and A, A' being duplicates. The final result will be [(A, A'), (B)].</p>
@@ -33,6 +35,5 @@ package com.bakdata.dedupe.duplicate_detection.offline;
  * documented.
  */
 @FunctionalInterface
-public interface OfflineDuplicateDetection<C extends Comparable<C>, T>
-        extends com.bakdata.dedupe.duplicate_detection.DuplicateDetection<C, T> {
+public interface OfflineDuplicateDetection<C extends Comparable<C>, T> extends DuplicateDetection<C, T> {
 }

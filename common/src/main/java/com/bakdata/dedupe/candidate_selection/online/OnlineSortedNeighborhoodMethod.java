@@ -156,7 +156,7 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
          * @return this
          */
         public OnlineSortedNeighborhoodMethodBuilder<T> sortingKey(final SortingKey<T, ?> sortingKey) {
-            return this.sortingKey(sortingKey, this.defaultWindowSize);
+            return this.sortingKey(sortingKey, this.defaultWindowSize$value);
         }
 
         /**
@@ -167,7 +167,7 @@ public class OnlineSortedNeighborhoodMethod<T> implements OnlineCandidateSelecti
          */
         public @NonNull OnlineSortedNeighborhoodMethodBuilder<T> sortingKeys(
                 final @NonNull Iterable<SortingKey<T, ?>> sortingKeys) {
-            return this.sortingKeys(sortingKeys, this.defaultWindowSize);
+            return this.sortingKeys(sortingKeys, this.defaultWindowSize$value);
         }
 
         /**

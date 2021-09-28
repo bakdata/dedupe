@@ -78,10 +78,11 @@ class RefineClusterImplTest {
     @Test
     void shouldCusterHeuristically() {
         final AtomicLong atomicLong = new AtomicLong();
-        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person, String> refineCluster = RefineClusterImpl.<Long, Person, String>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(personList -> atomicLong.getAndIncrement())
                 .maxSmallClusterSize(4)
+                .idExtractor(Person::getId)
                 .build();
 
         final Cluster<Long, Person> personCluster = new Cluster<>(0L, List.of(
@@ -100,10 +101,11 @@ class RefineClusterImplTest {
     @Test
     void shouldCluster() {
         final AtomicLong atomicLong = new AtomicLong();
-        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person, String> refineCluster = RefineClusterImpl.<Long, Person, String>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(personList -> atomicLong.getAndIncrement())
                 .maxSmallClusterSize(10)
+                .idExtractor(Person::getId)
                 .build();
 
         final Cluster<Long, Person> personCluster = new Cluster<>(0L, List.of(
@@ -122,10 +124,11 @@ class RefineClusterImplTest {
     @Test
     void shouldRefineCluster() {
         final AtomicLong atomicLong = new AtomicLong();
-        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person, String> refineCluster = RefineClusterImpl.<Long, Person, String>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(personList -> atomicLong.getAndIncrement())
                 .maxSmallClusterSize(10)
+                .idExtractor(Person::getId)
                 .build();
 
         final Cluster<Long, Person> personCluster = new Cluster<>(0L, List.of(
@@ -151,10 +154,11 @@ class RefineClusterImplTest {
     @Test
     void shouldRefineClusterHeuristically() {
         final AtomicLong atomicLong = new AtomicLong();
-        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person, String> refineCluster = RefineClusterImpl.<Long, Person, String>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(personList -> atomicLong.getAndIncrement())
                 .maxSmallClusterSize(4)
+                .idExtractor(Person::getId)
                 .build();
 
         final Cluster<Long, Person> personCluster = new Cluster<>(0L, List.of(
@@ -221,10 +225,11 @@ class RefineClusterImplTest {
 
         final Cluster<Long, Person> cluster = new Cluster<>(1L, firstCluster);
 
-        final RefineClusterImpl<Long, Person> refineCluster = RefineClusterImpl.<Long, Person>builder()
+        final RefineClusterImpl<Long, Person, String> refineCluster = RefineClusterImpl.<Long, Person, String>builder()
                 .classifier(new CustomClassifier())
                 .clusterIdGenerator(list -> 0L)
                 .maxSmallClusterSize(120)
+                .idExtractor(Person::getId)
                 .build();
 
         final Stream<Cluster<Long, Person>> stream = refineCluster.refine(Stream.of(cluster), Stream.of());

@@ -58,11 +58,11 @@ import lombok.Value;
 @Value
 @Builder
 public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparable<? super I>>
-        implements Clustering<C, T> {
+        implements Clustering<C, T, I> {
     /**
      * The wrapped clustering.
      */
-    @NonNull Clustering<C, T> clustering;
+    @NonNull Clustering<C, T, I> clustering;
     /**
      * A function to extract the id of a record for efficient, internal data structures.
      */
@@ -104,7 +104,7 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
     }
 
     @Override
-    public @NonNull Function<? super Iterable<? extends T>, C> getClusterIdGenerator() {
+    public @NonNull Function<? super Iterable<? extends I>, C> getClusterIdGenerator() {
         return this.clustering.getClusterIdGenerator();
     }
 
