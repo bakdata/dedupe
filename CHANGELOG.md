@@ -1,5 +1,12 @@
 # Change Log
 
+## [2.1.0](https://github.com/bakdata/dedupe/tree/2.1.0) (2021-09-28)
+[Full Changelog](https://github.com/bakdata/dedupe/compare/2.0.3...2.1.0)
+
+**Merged pull requests:**
+
+-  Make cluster id generator only use ids [\#24](https://github.com/bakdata/dedupe/pull/24) ([@philipp94831](https://github.com/philipp94831))
+
 ## [2.0.3](https://github.com/bakdata/dedupe/tree/2.0.3) (2019-11-06)
 [Full Changelog](https://github.com/bakdata/dedupe/compare/2.0.2...2.0.3)
 
