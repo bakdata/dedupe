@@ -2,7 +2,7 @@ description = "Typical implementation of similarity measures, duplicate detectio
 
 dependencies {
     "api"(project(":core"))
-    "api"(group = "org.apache.commons", name = "commons-text", version = "1.11.0")
+    "api"(group = "org.apache.commons", name = "commons-text", version = "1.9")
     "api"(group = "commons-codec", name = "commons-codec", version = "1.16.0")
 
     implementation(group = "com.google.guava", name = "guava", version = "33.0.0-jre")

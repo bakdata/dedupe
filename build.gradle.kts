@@ -55,7 +55,7 @@ subprojects {
     apply(plugin = "java-library")
     apply(plugin = "io.freefair.lombok")
 
-    configure<JavaPluginConvention> {
+    configure<JavaPluginExtension> {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
