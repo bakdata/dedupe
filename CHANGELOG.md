@@ -1,21 +1,28 @@
 # Change Log
 
+## [2.1.1](https://github.com/bakdata/dedupe/tree/2.1.1) (2024-01-29)
+[View commits](https://github.com/bakdata/dedupe/compare/2.1.0...2.1.1)
+
+**Merged pull requests:**
+
+- Update dependencies [\#26](https://github.com/bakdata/dedupe/pull/26) ([@philipp94831](https://github.com/philipp94831))
+
 ## [2.1.0](https://github.com/bakdata/dedupe/tree/2.1.0) (2021-09-28)
-[Full Changelog](https://github.com/bakdata/dedupe/compare/2.0.3...2.1.0)
+[View commits](https://github.com/bakdata/dedupe/compare/2.0.3...2.1.0)
 
 **Merged pull requests:**
 
 -  Make cluster id generator only use ids [\#24](https://github.com/bakdata/dedupe/pull/24) ([@philipp94831](https://github.com/philipp94831))
 
 ## [2.0.3](https://github.com/bakdata/dedupe/tree/2.0.3) (2019-11-06)
-[Full Changelog](https://github.com/bakdata/dedupe/compare/2.0.2...2.0.3)
+[View commits](https://github.com/bakdata/dedupe/compare/2.0.2...2.0.3)
 
 **Merged pull requests:**
 
 - Handle clusters with more than 128 elements [\#23](https://github.com/bakdata/dedupe/pull/23) ([@SvenLehmann](https://github.com/SvenLehmann))
 
 ## [2.0.2](https://github.com/bakdata/dedupe/tree/2.0.2) (2019-10-07)
-[Full Changelog](https://github.com/bakdata/dedupe/compare/2.0.1...2.0.2)
+[View commits](https://github.com/bakdata/dedupe/compare/2.0.1...2.0.2)
 
 **Merged pull requests:**
 
@@ -24,7 +31,7 @@
 - Fix right candidate selection for large cluster refinement [\#20](https://github.com/bakdata/dedupe/pull/20) ([@fapaul](https://github.com/fapaul))
 
 ## [2.0.1](https://github.com/bakdata/dedupe/tree/2.0.1) (2019-09-11)
-[Full Changelog](https://github.com/bakdata/dedupe/compare/2.0.0...2.0.1)
+[View commits](https://github.com/bakdata/dedupe/compare/2.0.0...2.0.1)
 
 **Closed issues:**
 
@@ -36,7 +43,7 @@
 - Feature multi token example [\#12](https://github.com/bakdata/dedupe/pull/12) ([@AHeise](https://github.com/AHeise))
 
 ## [2.0.0](https://github.com/bakdata/dedupe/tree/2.0.0) (2019-03-21)
-[Full Changelog](https://github.com/bakdata/dedupe/compare/1.1.0...2.0.0)
+[View commits](https://github.com/bakdata/dedupe/compare/1.1.0...2.0.0)
 
 **Closed issues:**
 
@@ -56,17 +63,18 @@
 - General cleanup [\#7](https://github.com/bakdata/dedupe/pull/7) ([@AHeise](https://github.com/AHeise))
 
 ## [1.1.0](https://github.com/bakdata/dedupe/tree/1.1.0) (2019-02-12)
-[Full Changelog](https://github.com/bakdata/dedupe/compare/1.0.1...1.1.0)
+[View commits](https://github.com/bakdata/dedupe/compare/1.0.1...1.1.0)
 
 **Implemented enhancements:**
 
 - Add github release and changelog [\#6](https://github.com/bakdata/dedupe/issues/6)
 
 ## [1.0.1](https://github.com/bakdata/dedupe/tree/1.0.1) (2019-01-11)
-[Full Changelog](https://github.com/bakdata/dedupe/compare/1.0.0...1.0.1)
+[View commits](https://github.com/bakdata/dedupe/compare/1.0.0...1.0.1)
 
 
 ## [1.0.0](https://github.com/bakdata/dedupe/tree/1.0.0) (2018-12-17)
+[View commits](https://github.com/bakdata/dedupe/compare/5ebf487890bb4d3bd2967e0be9979e58a16ee9ff...1.0.0)
 
 **Merged pull requests:**
 
