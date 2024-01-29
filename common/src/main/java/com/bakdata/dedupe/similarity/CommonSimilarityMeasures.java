@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 bakdata GmbH
+ * Copyright (c) 2024 bakdata
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.text.similarity.EditDistance;
-import org.apache.commons.text.similarity.JaroWinklerDistance;
+import org.apache.commons.text.similarity.JaroWinklerSimilarity;
 import org.apache.commons.text.similarity.SimilarityScore;
 
 
@@ -121,8 +121,8 @@ public class CommonSimilarityMeasures {
             }
 
             @Override
-            public double getNonNullSimilarity(@NonNull T left, @NonNull T right, @NonNull SimilarityContext context) {
-                return new JaroWinklerDistance().apply(left, right).doubleValue();
+            public double getNonNullSimilarity(@NonNull final T left, @NonNull final T right, @NonNull final SimilarityContext context) {
+                return new JaroWinklerSimilarity().apply(left, right).doubleValue();
             }
         };
     }
