@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 bakdata GmbH
+ * Copyright (c) 2025 bakdata
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +68,8 @@ public class ConflictResolutionFusion<R> implements Fusion<R> {
     @NonNull ConflictResolution<R, R> rootResolution;
 
     @Getter(value = AccessLevel.PRIVATE, lazy = true)
-    @NonNull Map<@NonNull String, @NonNull Source> sourceByName =
+    @NonNull
+    Map<String, Source> sourceByName =
             this.sources.stream().collect(Collectors.toMap(Source::getName, s -> s));
 
     @Override

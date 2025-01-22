@@ -1,10 +1,8 @@
 plugins {
-    // release
-    id("net.researchgate.release") version "3.0.2"
-    id("com.bakdata.sonar") version "1.1.11"
-    id("com.bakdata.sonatype") version "1.1.11"
-    id("org.hildan.github.changelog") version "1.12.1"
-    id("io.freefair.lombok") version "6.6.3" apply false
+    id("com.bakdata.release") version "1.4.0"
+    id("com.bakdata.sonar") version "1.4.0"
+    id("com.bakdata.sonatype") version "1.4.1"
+    id("io.freefair.lombok") version "8.4" apply false
 }
 
 allprojects {
@@ -31,12 +29,6 @@ configure<com.bakdata.gradle.SonatypeSettings> {
     }
 }
 
-configure<org.hildan.github.changelog.plugin.GitHubChangelogExtension> {
-    githubUser = "bakdata"
-    futureVersionTag = findProperty("changelog.releaseVersion")?.toString()
-    sinceTag = findProperty("changelog.sinceTag")?.toString()
-}
-
 tasks.register<Javadoc>("javadoc") {
     description = "Generates a global javadoc from all the modules"
     options {
@@ -56,8 +48,9 @@ subprojects {
     apply(plugin = "io.freefair.lombok")
 
     configure<JavaPluginExtension> {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(11)
+        }
     }
 
     tasks.withType<Javadoc> {
@@ -78,11 +71,5 @@ subprojects {
         "testImplementation"("org.junit.jupiter:junit-jupiter-params:5.10.1")
         "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:5.10.1")
         "testImplementation"(group = "org.assertj", name = "assertj-core", version = "3.25.1")
-    }
-}
-
-release {
-    git {
-        requireBranch.set("master")
     }
 }
