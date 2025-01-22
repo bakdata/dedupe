@@ -51,12 +51,12 @@ public class ConflictResolutionFusion<R> implements Fusion<R> {
      * #getSources()}.
      */
     @NonNull
-    Function<R, String> sourceExtractor;
+    Function<@NonNull R, String> sourceExtractor;
     /**
      * A function that extract the last modification timestamp of a record. Useful for time-based resolutions.
      */
     @NonNull
-    Function<R, LocalDateTime> lastModifiedExtractor;
+    Function<@NonNull R, @NonNull LocalDateTime> lastModifiedExtractor;
     /**
      * The list of possible sources. Superfluous sources are ignored.
      */
@@ -68,7 +68,8 @@ public class ConflictResolutionFusion<R> implements Fusion<R> {
     @NonNull ConflictResolution<R, R> rootResolution;
 
     @Getter(value = AccessLevel.PRIVATE, lazy = true)
-    @NonNull Map<@NonNull String, @NonNull Source> sourceByName =
+    @NonNull
+    Map<String, Source> sourceByName =
             this.sources.stream().collect(Collectors.toMap(Source::getName, s -> s));
 
     @Override
