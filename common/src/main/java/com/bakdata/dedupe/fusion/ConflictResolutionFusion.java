@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 bakdata GmbH
+ * Copyright (c) 2025 bakdata
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,12 +51,12 @@ public class ConflictResolutionFusion<R> implements Fusion<R> {
      * #getSources()}.
      */
     @NonNull
-    Function<@NonNull R, String> sourceExtractor;
+    Function<R, String> sourceExtractor;
     /**
      * A function that extract the last modification timestamp of a record. Useful for time-based resolutions.
      */
     @NonNull
-    Function<@NonNull R, @NonNull LocalDateTime> lastModifiedExtractor;
+    Function<R, LocalDateTime> lastModifiedExtractor;
     /**
      * The list of possible sources. Superfluous sources are ignored.
      */
