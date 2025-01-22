@@ -1,11 +1,22 @@
+buildscript {
+    repositories {
+        maven {
+            url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
+        }
+    }
+    dependencies {
+        classpath("com.bakdata.gradle:sonar:1.5.3-SNAPSHOT")
+        classpath("com.bakdata.gradle:release:1.5.3-SNAPSHOT")
+        classpath("com.bakdata.gradle:sonatype:1.5.3-SNAPSHOT")
+    }
+}
+
 plugins {
-    // release
-    id("net.researchgate.release") version "3.0.2"
-    id("com.bakdata.sonar") version "1.1.17"
-    id("com.bakdata.sonatype") version "1.2.1"
-    id("org.hildan.github.changelog") version "2.2.0"
     id("io.freefair.lombok") version "8.4" apply false
 }
+apply(plugin = "com.bakdata.release")
+apply(plugin = "com.bakdata.sonar")
+apply(plugin = "com.bakdata.sonatype")
 
 allprojects {
     group = "com.bakdata.dedupe"
@@ -29,12 +40,6 @@ configure<com.bakdata.gradle.SonatypeSettings> {
             name.set("Philipp Schirmer")
         }
     }
-}
-
-configure<org.hildan.github.changelog.plugin.GitHubChangelogExtension> {
-    githubUser = "bakdata"
-    futureVersionTag = findProperty("changelog.releaseVersion")?.toString()
-    sinceTag = findProperty("changelog.sinceTag")?.toString()
 }
 
 tasks.register<Javadoc>("javadoc") {
@@ -75,15 +80,10 @@ subprojects {
     }
 
     dependencies {
-        "testImplementation"("org.junit.jupiter:junit-jupiter-api:5.10.1")
-        "testImplementation"("org.junit.jupiter:junit-jupiter-params:5.10.1")
-        "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-        "testImplementation"(group = "org.assertj", name = "assertj-core", version = "3.25.1")
-    }
-}
-
-release {
-    git {
-        requireBranch.set("master")
+        val junitVersion = "5.11.4"
+        "testImplementation"("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+        "testImplementation"("org.junit.jupiter:junit-jupiter-params:$junitVersion")
+        "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+        "testImplementation"(group = "org.assertj", name = "assertj-core", version = "3.27.2")
     }
 }
