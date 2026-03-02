@@ -17,18 +17,6 @@ allprojects {
     }
 }
 
-publication {
-    developers {
-        developer {
-            name.set("Arvid Heise")
-            id.set("AHeise")
-        }
-        developer {
-            name.set("Philipp Schirmer")
-        }
-    }
-}
-
 tasks.register<Javadoc>("javadoc") {
     description = "Generates a global javadoc from all the modules"
     options {
@@ -38,7 +26,12 @@ tasks.register<Javadoc>("javadoc") {
             addBooleanOption("-allow-script-in-comments", true)
             header("<script src=\"http://cdn.jsdelivr.net/highlight.js/8.6/highlight.min.js\"></script>")
             footer("<script type=\"text/javascript\">hljs.initHighlightingOnLoad();</script>")
-            tags("apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:", "sneaky:a:Sneaky Throws:")
+            tags(
+                "apiNote:a:API Note:",
+                "implSpec:a:Implementation Requirements:",
+                "implNote:a:Implementation Note:",
+                "sneaky:a:Sneaky Throws:"
+            )
         }
     }
 }
@@ -53,6 +46,18 @@ subprojects {
         }
     }
 
+    publication {
+        developers {
+            developer {
+                name.set("Arvid Heise")
+                id.set("AHeise")
+            }
+            developer {
+                name.set("Philipp Schirmer")
+            }
+        }
+    }
+
     tasks.withType<Javadoc> {
         options {
             (this as StandardJavadocDocletOptions).apply {
@@ -61,7 +66,12 @@ subprojects {
                 addBooleanOption("-allow-script-in-comments", true)
                 header("<script src=\"http://cdn.jsdelivr.net/highlight.js/8.6/highlight.min.js\"></script>")
                 footer("<script type=\"text/javascript\">hljs.initHighlightingOnLoad();</script>")
-                tags("apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:", "sneaky:a:Sneaky Throws:")
+                tags(
+                    "apiNote:a:API Note:",
+                    "implSpec:a:Implementation Requirements:",
+                    "implNote:a:Implementation Note:",
+                    "sneaky:a:Sneaky Throws:"
+                )
             }
         }
     }
