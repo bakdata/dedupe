@@ -1,84 +1,156 @@
-# Change Log
+# Changelog
 
-## [2.1.1](https://github.com/bakdata/dedupe/tree/2.1.1) (2024-01-29)
-[View commits](https://github.com/bakdata/dedupe/compare/2.1.0...2.1.1)
+All notable changes to this project will be documented in this file.
 
-**Merged pull requests:**
+## [2.1.2](https://github.com/bakdata/dedupe/tree/2.1.2) - 2026-03-02
+### What's changed
 
-- Update dependencies [\#26](https://github.com/bakdata/dedupe/pull/26) ([@philipp94831](https://github.com/philipp94831))
+* Migrate azure pipeline to GH-action by @yannick-roeder in [#27](https://github.com/bakdata/dedupe/pull/27)
 
-## [2.1.0](https://github.com/bakdata/dedupe/tree/2.1.0) (2021-09-28)
-[View commits](https://github.com/bakdata/dedupe/compare/2.0.3...2.1.0)
+* Upgrade to Gradle 8.4 by @philipp94831 in [#28](https://github.com/bakdata/dedupe/pull/28)
 
-**Merged pull requests:**
+* Upgrade to Gradle 9.3 by @philipp94831 in [#29](https://github.com/bakdata/dedupe/pull/29)
 
--  Make cluster id generator only use ids [\#24](https://github.com/bakdata/dedupe/pull/24) ([@philipp94831](https://github.com/philipp94831))
+* Configure Dependabot by @philipp94831 in [#30](https://github.com/bakdata/dedupe/pull/30)
 
-## [2.0.3](https://github.com/bakdata/dedupe/tree/2.0.3) (2019-11-06)
-[View commits](https://github.com/bakdata/dedupe/compare/2.0.2...2.0.3)
+* Bump org.apache.commons:commons-text from 1.11.0 to 1.15.0 by @dependabot[bot] in [#34](https://github.com/bakdata/dedupe/pull/34)
 
-**Merged pull requests:**
+* Bump org.apache.commons:commons-csv from 1.10.0 to 1.14.1 by @dependabot[bot] in [#35](https://github.com/bakdata/dedupe/pull/35)
 
-- Handle clusters with more than 128 elements [\#23](https://github.com/bakdata/dedupe/pull/23) ([@SvenLehmann](https://github.com/SvenLehmann))
+* Bump commons-codec:commons-codec from 1.16.0 to 1.21.0 by @dependabot[bot] in [#32](https://github.com/bakdata/dedupe/pull/32)
 
-## [2.0.2](https://github.com/bakdata/dedupe/tree/2.0.2) (2019-10-07)
-[View commits](https://github.com/bakdata/dedupe/compare/2.0.1...2.0.2)
-
-**Merged pull requests:**
-
-- Add RefineCluster interface [\#22](https://github.com/bakdata/dedupe/pull/22) ([@SvenLehmann](https://github.com/SvenLehmann))
-- Fix heuristic cluster refinement [\#21](https://github.com/bakdata/dedupe/pull/21) ([@SvenLehmann](https://github.com/SvenLehmann))
-- Fix right candidate selection for large cluster refinement [\#20](https://github.com/bakdata/dedupe/pull/20) ([@fapaul](https://github.com/fapaul))
-
-## [2.0.1](https://github.com/bakdata/dedupe/tree/2.0.1) (2019-09-11)
-[View commits](https://github.com/bakdata/dedupe/compare/2.0.0...2.0.1)
-
-**Closed issues:**
-
-- SimilarityMeasure\#getSimilarity recurses infinitely if one parameter is null [\#18](https://github.com/bakdata/dedupe/issues/18)
-
-**Merged pull requests:**
-
-- Fix infinite recursion in SimilarityMeasure [\#19](https://github.com/bakdata/dedupe/pull/19) ([@SvenLehmann](https://github.com/SvenLehmann))
-- Feature multi token example [\#12](https://github.com/bakdata/dedupe/pull/12) ([@AHeise](https://github.com/AHeise))
-
-## [2.0.0](https://github.com/bakdata/dedupe/tree/2.0.0) (2019-03-21)
-[View commits](https://github.com/bakdata/dedupe/compare/1.1.0...2.0.0)
-
-**Closed issues:**
-
-- Add javadoc as gh\-page [\#15](https://github.com/bakdata/dedupe/issues/15)
-- Revise common and add javadoc [\#13](https://github.com/bakdata/dedupe/issues/13)
-- Revise API and add javadoc [\#9](https://github.com/bakdata/dedupe/issues/9)
-
-**Implemented enhancements:**
-
-- Refactored API and added javadocs [\#10](https://github.com/bakdata/dedupe/pull/10) ([@AHeise](https://github.com/AHeise))
-- Classification example on multi token field [\#11](https://github.com/bakdata/dedupe/issues/11)
-
-**Merged pull requests:**
-
-- Refactor common [\#16](https://github.com/bakdata/dedupe/pull/16) ([@AHeise](https://github.com/AHeise))
-- Moving from Travis to Azure pipelines [\#8](https://github.com/bakdata/dedupe/pull/8) ([@AHeise](https://github.com/AHeise))
-- General cleanup [\#7](https://github.com/bakdata/dedupe/pull/7) ([@AHeise](https://github.com/AHeise))
-
-## [1.1.0](https://github.com/bakdata/dedupe/tree/1.1.0) (2019-02-12)
-[View commits](https://github.com/bakdata/dedupe/compare/1.0.1...1.1.0)
-
-**Implemented enhancements:**
-
-- Add github release and changelog [\#6](https://github.com/bakdata/dedupe/issues/6)
-
-## [1.0.1](https://github.com/bakdata/dedupe/tree/1.0.1) (2019-01-11)
-[View commits](https://github.com/bakdata/dedupe/compare/1.0.0...1.0.1)
+* Bump com.google.guava:guava from 33.0.0-jre to 33.5.0-jre by @dependabot[bot] in [#33](https://github.com/bakdata/dedupe/pull/33)
 
 
-## [1.0.0](https://github.com/bakdata/dedupe/tree/1.0.0) (2018-12-17)
-[View commits](https://github.com/bakdata/dedupe/compare/5ebf487890bb4d3bd2967e0be9979e58a16ee9ff...1.0.0)
+### New Contributors
+* @dependabot[bot] made their first contribution in [#33](https://github.com/bakdata/dedupe/pull/33)
+* @yannick-roeder made their first contribution in [#27](https://github.com/bakdata/dedupe/pull/27)
 
-**Merged pull requests:**
+**Full Changelog**: https://github.com/bakdata/dedupe/compare/2.1.1...2.1.2
 
-- Setting up travis and sonar [\#2](https://github.com/bakdata/dedupe/pull/2) ([@AHeise](https://github.com/AHeise))
-- Setting up travis and sonar [\#4](https://github.com/bakdata/dedupe/pull/4) ([@AHeise](https://github.com/AHeise))
-- Setting up travis and sonar [\#3](https://github.com/bakdata/dedupe/pull/3) ([@AHeise](https://github.com/AHeise))
-- Add license 1 [\#1](https://github.com/bakdata/dedupe/pull/1) ([@AHeise](https://github.com/AHeise))
+## [2.1.1](https://github.com/bakdata/dedupe/tree/2.1.1) - 2024-01-29
+### What's changed
+
+* Update dependencies by @philipp94831 in [#26](https://github.com/bakdata/dedupe/pull/26)
+
+
+**Full Changelog**: https://github.com/bakdata/dedupe/compare/2.1.0...2.1.1
+
+## [2.1.0](https://github.com/bakdata/dedupe/tree/2.1.0) - 2021-09-28
+### What's changed
+
+* Make cluster id generator only use ids by @philipp94831 in [#24](https://github.com/bakdata/dedupe/pull/24)
+
+
+**Full Changelog**: https://github.com/bakdata/dedupe/compare/2.0.3...2.1.0
+
+## [2.0.3](https://github.com/bakdata/dedupe/tree/2.0.3) - 2019-11-06
+### What's changed
+
+* Handle clusters with more than 128 elements by @SvenLehmann in [#23](https://github.com/bakdata/dedupe/pull/23)
+
+
+**Full Changelog**: https://github.com/bakdata/dedupe/compare/2.0.2...2.0.3
+
+## [2.0.2](https://github.com/bakdata/dedupe/tree/2.0.2) - 2019-10-07
+### What's changed
+
+* Fix right candidate selection for large cluster refinement in [#20](https://github.com/bakdata/dedupe/pull/20)
+
+* Fix heuristic cluster refinement by @SvenLehmann in [#21](https://github.com/bakdata/dedupe/pull/21)
+
+* Add RefineCluster interface
+
+* Revert "Add RefineCluster interface"
+
+* Add RefineCluster interface by @SvenLehmann in [#22](https://github.com/bakdata/dedupe/pull/22)
+
+
+### New Contributors
+* @ made their first contribution
+
+**Full Changelog**: https://github.com/bakdata/dedupe/compare/2.0.1...2.0.2
+
+## [2.0.1](https://github.com/bakdata/dedupe/tree/2.0.1) - 2019-09-11
+### What's changed
+
+* Fixed coverage report for multi module setup by @AHeise
+
+* Fix infinite recursion in SimilarityMeasure by @SvenLehmann in [#19](https://github.com/bakdata/dedupe/pull/19)
+
+
+### New Contributors
+* @SvenLehmann made their first contribution in [#19](https://github.com/bakdata/dedupe/pull/19)
+
+**Full Changelog**: https://github.com/bakdata/dedupe/compare/2.0.0...2.0.1
+
+## [2.0.0](https://github.com/bakdata/dedupe/tree/2.0.0) - 2019-03-21
+### What's changed
+
+* General cleanup by @AHeise in [#7](https://github.com/bakdata/dedupe/pull/7)
+
+* Moving from Travis to Azure pipelines by @AHeise in [#8](https://github.com/bakdata/dedupe/pull/8)
+
+* Added azure build badge and added maven/gradle snippets by @AHeise
+
+* Preparing 2.0.0 release by @AHeise
+
+* Refactored API and added javadocs by @AHeise in [#10](https://github.com/bakdata/dedupe/pull/10)
+
+* Refactor common by @AHeise in [#16](https://github.com/bakdata/dedupe/pull/16)
+
+* Added javadoc to readme and revised readme by @AHeise
+
+
+**Full Changelog**: https://github.com/bakdata/dedupe/compare/1.1.0...2.0.0
+
+## [1.1.0](https://github.com/bakdata/dedupe/tree/1.1.0) - 2019-02-12
+### What's changed
+
+* Initial commit by @AHeise
+
+* Restructure modules by @philipp94831
+
+* Moving conflict resolutions completely to common by @AHeise
+
+* Adding id to cluster and extending clustering implementation to generate such ids by @AHeise
+
+* Added ID parameter to cluster by @AHeise
+
+* Added readme by @AHeise
+
+* Made cluster id comparable by @AHeise
+
+* Cleanup by @AHeise
+
+* Adding sonar and travis config + code cleanup by @AHeise
+
+* Add license 1 (#1) by @AHeise
+
+* Setting up travis and sonar (#2) by @AHeise
+
+* Adding nexus deployment and releasing through travis by @AHeise
+
+* Using bakdata OSS plugins and switched to Kotlin DSL by @AHeise
+
+* Bumped bakdata plugin version to 1.0.1 by @AHeise
+
+* General cleanup with bakdata code style. by @AHeise
+
+* Applied bakdata inspection by @AHeise
+
+* Fully use OnlineDuplicateDetection to avoid code duplication by @AHeise
+
+* Adding descriptions for sonatype releases. by @AHeise
+
+* Setting up github release and changelog generation by @AHeise
+
+
+### New Contributors
+* @bakdata-bot made their first contribution
+* @AHeise made their first contribution
+* @philipp94831 made their first contribution
+
+**Full Changelog**: https://github.com/bakdata/dedupe/compare/1.0.1...1.1.0
+
+<!-- generated by git-cliff -->
