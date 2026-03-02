@@ -1,0 +1,7 @@
+rootProject.name = "dedupe"
+
+include(
+    "core",
+    "common",
+    "examples",
+)

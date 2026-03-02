@@ -1,8 +1,8 @@
 plugins {
-    id("com.bakdata.release") version "1.4.0"
-    id("com.bakdata.sonar") version "1.4.0"
-    id("com.bakdata.sonatype") version "1.4.1"
-    id("io.freefair.lombok") version "8.4" apply false
+    alias(libs.plugins.release)
+    alias(libs.plugins.sonar)
+    alias(libs.plugins.sonatype)
+    alias(libs.plugins.lombok) apply false
 }
 
 allprojects {
@@ -17,7 +17,7 @@ allprojects {
     }
 }
 
-configure<com.bakdata.gradle.SonatypeSettings> {
+publication {
     developers {
         developer {
             name.set("Arvid Heise")
@@ -67,9 +67,8 @@ subprojects {
     }
 
     dependencies {
-        "testImplementation"("org.junit.jupiter:junit-jupiter-api:5.10.1")
-        "testImplementation"("org.junit.jupiter:junit-jupiter-params:5.10.1")
-        "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-        "testImplementation"(group = "org.assertj", name = "assertj-core", version = "3.25.1")
+        "testRuntimeOnly"(rootProject.libs.junit.platform.launcher)
+        "testImplementation"(rootProject.libs.junit.jupiter)
+        "testImplementation"(rootProject.libs.assertj)
     }
 }
