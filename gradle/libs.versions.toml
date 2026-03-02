@@ -2,7 +2,7 @@
 junit = "5.14.3"
 
 [libraries]
-commons-text = { group = "org.apache.commons", name = "commons-text", version = "1.11.0" }
+commons-text = { group = "org.apache.commons", name = "commons-text", version = "1.15.0" }
 commons-codec = { group = "commons-codec", name = "commons-codec", version = "1.16.0" }
 commons-csv = { group = "org.apache.commons", name = "commons-csv", version = "1.10.0" }
 guava = { group = "com.google.guava", name = "guava", version = "33.0.0-jre" }
