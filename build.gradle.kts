@@ -1,8 +1,8 @@
 plugins {
-    id("com.bakdata.release") version "1.4.0"
-    id("com.bakdata.sonar") version "1.4.0"
-    id("com.bakdata.sonatype") version "1.4.1"
-    id("io.freefair.lombok") version "8.4" apply false
+    alias(libs.plugins.release)
+    alias(libs.plugins.sonar)
+    alias(libs.plugins.sonatype)
+    alias(libs.plugins.lombok) apply false
 }
 
 allprojects {
@@ -17,18 +17,6 @@ allprojects {
     }
 }
 
-configure<com.bakdata.gradle.SonatypeSettings> {
-    developers {
-        developer {
-            name.set("Arvid Heise")
-            id.set("AHeise")
-        }
-        developer {
-            name.set("Philipp Schirmer")
-        }
-    }
-}
-
 tasks.register<Javadoc>("javadoc") {
     description = "Generates a global javadoc from all the modules"
     options {
@@ -38,7 +26,12 @@ tasks.register<Javadoc>("javadoc") {
             addBooleanOption("-allow-script-in-comments", true)
             header("<script src=\"http://cdn.jsdelivr.net/highlight.js/8.6/highlight.min.js\"></script>")
             footer("<script type=\"text/javascript\">hljs.initHighlightingOnLoad();</script>")
-            tags("apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:", "sneaky:a:Sneaky Throws:")
+            tags(
+                "apiNote:a:API Note:",
+                "implSpec:a:Implementation Requirements:",
+                "implNote:a:Implementation Note:",
+                "sneaky:a:Sneaky Throws:"
+            )
         }
     }
 }
@@ -53,6 +46,18 @@ subprojects {
         }
     }
 
+    publication {
+        developers {
+            developer {
+                name.set("Arvid Heise")
+                id.set("AHeise")
+            }
+            developer {
+                name.set("Philipp Schirmer")
+            }
+        }
+    }
+
     tasks.withType<Javadoc> {
         options {
             (this as StandardJavadocDocletOptions).apply {
@@ -61,15 +66,19 @@ subprojects {
                 addBooleanOption("-allow-script-in-comments", true)
                 header("<script src=\"http://cdn.jsdelivr.net/highlight.js/8.6/highlight.min.js\"></script>")
                 footer("<script type=\"text/javascript\">hljs.initHighlightingOnLoad();</script>")
-                tags("apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:", "sneaky:a:Sneaky Throws:")
+                tags(
+                    "apiNote:a:API Note:",
+                    "implSpec:a:Implementation Requirements:",
+                    "implNote:a:Implementation Note:",
+                    "sneaky:a:Sneaky Throws:"
+                )
             }
         }
     }
 
     dependencies {
-        "testImplementation"("org.junit.jupiter:junit-jupiter-api:5.10.1")
-        "testImplementation"("org.junit.jupiter:junit-jupiter-params:5.10.1")
-        "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-        "testImplementation"(group = "org.assertj", name = "assertj-core", version = "3.25.1")
+        "testRuntimeOnly"(rootProject.libs.junit.platform.launcher)
+        "testImplementation"(rootProject.libs.junit.jupiter)
+        "testImplementation"(rootProject.libs.assertj)
     }
 }
