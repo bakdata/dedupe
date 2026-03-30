@@ -104,7 +104,7 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
     }
 
     @Override
-    public @NonNull Function<? super Iterable<? extends I>, C> getClusterIdGenerator() {
+    public @NonNull Function<? super Iterable<I>, C> getClusterIdGenerator() {
         return this.clustering.getClusterIdGenerator();
     }
 

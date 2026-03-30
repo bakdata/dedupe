@@ -46,7 +46,7 @@ public class AggregatingSimilarityMeasure<T> implements SimilarityMeasure<T> {
      */
     @NonNull ToDoubleFunction<? super DoubleStream> aggregator;
     /**
-     * The similarity measures that will successively applied on the input values.
+     * The similarity measures that will successively apply on the input values.
      */
     @NonNull List<SimilarityMeasure<? super T>> similarityMeasures;
 

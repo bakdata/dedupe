@@ -91,7 +91,7 @@ public class Cluster<C extends Comparable<C>, T> {
      * @return the newly created merged cluster or this iff {@code other == this}.
      */
     public @NonNull <I> Cluster<C, T> merge(
-            final @NonNull Function<? super Iterable<? extends I>, ? extends C> idGenerator,
+            final @NonNull Function<? super Iterable<I>, ? extends C> idGenerator,
             final @NonNull Function<? super T, ? extends I> idExtractor,
             final @NonNull Cluster<C, ? extends T> other) {
         if (other == this) {
