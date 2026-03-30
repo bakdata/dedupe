@@ -43,7 +43,12 @@ class PersonDeduplicationTest {
     private static final DateTimeFormatter BDAY_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yy");
 
     private static List<Person> parseCsv(final String resourceName) throws IOException {
-        final CSVFormat format = CSVFormat.newFormat('\t').withFirstRecordAsHeader().withQuote('"');
+        final CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setDelimiter('\t')
+                .setQuote('"')
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .get();
         try (final CSVParser parser = CSVParser
                 .parse(PersonDeduplicationTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8,
                         format)) {
