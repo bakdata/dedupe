@@ -94,7 +94,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
      * A function to generate the id for newly split clusters.
      */
     @NonNull
-    Function<? super Iterable<I>, C> clusterIdGenerator;
+    Function<Iterable<I>, C> clusterIdGenerator;
     /**
      * A function to extract the id of a record.
      */
@@ -166,7 +166,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
     private List<ClassifiedCandidate<T>> getRelevantClassifications(final Cluster<C, ? super T> cluster,
             final @NonNull Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex) {
         return cluster.getElements().stream()
-                .flatMap(record -> relevantClassificationIndex.getOrDefault(record, List.of()).stream()
+                .flatMap(element -> relevantClassificationIndex.getOrDefault(element, List.of()).stream()
                         .filter(classifiedCandidate -> cluster
                                 .contains(classifiedCandidate.getCandidate().getRecord2())))
                 .collect(Collectors.toList());

@@ -37,7 +37,7 @@ public class ClusterIdGenerators {
     /**
      * Returns an id generator that generates ints starting from 0.
      */
-    public static <T> Function<? super Iterable<? extends T>, Integer> intGenerator() {
+    public static <T> Function<Iterable<T>, Integer> intGenerator() {
         final AtomicInteger nextId = new AtomicInteger();
         return objects -> nextId.getAndIncrement();
     }
@@ -45,7 +45,7 @@ public class ClusterIdGenerators {
     /**
      * Returns an id generator that generates longs starting from 0.
      */
-    public static <T> Function<? super Iterable<? extends T>, Long> longGenerator() {
+    public static <T> Function<Iterable<T>, Long> longGenerator() {
         final AtomicLong nextId = new AtomicLong();
         return objects -> nextId.getAndIncrement();
     }
@@ -53,7 +53,7 @@ public class ClusterIdGenerators {
     /**
      * Returns an id generator that generates strings with a given prefix starting from 0.
      */
-    public static <T> Function<? super Iterable<? extends T>, String> stringGenerator(final String prefix) {
+    public static <T> Function<Iterable<T>, String> stringGenerator(final String prefix) {
         final AtomicLong nextId = new AtomicLong();
         return objects -> prefix + nextId.getAndIncrement();
     }

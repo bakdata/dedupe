@@ -52,5 +52,5 @@ public interface Clustering<C extends Comparable<C>, T, I> {
      * @return the cluster id generator.
      */
     @NonNull
-    Function<? super Iterable<I>, C> getClusterIdGenerator();
+    Function<Iterable<I>, C> getClusterIdGenerator();
 }

@@ -90,7 +90,7 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
         final T firstElement = clusters.get(0).get(0);
         final List<Candidate<T>> candidates = clusters.stream()
                 .flatMap(cluster -> cluster.getElements().stream()
-                        .map(record -> new OnlineCandidate<>(firstElement, record)))
+                        .map(element -> new OnlineCandidate<>(firstElement, element)))
                 .collect(Collectors.toList());
         final List<Cluster<C, T>> transitiveClusters = this.getInternalClosure().clusterDuplicates(candidates);
         if (transitiveClusters.size() != 1) {
@@ -104,13 +104,13 @@ public class ConsistentClustering<C extends Comparable<C>, T, I extends Comparab
     }
 
     @Override
-    public @NonNull Function<? super Iterable<I>, C> getClusterIdGenerator() {
+    public @NonNull Function<Iterable<I>, C> getClusterIdGenerator() {
         return this.clustering.getClusterIdGenerator();
     }
 
     private boolean noRecordInIndex(final Collection<? extends Cluster<C, T>> clusters) {
         final Map<I, Cluster<C, T>> clusterIndex = this.getInternalClosure().getClusterIndex();
         return clusters.stream().flatMap(cluster -> cluster.getElements().stream())
-                .allMatch(record -> clusterIndex.get(this.idExtractor.apply(record)) == null);
+                .allMatch(element -> clusterIndex.get(this.idExtractor.apply(element)) == null);
     }
 }

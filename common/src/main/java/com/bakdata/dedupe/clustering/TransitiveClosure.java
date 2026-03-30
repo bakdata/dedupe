@@ -60,7 +60,7 @@ public class TransitiveClosure<C extends Comparable<C>, T, I extends Comparable<
      * A function to generate the id for newly formed clusters.
      */
     @NonNull
-    Function<? super Iterable<I>, C> clusterIdGenerator;
+    Function<Iterable<I>, C> clusterIdGenerator;
     /**
      * A backing map for old clusters. Defaults to an in-memory map if null during construction.
      */

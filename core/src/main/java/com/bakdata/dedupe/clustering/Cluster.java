@@ -66,8 +66,8 @@ public class Cluster<C extends Comparable<C>, T> {
         this(id, new ArrayList<>());
     }
 
-    public void add(final @NonNull T record) {
-        this.elements.add(record);
+    public void add(final @NonNull T element) {
+        this.elements.add(element);
     }
 
     public int size() {
@@ -78,8 +78,8 @@ public class Cluster<C extends Comparable<C>, T> {
         return this.elements.get(index);
     }
 
-    public boolean contains(final @NonNull T record) {
-        return this.elements.contains(record);
+    public boolean contains(final @NonNull T element) {
+        return this.elements.contains(element);
     }
 
     /**
