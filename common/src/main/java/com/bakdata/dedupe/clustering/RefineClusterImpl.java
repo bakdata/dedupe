@@ -99,7 +99,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
      * A function to extract the id of a record.
      */
     @NonNull
-    Function<? super T, I> idExtractor;
+    Function<T, I> idExtractor;
 
     private static double getWeight(final ClassificationResult classificationResult) {
         switch (classificationResult.getClassification()) {
