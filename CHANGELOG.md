@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0](https://github.com/bakdata/dedupe/tree/2.2.0) - 2026-03-31
+### What's changed
+
+* Fix generic wildcards by @philipp94831 in [#36](https://github.com/bakdata/dedupe/pull/36)
+
+
+**Full Changelog**: https://github.com/bakdata/dedupe/compare/2.1.2...2.2.0
+
 ## [2.1.2](https://github.com/bakdata/dedupe/tree/2.1.2) - 2026-03-02
 ### What's changed
 
