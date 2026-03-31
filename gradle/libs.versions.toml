@@ -13,7 +13,7 @@ junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.r
 assertj = { group = "org.assertj", name = "assertj-core", version = "3.27.7" }
 
 [plugins]
-release = { id = "com.bakdata.release", version = "2.1.0" }
-sonar = { id = "com.bakdata.sonar", version = "2.1.0" }
-sonatype = { id = "com.bakdata.sonatype", version = "2.1.0" }
+release = { id = "com.bakdata.release", version = "2.2.0" }
+sonar = { id = "com.bakdata.sonar", version = "2.2.0" }
+sonatype = { id = "com.bakdata.sonatype", version = "2.2.0" }
 lombok = { id = "io.freefair.lombok", version = "9.2.0" }

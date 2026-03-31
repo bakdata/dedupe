@@ -43,11 +43,11 @@ public interface RefineCluster<C extends Comparable<C>, T, I> {
      * A function to generate the id for newly split clusters.
      */
     @NonNull
-    Function<? super Iterable<? extends I>, C> getClusterIdGenerator();
+    Function<Iterable<I>, C> getClusterIdGenerator();
 
     /**
      * A function to extract the id of a record.
      */
     @NonNull
-    Function<? super T, I> getIdExtractor();
+    Function<T, I> getIdExtractor();
 }

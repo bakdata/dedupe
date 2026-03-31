@@ -43,18 +43,23 @@ class PersonDeduplicationTest {
     private static final DateTimeFormatter BDAY_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yy");
 
     private static List<Person> parseCsv(final String resourceName) throws IOException {
-        final CSVFormat format = CSVFormat.newFormat('\t').withFirstRecordAsHeader().withQuote('"');
+        final CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setDelimiter('\t')
+                .setQuote('"')
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .get();
         try (final CSVParser parser = CSVParser
                 .parse(PersonDeduplicationTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8,
                         format)) {
             return parser.getRecords()
                     .stream()
-                    .map(record -> Person.builder()
-                            .id(record.get("id"))
-                            .firstName(record.get("firstname_full"))
-                            .lastName(record.get("lastname"))
-                            .birthDate(LocalDate.parse(record.get("birthdate"), BDAY_FORMAT))
-                            .gender(Gender.valueOf(record.get("gender").toUpperCase()))
+                    .map(csvRecord -> Person.builder()
+                            .id(csvRecord.get("id"))
+                            .firstName(csvRecord.get("firstname_full"))
+                            .lastName(csvRecord.get("lastname"))
+                            .birthDate(LocalDate.parse(csvRecord.get("birthdate"), BDAY_FORMAT))
+                            .gender(Gender.valueOf(csvRecord.get("gender").toUpperCase()))
                             .lastModified(LocalDateTime.now())
                             .build())
                     .collect(Collectors.toList());

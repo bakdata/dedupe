@@ -66,8 +66,8 @@ public class Cluster<C extends Comparable<C>, T> {
         this(id, new ArrayList<>());
     }
 
-    public void add(final @NonNull T record) {
-        this.elements.add(record);
+    public void add(final @NonNull T element) {
+        this.elements.add(element);
     }
 
     public int size() {
@@ -78,8 +78,8 @@ public class Cluster<C extends Comparable<C>, T> {
         return this.elements.get(index);
     }
 
-    public boolean contains(final @NonNull T record) {
-        return this.elements.contains(record);
+    public boolean contains(final @NonNull T element) {
+        return this.elements.contains(element);
     }
 
     /**
@@ -91,7 +91,7 @@ public class Cluster<C extends Comparable<C>, T> {
      * @return the newly created merged cluster or this iff {@code other == this}.
      */
     public @NonNull <I> Cluster<C, T> merge(
-            final @NonNull Function<? super Iterable<? extends I>, ? extends C> idGenerator,
+            final @NonNull Function<? super Iterable<I>, ? extends C> idGenerator,
             final @NonNull Function<? super T, ? extends I> idExtractor,
             final @NonNull Cluster<C, ? extends T> other) {
         if (other == this) {

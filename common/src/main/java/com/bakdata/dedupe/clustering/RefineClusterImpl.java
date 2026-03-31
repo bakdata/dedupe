@@ -56,7 +56,6 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.With;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.Wither;
 import org.apache.commons.lang3.tuple.Pair;
 
 
@@ -95,12 +94,12 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
      * A function to generate the id for newly split clusters.
      */
     @NonNull
-    Function<? super Iterable<? extends I>, C> clusterIdGenerator;
+    Function<Iterable<I>, C> clusterIdGenerator;
     /**
      * A function to extract the id of a record.
      */
     @NonNull
-    Function<? super T, I> idExtractor;
+    Function<T, I> idExtractor;
 
     private static double getWeight(final ClassificationResult classificationResult) {
         switch (classificationResult.getClassification()) {
@@ -167,7 +166,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
     private List<ClassifiedCandidate<T>> getRelevantClassifications(final Cluster<C, ? super T> cluster,
             final @NonNull Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex) {
         return cluster.getElements().stream()
-                .flatMap(record -> relevantClassificationIndex.getOrDefault(record, List.of()).stream()
+                .flatMap(element -> relevantClassificationIndex.getOrDefault(element, List.of()).stream()
                         .filter(classifiedCandidate -> cluster
                                 .contains(classifiedCandidate.getCandidate().getRecord2())))
                 .collect(Collectors.toList());
@@ -297,7 +296,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
                 .collect(Collectors.toList());
     }
 
-    private List<WeightedEdge> addRandomEdges(final @NonNull List<? extends WeightedEdge> edges,
+    private List<WeightedEdge> addRandomEdges(final @NonNull List<WeightedEdge> edges,
             final int desiredNumEdges) {
         final Set<WeightedEdge> weightedEdges = new LinkedHashSet<>(edges);
         for (int distance = 2; distance < this.maxSmallClusterSize && weightedEdges.size() < desiredNumEdges;
@@ -318,7 +317,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
     }
 
     private List<WeightedEdge> getWeightedEdges(final @NonNull Cluster<C, ? extends T> cluster,
-            final List<? extends WeightedEdge> duplicates,
+            final List<WeightedEdge> duplicates,
             final int desiredNumEdges) {
         final List<WeightedEdge> edges = this.getEdges(cluster, duplicates, desiredNumEdges);
 
@@ -328,7 +327,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
     }
 
     private List<WeightedEdge> getEdges(final @NonNull Cluster<C, ? extends T> cluster,
-            final List<? extends WeightedEdge> duplicates, final int desiredNumEdges) {
+            final List<WeightedEdge> duplicates, final int desiredNumEdges) {
         if (duplicates.isEmpty()) {
             final int n = cluster.size();
             return getRandomEdges(triangularNumber(n), desiredNumEdges);
@@ -427,7 +426,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
 
     static class GreedyClustering<C extends Comparable<C>, T> {
 
-        int[] greedyCluster(final Cluster<C, T> cluster, final @NonNull Collection<? extends WeightedEdge> edges) {
+        int[] greedyCluster(final Cluster<C, T> cluster, final @NonNull Collection<WeightedEdge> edges) {
 
             final Collection<WeightedEdge> queue = new PriorityQueue<>(Comparator.comparing(WeightedEdge::getWeight));
             queue.addAll(edges);
