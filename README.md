@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/bakdata/public/_apis/build/status/bakdata.dedupe?branchName=master)](https://dev.azure.com/bakdata/public/_build/latest?definitionId=4&branchName=master)
+[![Build and Publish](https://github.com/bakdata/dedupe/actions/workflows/build-and-publish.yaml/badge.svg)](https://github.com/bakdata/dedupe/actions/workflows/build-and-publish.yaml)
 [![Sonarcloud status](https://sonarcloud.io/api/project_badges/measure?project=com.bakdata.dedupe%3Adedupe&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.bakdata.dedupe%3Adedupe)
 [![Code coverage](https://sonarcloud.io/api/project_badges/measure?project=com.bakdata.dedupe%3Adedupe&metric=coverage)](https://sonarcloud.io/dashboard?id=com.bakdata.dedupe%3Adedupe)
 [![Maven](https://img.shields.io/maven-central/v/com.bakdata.dedupe/core.svg)](https://search.maven.org/search?q=g:com.bakdata.dedupe&core=gav)
@@ -56,8 +56,8 @@ OnlineDeduplication<Person> deduplication =
 // apply it to a list of customers
 List<Person> customers = ...;
 for(Person customer: customers) {
-    final Person fusedPerson = deduplication.deduplicate(customer);    
-    // store fused person
+final Person fusedPerson = this.deduplication.deduplicate(this.customer);
+// store fused person
 }
 ```
 
@@ -89,7 +89,7 @@ OnlineCandidateSelection<Person> candidateSelection = OnlineSortedNeighborhoodMe
             person -> CompositeValue.of(person.getBirthDate(), normalizeName(person.getLastName()))))
     .build();
 
-private static String normalizeName(String value) {
+private static String normalizeName(final String value) {
     // split umlauts into canonicals
     return java.text.Normalizer.normalize(value.toLowerCase(), java.text.Normalizer.Form.NFD)
             // remove everything in braces
@@ -113,10 +113,10 @@ Classifier<Person> personClassifier = RuleBasedClassifier.<Person>builder()
     .negativeRule("Different social security number", inequality().of(Person::getSSN))
     .positiveRule("Default", CommonSimilarityMeasures.<Person>weightedAverage()
         .add(10, Person::getSSN, equality())
-        .add(2, Person::getFirstName, max(levenshtein().cutoff(.5f), jaroWinkler()))
+            .add(2, Person::getFirstName, max(levenshtein().cutoff(0.5f), jaroWinkler()))
         .add(2, Person::getLastName, max(equality().of(beiderMorse()), jaroWinkler()))
         .build()
-        .scaleWithThreshold(.9f))
+            .scaleWithThreshold(0.9f))
     .build();
 ```
 
@@ -168,7 +168,7 @@ ConflictResolution<Person, Person> personMerge = ConflictResolutions.merge(Perso
 Fusion<Person> personFusion = ConflictResolutionFusion.<Person>builder()
     .sourceExtractor(Person::getSource)
     .lastModifiedExtractor(Person::getLastModified)
-    .rootResolution(personMerge)
+        .rootResolution(this.personMerge)
     .build();
 ```
 
