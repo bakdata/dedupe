@@ -56,7 +56,7 @@ OnlineDeduplication<Person> deduplication =
 // apply it to a list of customers
 List<Person> customers = ...;
 for(Person customer: customers) {
-    final Person fusedPerson = this.deduplication.deduplicate(this.customer);    
+    final Person fusedPerson = deduplication.deduplicate(this.customer);    
     // store fused person
 }
 ```
