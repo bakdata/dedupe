@@ -56,7 +56,7 @@ OnlineDeduplication<Person> deduplication =
 // apply it to a list of customers
 List<Person> customers = ...;
 for(Person customer: customers) {
-    final Person fusedPerson = deduplication.deduplicate(this.customer);    
+    final Person fusedPerson = deduplication.deduplicate(customer);    
     // store fused person
 }
 ```
@@ -89,7 +89,7 @@ OnlineCandidateSelection<Person> candidateSelection = OnlineSortedNeighborhoodMe
             person -> CompositeValue.of(person.getBirthDate(), normalizeName(person.getLastName()))))
     .build();
 
-private static String normalizeName(final String value) {
+private static String normalizeName(String value) {
     // split umlauts into canonicals
     return java.text.Normalizer.normalize(value.toLowerCase(), java.text.Normalizer.Form.NFD)
             // remove everything in braces
@@ -113,10 +113,10 @@ Classifier<Person> personClassifier = RuleBasedClassifier.<Person>builder()
     .negativeRule("Different social security number", inequality().of(Person::getSSN))
     .positiveRule("Default", CommonSimilarityMeasures.<Person>weightedAverage()
         .add(10, Person::getSSN, equality())
-        .add(2, Person::getFirstName, max(levenshtein().cutoff(0.5f), jaroWinkler()))
+        .add(2, Person::getFirstName, max(levenshtein().cutoff(.5f), jaroWinkler()))
         .add(2, Person::getLastName, max(equality().of(beiderMorse()), jaroWinkler()))
         .build()
-        .scaleWithThreshold(0.9f))
+        .scaleWithThreshold(.9f))
     .build();
 ```
 
@@ -168,7 +168,7 @@ ConflictResolution<Person, Person> personMerge = ConflictResolutions.merge(Perso
 Fusion<Person> personFusion = ConflictResolutionFusion.<Person>builder()
     .sourceExtractor(Person::getSource)
     .lastModifiedExtractor(Person::getLastModified)
-    .rootResolution(this.personMerge)
+    .rootResolution(personMerge)
     .build();
 ```
 
