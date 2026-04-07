@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/bakdata/public/_apis/build/status/bakdata.dedupe?branchName=master)](https://dev.azure.com/bakdata/public/_build/latest?definitionId=4&branchName=master)
+[![Build and Publish](https://github.com/bakdata/dedupe/actions/workflows/build-and-publish.yaml/badge.svg)](https://github.com/bakdata/dedupe/actions/workflows/build-and-publish.yaml)
 [![Sonarcloud status](https://sonarcloud.io/api/project_badges/measure?project=com.bakdata.dedupe%3Adedupe&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.bakdata.dedupe%3Adedupe)
 [![Code coverage](https://sonarcloud.io/api/project_badges/measure?project=com.bakdata.dedupe%3Adedupe&metric=coverage)](https://sonarcloud.io/dashboard?id=com.bakdata.dedupe%3Adedupe)
 [![Maven](https://img.shields.io/maven-central/v/com.bakdata.dedupe/core.svg)](https://search.maven.org/search?q=g:com.bakdata.dedupe&core=gav)
