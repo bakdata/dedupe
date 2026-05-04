@@ -6,7 +6,7 @@ commons-text = { group = "org.apache.commons", name = "commons-text", version = 
 commons-codec = { group = "commons-codec", name = "commons-codec", version = "1.21.0" }
 commons-csv = { group = "org.apache.commons", name = "commons-csv", version = "1.14.1" }
 guava = { group = "com.google.guava", name = "guava", version = "33.6.0-jre" }
-jgrapht = { group = "org.jgrapht", name = "jgrapht-core", version = "1.5.2" }
+jgrapht = { group = "org.jgrapht", name = "jgrapht-core", version = "1.5.3" }
 
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
