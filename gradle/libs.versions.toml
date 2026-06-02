@@ -1,5 +1,5 @@
 [versions]
-junit = "5.14.3"
+junit = "5.14.4"
 
 [libraries]
 commons-text = { group = "org.apache.commons", name = "commons-text", version = "1.15.0" }
