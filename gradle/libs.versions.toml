@@ -16,4 +16,4 @@ assertj = { group = "org.assertj", name = "assertj-core", version = "3.27.7" }
 release = { id = "com.bakdata.release", version = "2.2.1" }
 sonar = { id = "com.bakdata.sonar", version = "2.2.1" }
 sonatype = { id = "com.bakdata.sonatype", version = "2.2.1" }
-lombok = { id = "io.freefair.lombok", version = "9.5.0" }
+lombok = { id = "io.freefair.lombok", version = "9.8.2" }
