@@ -30,7 +30,7 @@ import lombok.Value;
  * Helper for composed (sorting) keys, which will perform position-wise comparison of the key elements.
  * <p>This class helps users to avoid string concatenation, as string concatenation will change the sorting order if
  * the strings in the beginning do not have the same length.</p>
- * <p>Example: Consider the two records [Ed, Sheeran] and [Edgar, Poe]. Concatentation will change order {@code
+ * <p>Example: Consider the two records [Ed, Sheeran] and [Edgar, Poe]. Concatenation will change order {@code
  * EdgarPoe < EdSheeran}.</p>
  * <p>{@code CompositeValue} also performs better than long strings, both in construction and during comparison.
  * Additionally, value types are preserved, such that non-textual values can also be correctly compared.</p>
