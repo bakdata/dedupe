@@ -39,16 +39,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
-import java.util.Spliterators;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,8 +63,15 @@ import org.apache.commons.lang3.tuple.Pair;
  * <p>To determine the inner-cluster similarities the confidence score of a {@link Classifier} is used. Negative scores
  * are allowed and strongly discourage certain pairs.</p>
  * <p>If all scores within a cluster are positive, the cluster will remain intact.</p>
- * <p>Note, this algorithm implements a perfect clustering for small clusters and a heuristic for large clusters. Small
- * clusters are below {@link #maxSmallClusterSize}.</p>
+ * <p>Note, this algorithm uses three strategies depending on the cluster size:</p>
+ * <ul>
+ *     <li>Clusters up to {@link #maxExhaustiveClusterSize} are classified completely and solved perfectly by
+ *     enumerating all possible clusterings. The number of clusterings grows with the Bell number of the cluster size,
+ *     which is why this size is limited to {@value #MAX_EXHAUSTIVE_CLUSTER_SIZE}.</li>
+ *     <li>Clusters up to {@link #maxSmallClusterSize} are classified completely and solved heuristically by a greedy
+ *     clustering followed by a local search with {@link #localSearchRestarts} random restarts.</li>
+ *     <li>Larger clusters are only classified partially and solved by a greedy clustering.</li>
+ * </ul>
  *
  * @param <C> the type of the cluster id.
  * @param <T> the type of the record.
@@ -76,14 +80,33 @@ import org.apache.commons.lang3.tuple.Pair;
 @Value
 @Builder
 public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineCluster<C, T, I> {
+    /**
+     * The maximum allowed value for {@link #maxExhaustiveClusterSize}. Bell(12) is already ~4 million clusterings.
+     */
+    public static final int MAX_EXHAUSTIVE_CLUSTER_SIZE = 12;
     private static final Random RANDOM = ThreadLocalRandom.current();
+    private static final long LOCAL_SEARCH_SEED = 0x5DEECE66DL;
+    private static final double EPSILON = 1.0e-12;
 
     /**
-     * The maximum size (inclusive) of a cluster. This size limits the maximum amount of comparisons to {@code max *
-     * (max - 1) / 2}.
+     * The maximum size (inclusive) of a cluster for which all pairs are classified. This size limits the maximum
+     * amount of comparisons to {@code max * (max - 1) / 2}.
      */
     @Builder.Default
     final int maxSmallClusterSize = 10;
+    /**
+     * The maximum size (inclusive) of a cluster that is solved perfectly by enumerating all possible clusterings. Must
+     * not exceed {@value #MAX_EXHAUSTIVE_CLUSTER_SIZE}, because the number of clusterings grows super-exponentially.
+     * Only relevant up to {@link #maxSmallClusterSize}.
+     */
+    @Builder.Default
+    final int maxExhaustiveClusterSize = 10;
+    /**
+     * The number of additional random restarts of the local search for clusters larger than
+     * {@link #maxExhaustiveClusterSize} and up to {@link #maxSmallClusterSize}.
+     */
+    @Builder.Default
+    final int localSearchRestarts = 5;
     /**
      * The classifier used to score the edges. Please note that binary classifiers (confidence always 1) can be used but
      * will not unleash the full potential.
@@ -114,7 +137,8 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
         }
     }
 
-    private static double scoreClustering(final int[] partitions, final double[][] weightMatrix) {
+    @VisibleForTesting
+    static double scoreClustering(final int[] partitions, final double[][] weightMatrix) {
         final int n = partitions.length;
         final int[] partitionSizes = new int[n];
         for (final int clustering : partitions) {
@@ -172,12 +196,28 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
                 .collect(Collectors.toList());
     }
 
-    public Stream<Cluster<C, T>> refine(final Stream<? extends Cluster<C, T>> clusters,
-            final @NonNull Stream<ClassifiedCandidate<T>> knownClassifications) {
-        final Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex =
-                this.getRelevantClassificationIndex(knownClassifications);
-        return clusters.flatMap(cluster -> this.refineCluster(cluster,
-                this.getRelevantClassifications(cluster, relevantClassificationIndex)));
+    /**
+     * Performs perfect clustering by maximizing intra-cluster similarity and minimizing inter-cluster similarity.<br>
+     * Compares EACH possible clustering, i.e., Bell(n) clusterings with O(n²) each. Only feasible for very small n.
+     *
+     * @return the best clustering
+     */
+    static int[] exhaustiveClustering(final double[][] weightMatrix) {
+        final Iterator<int[]> clusterings = new ClusteringGenerator(weightMatrix.length);
+        int[] bestClustering = null;
+        double bestScore = Double.NEGATIVE_INFINITY;
+        while (clusterings.hasNext()) {
+            final int[] clustering = clusterings.next();
+            final double score = scoreClustering(clustering, weightMatrix);
+            if (bestClustering == null || score > bestScore) {
+                bestScore = score;
+                bestClustering = clustering.clone();
+            }
+        }
+        if (bestClustering == null) {
+            throw new IllegalStateException("Non-empty clusters should have one valid clustering");
+        }
+        return bestClustering;
     }
 
     private Map<T, List<ClassifiedCandidate<T>>> getRelevantClassificationIndex(
@@ -196,14 +236,119 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
     }
 
     /**
-     * Performs perfect clustering by maximizing intra-cluster similarity and minimizing inter-cluster similarity.<br>
-     * Quite compute-heavy for larger clusters as we perform
-     * <li>a complete pair-wise comparison (expensive and quadratic)</li>
-     * <li>and compare EACH possible clustering (cheap and exponential).</li>
+     * Approximates {@link #exhaustiveClustering(double[][])} in polynomial time. Starts with a greedy clustering and
+     * additional random clusterings, improves each with a local search, and returns the best result. The random
+     * clusterings are seeded deterministically, so the same weights always yield the same clustering.
      *
-     * @return the best clustering
+     * @return the best clustering found
      */
-    private int[] refineSmallCluster(final @NonNull Cluster<C, T> cluster,
+    static int[] heuristicClustering(final double[][] weightMatrix, final int restarts) {
+        final int n = weightMatrix.length;
+        int[] bestClustering = localSearch(GreedyClustering.greedyCluster(weightMatrix, getEdges(weightMatrix)),
+                weightMatrix);
+        double bestScore = scoreClustering(bestClustering, weightMatrix);
+        final Random random = new Random(LOCAL_SEARCH_SEED);
+        final int numInitialClusters = Math.max(2, n / 3);
+        for (int restart = 0; restart < restarts; restart++) {
+            final int[] start = random.ints(n, 0, numInitialClusters).toArray();
+            final int[] clustering = localSearch(start, weightMatrix);
+            final double score = scoreClustering(clustering, weightMatrix);
+            if (score > bestScore + EPSILON) {
+                bestScore = score;
+                bestClustering = clustering;
+            }
+        }
+        return bestClustering;
+    }
+
+    /**
+     * Repeatedly moves single records to the cluster (or a new singleton cluster) that improves the score most, until
+     * no move improves the score anymore. Terminates because the score strictly increases with every move.
+     *
+     * @return a locally optimal clustering
+     */
+    static int[] localSearch(final int[] start, final double[][] weightMatrix) {
+        final int n = weightMatrix.length;
+        final int[] clustering = start.clone();
+        double score = scoreClustering(clustering, weightMatrix);
+        boolean improved = true;
+        while (improved) {
+            improved = false;
+            for (int i = 0; i < n; i++) {
+                final int originalCluster = clustering[i];
+                int bestCluster = originalCluster;
+                for (final int candidateCluster : getMoveTargets(clustering)) {
+                    if (candidateCluster == originalCluster) {
+                        continue;
+                    }
+                    clustering[i] = candidateCluster;
+                    final double newScore = scoreClustering(clustering, weightMatrix);
+                    if (newScore > score + EPSILON) {
+                        score = newScore;
+                        bestCluster = candidateCluster;
+                    }
+                }
+                clustering[i] = bestCluster;
+                improved |= bestCluster != originalCluster;
+            }
+        }
+        return clustering;
+    }
+
+    /**
+     * @return all cluster ids in use plus one unused id, which represents a new singleton cluster.
+     */
+    private static int[] getMoveTargets(final int[] clustering) {
+        final int n = clustering.length;
+        final boolean[] used = new boolean[n];
+        for (final int clusterId : clustering) {
+            used[clusterId] = true;
+        }
+        final int[] targets = new int[n];
+        int numTargets = 0;
+        boolean addedUnused = false;
+        for (int clusterId = 0; clusterId < n; clusterId++) {
+            if (used[clusterId] || !addedUnused) {
+                addedUnused |= !used[clusterId];
+                targets[numTargets++] = clusterId;
+            }
+        }
+        return Arrays.copyOf(targets, numTargets);
+    }
+
+    private static List<WeightedEdge> getEdges(final double[][] weightMatrix) {
+        final int n = weightMatrix.length;
+        final List<WeightedEdge> edges = new ArrayList<>(triangularNumber(n - 1));
+        for (int rowIndex = 0; rowIndex < n; rowIndex++) {
+            for (int colIndex = rowIndex + 1; colIndex < n; colIndex++) {
+                edges.add(WeightedEdge.of(rowIndex, colIndex, weightMatrix[rowIndex][colIndex]));
+            }
+        }
+        return edges;
+    }
+
+    public Stream<Cluster<C, T>> refine(final Stream<? extends Cluster<C, T>> clusters,
+            final @NonNull Stream<ClassifiedCandidate<T>> knownClassifications) {
+        if (this.maxExhaustiveClusterSize > MAX_EXHAUSTIVE_CLUSTER_SIZE) {
+            throw new IllegalArgumentException(String.format(
+                    "maxExhaustiveClusterSize must not exceed %d but was %d. Use maxSmallClusterSize to classify "
+                            + "larger clusters completely.", MAX_EXHAUSTIVE_CLUSTER_SIZE,
+                    this.maxExhaustiveClusterSize));
+        }
+        if (this.localSearchRestarts < 0) {
+            throw new IllegalArgumentException("localSearchRestarts must not be negative but was "
+                    + this.localSearchRestarts);
+        }
+        final Map<T, List<ClassifiedCandidate<T>>> relevantClassificationIndex =
+                this.getRelevantClassificationIndex(knownClassifications);
+        return clusters.flatMap(cluster -> this.refineCluster(cluster,
+                this.getRelevantClassifications(cluster, relevantClassificationIndex)));
+    }
+
+    /**
+     * Classifies all pairs of the cluster that are not yet known (quadratic).
+     */
+    private double[][] getFullWeightMatrix(final @NonNull Cluster<C, T> cluster,
             final @NonNull Iterable<ClassifiedCandidate<T>> knownClassifications) {
         final double[][] weightMatrix = this.getKnownWeightMatrix(cluster, knownClassifications);
 
@@ -217,13 +362,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
                 }
             }
         }
-
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new ClusteringGenerator(n), 0), false)
-                .map(clustering -> new AbstractMap.SimpleEntry<>(clustering.clone(),
-                        scoreClustering(clustering, weightMatrix)))
-                .max(Comparator.comparingDouble(Map.Entry::getValue))
-                .map(Map.Entry::getKey)
-                .orElseThrow(() -> new IllegalStateException("Non-empty clusters should have one valid clustering"));
+        return weightMatrix;
     }
 
     private List<WeightedEdge> toWeightedEdges(final Collection<ClassifiedCandidate<T>> knownClassifications,
@@ -256,7 +395,11 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
             return this.refineBigCluster(cluster, knownClassifications);
         }
 
-        return this.refineSmallCluster(cluster, knownClassifications);
+        final double[][] weightMatrix = this.getFullWeightMatrix(cluster, knownClassifications);
+        if (cluster.size() <= this.maxExhaustiveClusterSize) {
+            return exhaustiveClustering(weightMatrix);
+        }
+        return heuristicClustering(weightMatrix, this.localSearchRestarts);
     }
 
     private @NonNull double[][] getKnownWeightMatrix(final Cluster<C, ? extends T> cluster,
@@ -426,20 +569,19 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
 
     static class GreedyClustering<C extends Comparable<C>, T> {
 
-        int[] greedyCluster(final Cluster<C, T> cluster, final @NonNull Collection<WeightedEdge> edges) {
-
-            final Collection<WeightedEdge> queue = new PriorityQueue<>(Comparator.comparing(WeightedEdge::getWeight));
-            queue.addAll(edges);
-
-            final double[][] weightMatrix = new double[cluster.size()][cluster.size()];
-            for (final WeightedEdge edge : edges) {
-                weightMatrix[edge.getLeft()][edge.getRight()] = edge.getWeight();
-            }
+        /**
+         * Merges the clusters of the edges with the highest weights first, as long as the merge improves the score.
+         * Ties are broken by the order of the given edges.
+         */
+        static int[] greedyCluster(final double[][] weightMatrix, final @NonNull Collection<WeightedEdge> edges) {
+            final List<WeightedEdge> sortedEdges = edges.stream()
+                    .sorted(Comparator.comparingDouble(WeightedEdge::getWeight).reversed())
+                    .collect(Collectors.toList());
 
             // start with each publication in its own cluster
-            int[] clustering = IntStream.range(0, cluster.size()).toArray();
+            int[] clustering = IntStream.range(0, weightMatrix.length).toArray();
             double score = scoreClustering(clustering, weightMatrix);
-            for (final WeightedEdge edge : queue) {
+            for (final WeightedEdge edge : sortedEdges) {
                 final int[] newClustering = clustering.clone();
                 final int newClusterId = newClustering[edge.getLeft()];
                 final int oldClusterId = newClustering[edge.getRight()];
@@ -455,6 +597,14 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
                 }
             }
             return clustering;
+        }
+
+        int[] greedyCluster(final Cluster<C, T> cluster, final @NonNull Collection<WeightedEdge> edges) {
+            final double[][] weightMatrix = new double[cluster.size()][cluster.size()];
+            for (final WeightedEdge edge : edges) {
+                weightMatrix[edge.getLeft()][edge.getRight()] = edge.getWeight();
+            }
+            return greedyCluster(weightMatrix, edges);
         }
     }
 }
