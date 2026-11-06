@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.3.0](https://github.com/bakdata/dedupe/tree/2.3.0) - 2026-11-06
+### What's changed
+
+* Setup multi-ecosystem Dependabot group by @philipp94831 in [#38](https://github.com/bakdata/dedupe/pull/38)
+
+* Bump the "build" group with 1 update across multiple ecosystems by @dependabot[bot] in [#39](https://github.com/bakdata/dedupe/pull/39)
+
+* Bump com.google.guava:guava from 33.5.0-jre to 33.6.0-jre by @dependabot[bot] in [#40](https://github.com/bakdata/dedupe/pull/40)
+
+* Bump the "build" group with 2 updates across multiple ecosystems by @dependabot[bot] in [#42](https://github.com/bakdata/dedupe/pull/42)
+
+* Bump org.jgrapht:jgrapht-core from 1.5.2 to 1.5.3 by @dependabot[bot] in [#41](https://github.com/bakdata/dedupe/pull/41)
+
+* Bump org.junit.jupiter:junit-jupiter from 5.14.3 to 5.14.4 in the test-dependencies group by @dependabot[bot] in [#43](https://github.com/bakdata/dedupe/pull/43)
+
+* Bump the "build" group with 1 update across multiple ecosystems by @dependabot[bot] in [#45](https://github.com/bakdata/dedupe/pull/45)
+
+* Bump commons-codec:commons-codec from 1.21.0 to 1.22.0 by @dependabot[bot] in [#44](https://github.com/bakdata/dedupe/pull/44)
+
+* Bump the "build" group with 2 updates across multiple ecosystems by @dependabot[bot] in [#46](https://github.com/bakdata/dedupe/pull/46)
+
+* Bump the "build" group with 1 update across multiple ecosystems by @dependabot[bot] in [#47](https://github.com/bakdata/dedupe/pull/47)
+
+* Bump commons-codec:commons-codec from 1.22.0 to 1.22.1 by @dependabot[bot] in [#49](https://github.com/bakdata/dedupe/pull/49)
+
+* Bump the "build" group with 1 update across multiple ecosystems by @dependabot[bot] in [#50](https://github.com/bakdata/dedupe/pull/50)
+
+* Bump com.google.guava:guava from 33.6.0-jre to 33.7.1-jre by @dependabot[bot] in [#48](https://github.com/bakdata/dedupe/pull/48)
+
+* Bump com.google.guava:guava from 33.7.1-jre to 33.7.2-jre by @dependabot[bot] in [#51](https://github.com/bakdata/dedupe/pull/51)
+
+* Bump commons-codec:commons-codec from 1.22.1 to 1.23.0 by @dependabot[bot] in [#52](https://github.com/bakdata/dedupe/pull/52)
+
+* Bump the "build" group with 2 updates across multiple ecosystems by @dependabot[bot] in [#53](https://github.com/bakdata/dedupe/pull/53)
+
+* Make `RefineClusterImpl` usable for clusters larger than 10 by @philipp94831 in [#54](https://github.com/bakdata/dedupe/pull/54)
+
+
+**Full Changelog**: https://github.com/bakdata/dedupe/compare/2.2.0...2.3.0
+
 ## [2.2.0](https://github.com/bakdata/dedupe/tree/2.2.0) - 2026-03-31
 ### What's changed
 
