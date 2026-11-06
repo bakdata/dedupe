@@ -463,14 +463,14 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
     private List<WeightedEdge> getWeightedEdges(final @NonNull Cluster<C, ? extends T> cluster,
             final List<WeightedEdge> duplicates,
             final int desiredNumEdges) {
-        final List<WeightedEdge> edges = this.getEdges(cluster, duplicates, desiredNumEdges);
+        final List<WeightedEdge> edges = this.selectRandomEdges(cluster, duplicates, desiredNumEdges);
 
         return edges.stream()
                 .map(edge -> this.calculateWeightIfNeeded(cluster, edge))
                 .collect(Collectors.toList());
     }
 
-    private List<WeightedEdge> getEdges(final @NonNull Cluster<C, ? extends T> cluster,
+    private List<WeightedEdge> selectRandomEdges(final @NonNull Cluster<C, ? extends T> cluster,
             final List<WeightedEdge> duplicates, final int desiredNumEdges) {
         if (duplicates.isEmpty()) {
             final int n = cluster.size();
