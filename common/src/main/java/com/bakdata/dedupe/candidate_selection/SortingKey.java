@@ -48,7 +48,7 @@ public class SortingKey<T, K extends Comparable<K>> {
      * <p>Please try to avoid string concatenation and use {@link CompositeValue} unless you really want that
      * semantics. String concatenation will change the sorting order if the strings in the beginning do not have the
      * same length.</p>
-     * <p>Example: Consider the two records [Ed, Sheeran] and [Edgar, Poe]. Concatentation will change order {@code
+     * <p>Example: Consider the two records [Ed, Sheeran] and [Edgar, Poe]. Concatenation will change order {@code
      * EdgarPoe < EdSheeran}.</p>
      *
      * @see CompositeValue
