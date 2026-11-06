@@ -74,8 +74,8 @@ class RefineClusterImplTest {
 
     @Test
     void shouldCreateCorrectNumberOfRandomEdges() {
-        final int potentialNumEdges = 55; // gaussian sum of 11
-        final int desiredNumEdges = 45; // gaussian sum of 10
+        final int potentialNumEdges = 55; // Gaussian sum of 11
+        final int desiredNumEdges = 45; // Gaussian sum of 10
         assertThat(getRandomEdges(potentialNumEdges, desiredNumEdges))
                 .hasSize(desiredNumEdges);
     }
@@ -352,8 +352,8 @@ class RefineClusterImplTest {
     @RequiredArgsConstructor
     @Value
     public static class Person {
-        final String id;
-        final String name;
+        String id;
+        String name;
     }
 
     public static class CustomClassifier implements Classifier<Person> {

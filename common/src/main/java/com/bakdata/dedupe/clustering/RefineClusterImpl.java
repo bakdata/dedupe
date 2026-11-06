@@ -57,7 +57,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 
 /**
- * Splits large clusters into smaller clusters when the inter-cluster similarities are sub-optimal.
+ * Splits large clusters into smaller clusters when the inter-cluster similarities are suboptimal.
  * <p>{@link RefineClusterImpl} can be applied after aggressive clustering variations (leaning towards recall), such as
  * {@link TransitiveClosure}, to boost the overall precision.</p>
  * <p>To determine the inner-cluster similarities the confidence score of a {@link Classifier} is used. Negative scores
@@ -93,20 +93,20 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
      * amount of comparisons to {@code max * (max - 1) / 2}.
      */
     @Builder.Default
-    final int maxSmallClusterSize = 10;
+    int maxSmallClusterSize = 10;
     /**
      * The maximum size (inclusive) of a cluster that is solved perfectly by enumerating all possible clusterings. Must
      * not exceed {@value #MAX_EXHAUSTIVE_CLUSTER_SIZE}, because the number of clusterings grows super-exponentially.
      * Only relevant up to {@link #maxSmallClusterSize}.
      */
     @Builder.Default
-    final int maxExhaustiveClusterSize = 10;
+    int maxExhaustiveClusterSize = 10;
     /**
      * The number of additional random restarts of the local search for clusters larger than
      * {@link #maxExhaustiveClusterSize} and up to {@link #maxSmallClusterSize}.
      */
     @Builder.Default
-    final int localSearchRestarts = 5;
+    int localSearchRestarts = 5;
     /**
      * The classifier used to score the edges. Please note that binary classifiers (confidence always 1) can be used but
      * will not unleash the full potential.
@@ -289,7 +289,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
                     }
                 }
                 clustering[i] = bestCluster;
-                improved |= bestCluster != originalCluster;
+                improved = improved || bestCluster != originalCluster;
             }
         }
         return clustering;
@@ -309,8 +309,9 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
         boolean addedUnused = false;
         for (int clusterId = 0; clusterId < n; clusterId++) {
             if (used[clusterId] || !addedUnused) {
-                addedUnused |= !used[clusterId];
-                targets[numTargets++] = clusterId;
+                addedUnused = addedUnused || !used[clusterId];
+                targets[numTargets] = clusterId;
+                numTargets++;
             }
         }
         return Arrays.copyOf(targets, numTargets);
@@ -348,7 +349,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
     /**
      * Classifies all pairs of the cluster that are not yet known (quadratic).
      */
-    private double[][] getFullWeightMatrix(final @NonNull Cluster<C, T> cluster,
+    private double[][] getFullWeightMatrix(final @NonNull Cluster<C, ? extends T> cluster,
             final @NonNull Iterable<ClassifiedCandidate<T>> knownClassifications) {
         final double[][] weightMatrix = this.getKnownWeightMatrix(cluster, knownClassifications);
 
@@ -402,7 +403,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
         return heuristicClustering(weightMatrix, this.localSearchRestarts);
     }
 
-    private @NonNull double[][] getKnownWeightMatrix(final Cluster<C, ? extends T> cluster,
+    private double[][] getKnownWeightMatrix(final Cluster<C, ? extends T> cluster,
             final @NonNull Iterable<ClassifiedCandidate<T>> knownClassifications) {
         final int n = cluster.size();
         final double[][] weightMatrix = new double[n][n];
@@ -495,7 +496,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
     @FieldDefaults(level = AccessLevel.PRIVATE)
     private static final class ClusteringGenerator implements Iterator<int[]> {
         final int n;
-        final @NonNull int[] clustering;
+        final int[] clustering;
         boolean hasNext = true;
 
         private ClusteringGenerator(final int n) {
@@ -520,7 +521,7 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
         }
 
         @Override
-        public @NonNull int[] next() {
+        public int[] next() {
             if (!this.hasNext()) {
                 throw new NoSuchElementException();
             }
@@ -573,7 +574,8 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
          * Merges the clusters of the edges with the highest weights first, as long as the merge improves the score.
          * Ties are broken by the order of the given edges.
          */
-        static int[] greedyCluster(final double[][] weightMatrix, final @NonNull Collection<WeightedEdge> edges) {
+        private static int[] greedyCluster(final double[][] weightMatrix,
+                final @NonNull Collection<WeightedEdge> edges) {
             final List<WeightedEdge> sortedEdges = edges.stream()
                     .sorted(Comparator.comparingDouble(WeightedEdge::getWeight).reversed())
                     .collect(Collectors.toList());
