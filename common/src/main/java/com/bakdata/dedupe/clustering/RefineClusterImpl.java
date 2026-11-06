@@ -304,17 +304,14 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
         for (final int clusterId : clustering) {
             used[clusterId] = true;
         }
-        final int[] targets = new int[n];
-        int numTargets = 0;
-        boolean addedUnused = false;
-        for (int clusterId = 0; clusterId < n; clusterId++) {
-            if (used[clusterId] || !addedUnused) {
-                addedUnused = addedUnused || !used[clusterId];
-                targets[numTargets] = clusterId;
-                numTargets++;
-            }
-        }
-        return Arrays.copyOf(targets, numTargets);
+    	final int newClusterId = IntStream.range(0, n)
+            .filter(clusterId -> !used[clusterId])
+            .findFirst()
+            .orElse(-1);
+    	return IntStream.range(0, n)
+            .filter(clusterId -> used[clusterId] || clusterId == newClusterId)
+            .toArray();
+
     }
 
     private static List<WeightedEdge> getEdges(final double[][] weightMatrix) {
