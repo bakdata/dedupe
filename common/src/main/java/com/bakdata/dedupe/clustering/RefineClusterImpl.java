@@ -304,13 +304,13 @@ public class RefineClusterImpl<C extends Comparable<C>, T, I> implements RefineC
         for (final int clusterId : clustering) {
             used[clusterId] = true;
         }
-    	final int newClusterId = IntStream.range(0, n)
-            .filter(clusterId -> !used[clusterId])
-            .findFirst()
-            .orElse(-1);
-    	return IntStream.range(0, n)
-            .filter(clusterId -> used[clusterId] || clusterId == newClusterId)
-            .toArray();
+        final int newClusterId = IntStream.range(0, n)
+                .filter(clusterId -> !used[clusterId])
+                .findFirst()
+                .orElse(-1);
+        return IntStream.range(0, n)
+                .filter(clusterId -> used[clusterId] || clusterId == newClusterId)
+                .toArray();
 
     }
 
